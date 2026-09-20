@@ -1,6 +1,6 @@
 // TakeUUp Unified Frontend API Client
 
-export const BASE_URL = 'http://localhost:5141/api';
+const BASE_URL = 'http://localhost:5141/api';
 
 // Helper to determine if backend is online
 let isBackendOnline = false;

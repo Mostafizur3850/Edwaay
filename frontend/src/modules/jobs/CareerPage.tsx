@@ -83,7 +83,7 @@ export const CareerPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showTestIntro, setShowTestIntro] = useState(false);
     const [dynamicJobs, setDynamicJobs] = useState<any[]>([]);
-    
+
     // Form State
     const [formData, setFormData] = useState({
         name: '',
@@ -151,14 +151,14 @@ export const CareerPage = () => {
 
     const handleSubmitApplication = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!cvFile) {
             alert("Please upload your CV before submitting.");
             return;
         }
 
         setIsSubmitting(true);
-        
+
         // Simulate API call and save to local storage for Admin Panel
         setTimeout(() => {
             const newApplication = {
@@ -176,7 +176,7 @@ export const CareerPage = () => {
             localStorage.setItem('takeuup_applications', JSON.stringify([newApplication, ...existingApps]));
 
             setIsSubmitting(false);
-            
+
             // Check for test
             if (selectedJob.hasTest) {
                 setShowTestIntro(true);
@@ -203,17 +203,17 @@ export const CareerPage = () => {
                     <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                     {isBn ? 'আমরা নতুন জনবল নিয়োগ দিচ্ছি!' : 'We are hiring!'}
                 </div>
-                
+
                 <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
-                    {isBn ? 'স্মার্ট শিক্ষাব্যবস্থার ভবিষ্যৎ গড়ুন' : 'Build the Future of'} <br/>
+                    {isBn ? 'স্মার্ট শিক্ষাব্যবস্থার ভবিষ্যৎ গড়ুন' : 'Build the Future of'} <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 dark:from-cyan-400 dark:via-blue-500 dark:to-purple-600">
                         {isBn ? 'টেকআপ প্ল্যাটফর্মের সাথে 🚀' : 'Education'}
                     </span>
                 </h1>
-                
+
                 <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-12 font-light">
-                    {isBn 
-                        ? 'টেকআপ এডুকেশন প্ল্যাটফর্মে কৃত্রিম বুদ্ধিমত্তা ও বিশ্বমানের লার্নিং টুলস দিয়ে দেশের লাখ লাখ শিক্ষার্থীর স্বপ্ন পূরণে আমাদের সাথে কাজ করুন।' 
+                    {isBn
+                        ? 'টেকআপ এডুকেশন প্ল্যাটফর্মে কৃত্রিম বুদ্ধিমত্তা ও বিশ্বমানের লার্নিং টুলস দিয়ে দেশের লাখ লাখ শিক্ষার্থীর স্বপ্ন পূরণে আমাদের সাথে কাজ করুন।'
                         : 'Join TakeUUp and help millions of students across Bangladesh achieve their dreams. We looking for passionate individuals to join our mission.'}
                 </p>
 
@@ -263,14 +263,14 @@ export const CareerPage = () => {
 
                 <div className="space-y-4">
                     {allOpenings.map((job) => (
-                        <div 
-                            key={job.id} 
+                        <div
+                            key={job.id}
                             onClick={() => handleApply(job)}
                             className={`group relative bg-white dark:bg-[#0F172A] border ${job.border} p-6 md:p-8 rounded-3xl transition-all hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-2xl ${job.shadow} overflow-hidden cursor-pointer`}
                         >
                             {/* Hover Glow */}
                             <div className={`absolute inset-0 bg-gradient-to-r ${job.bg.replace('bg-', 'from-')} to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
-                            
+
                             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                                 <div className="flex items-start gap-5">
                                     <div className={`w-14 h-14 rounded-2xl ${job.bg} ${job.color} flex items-center justify-center shrink-0 shadow-inner`}>
@@ -290,7 +290,7 @@ export const CareerPage = () => {
                                     <span className="text-slate-700 dark:text-white font-bold bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-sm border border-slate-200 dark:border-slate-700">
                                         {job.salary}
                                     </span>
-                                    <button 
+                                    <button
                                         className="flex items-center gap-2 text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-slate-900 dark:hover:text-white transition-colors group/btn"
                                     >
                                         {isBn ? 'আবেদন করুন' : 'Apply Now'} <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
@@ -320,9 +320,9 @@ export const CareerPage = () => {
             {selectedJob && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm transition-opacity" onClick={closeApplyModal} />
-                    
+
                     <div className="relative w-full max-w-2xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
-                        
+
                         {showTestIntro ? (
                             // Test Intro View
                             <div className="p-8 text-center">
@@ -333,7 +333,7 @@ export const CareerPage = () => {
                                 <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
                                     To complete your application for <span className="text-slate-900 dark:text-white font-semibold">{selectedJob.role}</span>, you must pass a short assessment.
                                 </p>
-                                
+
                                 <div className="flex justify-center gap-6 mb-8">
                                     <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 w-32">
                                         <div className="text-2xl font-bold text-slate-900 dark:text-white">{selectedJob.testConfig?.questions?.length || 5}</div>
@@ -346,13 +346,13 @@ export const CareerPage = () => {
                                 </div>
 
                                 <div className="flex flex-col gap-3">
-                                    <button 
+                                    <button
                                         onClick={() => navigate(`/jobs/test/${selectedJob.id}`)}
                                         className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
                                     >
                                         Start Test Now <PlayCircle size={20} />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={closeApplyModal}
                                         className="text-slate-500 hover:text-slate-600 dark:hover:text-slate-400 text-sm font-medium py-2"
                                     >
@@ -378,7 +378,7 @@ export const CareerPage = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">{isBn ? 'পূর্ণ নাম' : 'Full Name'}</label>
-                                                <input 
+                                                <input
                                                     required type="text" name="name" value={formData.name} onChange={handleInputChange}
                                                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-cyan-500 outline-none transition-all"
                                                     placeholder="John Doe"
@@ -386,7 +386,7 @@ export const CareerPage = () => {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">{isBn ? 'ইমেইল এড্রেস' : 'Email Address'}</label>
-                                                <input 
+                                                <input
                                                     required type="email" name="email" value={formData.email} onChange={handleInputChange}
                                                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-cyan-500 outline-none transition-all"
                                                     placeholder="john@example.com"
@@ -397,7 +397,7 @@ export const CareerPage = () => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">{isBn ? 'ফোন নম্বর' : 'Phone Number'}</label>
-                                                <input 
+                                                <input
                                                     required type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
                                                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-cyan-500 outline-none transition-all"
                                                     placeholder="+880 17..."
@@ -405,7 +405,7 @@ export const CareerPage = () => {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Portfolio / LinkedIn</label>
-                                                <input 
+                                                <input
                                                     type="url" name="portfolio" value={formData.portfolio} onChange={handleInputChange}
                                                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:border-cyan-500 outline-none transition-all"
                                                     placeholder="https://..."
@@ -448,7 +448,7 @@ export const CareerPage = () => {
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">{isBn ? 'কেন আপনি এই পদের জন্য উপযুক্ত?' : 'Why are you a good fit?'}</label>
-                                            <textarea 
+                                            <textarea
                                                 rows={4}
                                                 name="coverLetter"
                                                 value={formData.coverLetter}
@@ -461,13 +461,13 @@ export const CareerPage = () => {
                                 </div>
 
                                 <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0F172A] rounded-b-3xl flex justify-end gap-3">
-                                    <button 
+                                    <button
                                         onClick={closeApplyModal}
                                         className="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
                                     >
                                         {isBn ? 'বাতিল' : 'Cancel'}
                                     </button>
-                                    <button 
+                                    <button
                                         type="submit"
                                         form="applicationForm"
                                         disabled={isSubmitting}

@@ -11,9 +11,9 @@ const TEMPLATES = [
 // Reusable Input Component with Icon
 const InputWithIcon = ({ label, icon: Icon, value, onChange, placeholder }: any) => (
     <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">{label}</label>
+        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">{label}</label>
         <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-cyan-400 transition-colors">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-cyan-500 dark:group-focus-within:text-cyan-400 transition-colors">
                 <Icon size={18} />
             </div>
             <input
@@ -21,7 +21,7 @@ const InputWithIcon = ({ label, icon: Icon, value, onChange, placeholder }: any)
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm hover:border-slate-600"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm hover:border-slate-300 dark:hover:border-slate-600"
             />
         </div>
     </div>
@@ -126,13 +126,13 @@ export const CVBuilder = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0B0F19] text-white font-sans flex flex-col lg:flex-row">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-white font-sans flex flex-col lg:flex-row">
             
             {/* --- LEFT: EDITOR PANEL --- */}
-            <div className="w-full lg:w-1/3 bg-[#151921] border-r border-white/5 h-screen overflow-y-auto custom-scrollbar p-6 print:hidden flex flex-col">
+            <div className="w-full lg:w-1/3 bg-white dark:bg-[#151921] border-r border-slate-200 dark:border-white/5 h-screen overflow-y-auto custom-scrollbar p-6 print:hidden flex flex-col">
                 <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <PenTool className="text-cyan-400" /> CV Builder
+                    <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                        <PenTool className="text-cyan-500 dark:text-cyan-400" /> CV Builder
                     </h2>
                     <div className="flex gap-3">
                         <button 
@@ -142,19 +142,19 @@ export const CVBuilder = () => {
                         >
                             {isSaving ? "Saving..." : "Save Resume"}
                         </button>
-                        <button onClick={() => window.history.back()} className="text-sm text-slate-400 hover:text-white">Exit</button>
+                        <button onClick={() => window.history.back()} className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">Exit</button>
                     </div>
                 </div>
 
                 {/* Template Selector */}
                 <div className="mb-8">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 block">Choose Template</label>
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-500 uppercase tracking-wider mb-3 block">Choose Template</label>
                     <div className="grid grid-cols-3 gap-2">
                         {TEMPLATES.map(t => (
                             <button 
                                 key={t.id}
                                 onClick={() => setSelectedTemplate(t.id)}
-                                className={`p-2 rounded-lg border text-xs font-medium transition-all ${selectedTemplate === t.id ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                                className={`p-2 rounded-lg border text-xs font-medium transition-all ${selectedTemplate === t.id ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'}`}
                             >
                                 {t.name}
                             </button>
@@ -163,12 +163,12 @@ export const CVBuilder = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-slate-800 p-1 rounded-lg mb-6 overflow-x-auto">
+                <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg mb-6 overflow-x-auto">
                     {['personal', 'edu', 'exp', 'skills'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors capitalize ${activeTab === tab ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors capitalize ${activeTab === tab ? 'bg-white dark:bg-cyan-600 text-cyan-700 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
                             {tab === 'personal' ? 'Identity' : tab === 'edu' ? 'Education' : tab === 'exp' ? 'Experience' : 'Skills'}
                         </button>
@@ -181,10 +181,10 @@ export const CVBuilder = () => {
                     {activeTab === 'personal' && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {/* Identity Section */}
-                            <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+                            <div className="bg-slate-50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 space-y-4">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <div className="p-1.5 bg-cyan-500/20 rounded-lg text-cyan-400"><User size={16} /></div>
-                                    <h3 className="font-bold text-slate-200 text-sm">Identity Details</h3>
+                                    <div className="p-1.5 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg text-cyan-600 dark:text-cyan-400"><User size={16} /></div>
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Identity Details</h3>
                                 </div>
                                 <InputWithIcon 
                                     label="Full Name" 
@@ -203,10 +203,10 @@ export const CVBuilder = () => {
                             </div>
 
                             {/* Contact Section */}
-                            <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+                            <div className="bg-slate-50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 space-y-4">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <div className="p-1.5 bg-emerald-500/20 rounded-lg text-emerald-400"><Phone size={16} /></div>
-                                    <h3 className="font-bold text-slate-200 text-sm">Contact Information</h3>
+                                    <div className="p-1.5 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg text-emerald-600 dark:text-emerald-400"><Phone size={16} /></div>
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Contact Information</h3>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
@@ -218,21 +218,21 @@ export const CVBuilder = () => {
                             </div>
 
                             {/* Socials Section */}
-                            <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+                            <div className="bg-slate-50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 space-y-4">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <div className="p-1.5 bg-blue-500/20 rounded-lg text-blue-400"><Globe size={16} /></div>
-                                    <h3 className="font-bold text-slate-200 text-sm">Social Links</h3>
+                                    <div className="p-1.5 bg-blue-100 dark:bg-blue-500/20 rounded-lg text-blue-600 dark:text-blue-400"><Globe size={16} /></div>
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Social Links</h3>
                                 </div>
                                 <InputWithIcon label="LinkedIn" icon={Linkedin} value={cvData.linkedin} onChange={(e: any) => updateField('linkedin', e.target.value)} placeholder="linkedin.com/in/username" />
                                 <InputWithIcon label="Portfolio / GitHub" icon={Github} value={cvData.portfolio} onChange={(e: any) => updateField('portfolio', e.target.value)} placeholder="github.com/username" />
                             </div>
 
                             {/* Summary Section with AI */}
-                            <div className="bg-gradient-to-br from-purple-900/10 to-slate-800/30 p-5 rounded-2xl border border-purple-500/20 relative group">
+                            <div className="bg-gradient-to-br from-purple-50 to-slate-50 dark:from-purple-900/10 dark:to-slate-800/30 p-5 rounded-2xl border border-purple-200 dark:border-purple-500/20 relative group">
                                 <div className="flex justify-between items-center mb-4">
                                     <div className="flex items-center gap-2">
-                                        <div className="p-1.5 bg-purple-500/20 rounded-lg text-purple-400"><Sparkles size={16} /></div>
-                                        <h3 className="font-bold text-slate-200 text-sm">Professional Summary</h3>
+                                        <div className="p-1.5 bg-purple-100 dark:bg-purple-500/20 rounded-lg text-purple-600 dark:text-purple-400"><Sparkles size={16} /></div>
+                                        <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Professional Summary</h3>
                                     </div>
                                     <button 
                                         onClick={handleAISummary}
@@ -248,7 +248,7 @@ export const CVBuilder = () => {
                                     value={cvData.summary} 
                                     onChange={e => updateField('summary', e.target.value)} 
                                     placeholder="Briefly describe your professional background and key achievements..."
-                                    className="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-4 text-sm text-slate-200 placeholder-slate-500 focus:border-purple-400 focus:ring-1 focus:ring-purple-400/50 outline-none leading-relaxed resize-none transition-all"
+                                    className="w-full bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:border-purple-400 focus:ring-1 focus:ring-purple-400/50 outline-none leading-relaxed resize-none transition-all"
                                 />
                                 <p className="text-[10px] text-slate-500 mt-2 text-right">
                                     Tip: Fill in your job title and skills tab for better AI results.
@@ -261,10 +261,10 @@ export const CVBuilder = () => {
                     {activeTab === 'edu' && (
                         <div className="space-y-4 animate-in fade-in">
                             {cvData.education.map((edu, idx) => (
-                                <div key={edu.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 relative group">
+                                <div key={edu.id} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative group">
                                     <button 
                                         onClick={() => setCvData({...cvData, education: cvData.education.filter(e => e.id !== edu.id)})}
-                                        className="absolute top-2 right-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-2 right-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -283,7 +283,7 @@ export const CVBuilder = () => {
                             ))}
                             <button 
                                 onClick={() => setCvData({...cvData, education: [...cvData.education, { id: Date.now(), degree: '', school: '', year: '' }]})}
-                                className="w-full py-3 border border-dashed border-slate-600 rounded-xl text-slate-400 hover:border-cyan-500 hover:text-cyan-400 hover:bg-slate-800/50 flex items-center justify-center gap-2 text-sm font-medium transition-all"
+                                className="w-full py-3 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 dark:hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center justify-center gap-2 text-sm font-medium transition-all"
                             >
                                 <Plus size={16} /> Add Education
                             </button>
@@ -294,10 +294,10 @@ export const CVBuilder = () => {
                     {activeTab === 'exp' && (
                         <div className="space-y-4 animate-in fade-in">
                              {cvData.experience.map((exp, idx) => (
-                                <div key={exp.id} className="bg-slate-800 p-5 rounded-xl border border-slate-700 relative group">
+                                <div key={exp.id} className="bg-slate-50 dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 relative group">
                                     <button 
                                         onClick={() => setCvData({...cvData, experience: cvData.experience.filter(e => e.id !== exp.id)})}
-                                        className="absolute top-3 right-3 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-3 right-3 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -320,7 +320,7 @@ export const CVBuilder = () => {
                                             }} placeholder="Present" />
                                     </div>
                                     <div className="relative">
-                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Description</label>
+                                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Description</label>
                                          <textarea 
                                             placeholder="Describe your responsibilities and achievements..." 
                                             rows={3}
@@ -328,12 +328,12 @@ export const CVBuilder = () => {
                                             onChange={e => {
                                                 const newExp = [...cvData.experience]; newExp[idx].desc = e.target.value; setCvData({...cvData, experience: newExp});
                                             }} 
-                                            className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-cyan-500 outline-none pr-10 resize-none"
+                                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-cyan-500 outline-none pr-10 resize-none"
                                         />
                                         <button 
                                             onClick={() => handleAIEnhanceExp(exp.id, exp.desc)}
                                             disabled={isGenerating}
-                                            className="absolute bottom-3 right-3 text-purple-400 hover:text-purple-300 p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors border border-purple-500/20"
+                                            className="absolute bottom-3 right-3 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 p-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-purple-200 dark:border-purple-500/20"
                                             title="Polish with AI"
                                         >
                                             <Sparkles size={16} />
@@ -343,7 +343,7 @@ export const CVBuilder = () => {
                             ))}
                             <button 
                                 onClick={() => setCvData({...cvData, experience: [...cvData.experience, { id: Date.now(), title: '', company: '', start: '', end: '', desc: '' }]})}
-                                className="w-full py-3 border border-dashed border-slate-600 rounded-xl text-slate-400 hover:border-cyan-500 hover:text-cyan-400 hover:bg-slate-800/50 flex items-center justify-center gap-2 text-sm font-medium transition-all"
+                                className="w-full py-3 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 dark:hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center justify-center gap-2 text-sm font-medium transition-all"
                             >
                                 <Plus size={16} /> Add Experience
                             </button>
@@ -353,31 +353,31 @@ export const CVBuilder = () => {
                     {/* Skills Tab */}
                     {activeTab === 'skills' && (
                         <div className="space-y-6 animate-in fade-in">
-                            <div className="bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50">
-                                <label className="text-sm font-bold text-slate-200 mb-3 block flex items-center gap-2">
-                                    <Code size={16} className="text-cyan-400" /> Technical Skills
+                            <div className="bg-slate-50 dark:bg-slate-800/30 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50">
+                                <label className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 block flex items-center gap-2">
+                                    <Code size={16} className="text-cyan-600 dark:text-cyan-400" /> Technical Skills
                                 </label>
                                 <textarea 
                                     rows={4}
                                     value={cvData.skills.join(', ')}
                                     onChange={e => updateField('skills', e.target.value.split(',').map(s => s.trim()))}
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-sm text-white placeholder-slate-600 focus:border-cyan-500 outline-none"
+                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-cyan-500 outline-none"
                                     placeholder="Enter skills separated by commas (e.g. React, Java, Leadership, Public Speaking)"
                                 />
                                 <p className="text-xs text-slate-500 mt-2">Separate each skill with a comma.</p>
                             </div>
                             
                             <div>
-                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Preview</h4>
+                                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Preview</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {cvData.skills.map((skill, i) => skill && (
-                                        <span key={i} className="px-3 py-1.5 bg-cyan-900/20 text-cyan-400 text-xs font-bold rounded-lg border border-cyan-500/20 flex items-center gap-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                                        <span key={i} className="px-3 py-1.5 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400 text-xs font-bold rounded-lg border border-cyan-200 dark:border-cyan-500/20 flex items-center gap-1">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
                                             {skill}
                                         </span>
                                     ))}
                                     {cvData.skills.length === 0 || (cvData.skills.length === 1 && !cvData.skills[0]) && (
-                                        <span className="text-slate-600 text-sm italic">No skills added yet.</span>
+                                        <span className="text-slate-500 dark:text-slate-600 text-sm italic">No skills added yet.</span>
                                     )}
                                 </div>
                             </div>
@@ -387,7 +387,7 @@ export const CVBuilder = () => {
             </div>
 
             {/* --- RIGHT: LIVE PREVIEW --- */}
-            <div className="w-full lg:w-2/3 bg-slate-900 p-8 flex flex-col items-center justify-center relative print:w-full print:p-0 print:absolute print:top-0 print:left-0 print:bg-white print:text-black">
+            <div className="w-full lg:w-2/3 bg-slate-100 dark:bg-slate-900 p-8 flex flex-col items-center justify-center relative print:w-full print:p-0 print:absolute print:top-0 print:left-0 print:bg-white print:text-black">
                 
                 {/* Preview Toolbar */}
                 <div className="absolute top-6 right-6 flex gap-3 print:hidden z-10">

@@ -18,6 +18,46 @@ export const LandingPage: React.FC = () => {
   const isBn = language === 'bn';
 
   const [activeTab, setActiveTab] = useState<'hsc' | 'engineering' | 'medical' | 'varsity' | 'bcs'>('hsc');
+  const [activeLeaderboardTab, setActiveLeaderboardTab] = useState('Today');
+  
+  const leaderboardData: Record<string, any[]> = {
+    Today: [
+      { rank: 1, name: 'Tanvir Hasan', score: '98.4%' },
+      { rank: 2, name: 'Farzana Akter', score: '97.8%' },
+      { rank: 3, name: 'Shakib Islam', score: '97.2%' },
+      { rank: 4, name: 'Mim Rahman', score: '96.9%' },
+      { rank: 5, name: 'Arafat Khan', score: '96.5%' }
+    ],
+    Weekly: [
+      { rank: 1, name: 'Mehedi Hasan', score: '99.1%' },
+      { rank: 2, name: 'Tanvir Hasan', score: '98.5%' },
+      { rank: 3, name: 'Sadia Islam', score: '97.9%' },
+      { rank: 4, name: 'Rakib Hossain', score: '97.4%' },
+      { rank: 5, name: 'Jannatul Ferdous', score: '97.0%' }
+    ],
+    Monthly: [
+      { rank: 1, name: 'Farzana Akter', score: '99.5%' },
+      { rank: 2, name: 'Mehedi Hasan', score: '99.2%' },
+      { rank: 3, name: 'Tanvir Hasan', score: '98.8%' },
+      { rank: 4, name: 'Arafat Khan', score: '98.1%' },
+      { rank: 5, name: 'Sajid Islam', score: '97.7%' }
+    ],
+    Exam: [
+      { rank: 1, name: 'Shakib Islam', score: '100%' },
+      { rank: 2, name: 'Mim Rahman', score: '99.0%' },
+      { rank: 3, name: 'Farzana Akter', score: '98.5%' },
+      { rank: 4, name: 'Tanvir Hasan', score: '98.0%' },
+      { rank: 5, name: 'Mehedi Hasan', score: '97.5%' }
+    ],
+    Subject: [
+      { rank: 1, name: 'Sajid Islam', score: '99.8%' },
+      { rank: 2, name: 'Arafat Khan', score: '99.4%' },
+      { rank: 3, name: 'Jannatul Ferdous', score: '98.9%' },
+      { rank: 4, name: 'Rakib Hossain', score: '98.3%' },
+      { rank: 5, name: 'Sadia Islam', score: '97.8%' }
+    ]
+  };
+
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -551,6 +591,69 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* CURRENT AFFAIRS & RECENT NEWS SECTION */}
+      <section className={`py-6 ${isDark ? 'bg-[#030712]' : 'bg-[#fffcf0]'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
+            
+            {/* Left Side: Current Affairs Quiz */}
+            <div className={`rounded-xl border overflow-hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-red-50 shadow-sm'}`}>
+              <div className="flex justify-center border-b border-transparent relative">
+                <div className={`absolute top-0 w-full h-8 ${isDark ? 'bg-red-900/10' : 'bg-[#faebe8]'}`}></div>
+                <div className={`relative px-4 py-1 mt-0.5 rounded-t-lg font-bold text-sm ${isDark ? 'bg-red-900/30 text-red-400' : 'bg-[#f4e6e3] text-[#8b3a33]'}`}>
+                  {isBn ? 'কারেন্ট অ্যাফেয়ার্স' : 'Current Affairs'}
+                </div>
+              </div>
+              <div className="p-3 md:p-4">
+                <h3 className={`text-base md:text-lg font-bold mb-3 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {isBn ? 'বাংলা ভাষায় প্রকাশিত প্রথম সংবাদপত্র কোনটি?' : 'Which was the first newspaper published in the Bengali language?'}
+                </h3>
+                <div className="space-y-2">
+                  {(isBn ? ['দিগদর্শন', 'তত্ত্ববোধিনী', 'সংবাদ প্রভাকর', 'বঙ্গদর্শন'] : ['Digdarshan', 'Tattwabodhini', 'Sambad Prabhakar', 'Bangadarshan']).map((option, idx) => (
+                    <div key={idx} className={`p-2 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${isDark ? 'border-slate-700 hover:border-slate-500 hover:bg-slate-800' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
+                      <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center border text-sm font-medium ${isDark ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-white text-slate-600 shadow-sm'}`}>
+                        {isBn ? ['ক', 'খ', 'গ', 'ঘ'][idx] : ['A', 'B', 'C', 'D'][idx]}
+                      </div>
+                      <span className={`text-base font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{option}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side: Recent News */}
+            <div className="flex flex-col h-full">
+              <h3 className={`text-base md:text-lg font-bold mb-3 pl-2 border-l-4 ${isDark ? 'border-blue-500 text-white' : 'border-blue-600 text-slate-900'}`}>
+                {isBn ? 'সাম্প্রতিক নিউজ' : 'Recent News'}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-grow">
+                {/* News Card 1 */}
+                <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <img src="https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=600&auto=format&fit=crop" alt="News 1" className="w-full h-24 sm:h-32 object-cover" />
+                  <div className="p-3 flex-grow flex flex-col justify-between">
+                    <h4 className={`font-bold text-sm md:text-base mb-1.5 leading-snug line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {isBn ? 'তীব্বতের গুরুত্বপূর্ণ খনিজ আহরণে জো...' : 'Focus on extracting important minerals in Tibet...'}
+                    </h4>
+                    <p className={`text-[10px] md:text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
+                  </div>
+                </div>
+                {/* News Card 2 */}
+                <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=600&auto=format&fit=crop" alt="News 2" className="w-full h-24 sm:h-32 object-cover" />
+                  <div className="p-3 flex-grow flex flex-col justify-between">
+                    <h4 className={`font-bold text-sm md:text-base mb-1.5 leading-snug line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {isBn ? 'জাতীয় বেতন স্কেলের গেজেট প্রকাশ...' : 'Gazette issued for National Pay...'}
+                    </h4>
+                    <p className={`text-[10px] md:text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* 1.5. EVERY STAGE SECTION */}
       <section className={`py-16 relative ${isDark ? 'bg-[#070b14]' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -1067,7 +1170,8 @@ export const LandingPage: React.FC = () => {
               {['Today', 'Weekly', 'Monthly', 'Exam', 'Subject'].map((tab, idx) => (
                 <button
                   key={idx}
-                  className={`px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${idx === 0
+                  onClick={() => setActiveLeaderboardTab(tab)}
+                  className={`px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${activeLeaderboardTab === tab
                       ? (isDark ? 'bg-white text-slate-900' : 'bg-[#111827] text-white')
                       : (isDark ? 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800' : 'bg-transparent border-slate-200 text-slate-700 hover:bg-white')
                     } border`}
@@ -1083,16 +1187,19 @@ export const LandingPage: React.FC = () => {
 
             {/* List Items */}
             <div className="flex flex-col">
-              {[
-                { rank: 1, name: 'Tanvir Hasan', score: '98.4%', color: isDark ? 'bg-red-500/20 text-red-400' : 'bg-[#dc2626] text-white' },
-                { rank: 2, name: 'Farzana Akter', score: '97.8%', color: isDark ? 'bg-[#fef3c7]/20 text-[#fef3c7]' : 'bg-[#fef3c7] text-[#92400e]' },
-                { rank: 3, name: 'Shakib Islam', score: '97.2%', color: isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-[#e0f2fe] text-[#0369a1]' },
-                { rank: 4, name: 'Mim Rahman', score: '96.9%', color: isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600' },
-                { rank: 5, name: 'Arafat Khan', score: '96.5%', color: isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600' }
-              ].map((user, i) => (
+              {leaderboardData[activeLeaderboardTab]?.map((user, i) => {
+                const colors = [
+                  isDark ? 'bg-red-500/20 text-red-400' : 'bg-[#dc2626] text-white',
+                  isDark ? 'bg-[#fef3c7]/20 text-[#fef3c7]' : 'bg-[#fef3c7] text-[#92400e]',
+                  isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-[#e0f2fe] text-[#0369a1]',
+                  isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600',
+                  isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'
+                ];
+                const color = colors[i] || colors[4];
+                return (
                 <div key={i} className={`flex items-center justify-between px-6 py-5 border-b ${isDark ? 'border-slate-800/80' : 'border-slate-100'}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold ${user.color}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold ${color}`}>
                       {user.rank}
                     </div>
                     <span className={`text-[15px] font-medium ${isDark ? 'text-slate-200' : 'text-[#111827]'}`}>
@@ -1103,7 +1210,8 @@ export const LandingPage: React.FC = () => {
                     {user.score}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Current User Footer */}

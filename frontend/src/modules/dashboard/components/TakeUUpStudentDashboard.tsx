@@ -8,7 +8,6 @@ import {
   Clock, AlertCircle, HelpCircle, GraduationCap, Briefcase, Calculator as CalcIcon, X, Menu, Bookmark, BarChart3,
   Atom, FlaskConical, Ruler, Dna, Globe
 } from 'lucide-react';
-import { BASE_URL } from '../../../services/api';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentCourse, StudentMistakeItem, StudentCertificate } from '../../../types/types';
 import { QuestionBank } from '../../quiz/QuestionBank';
@@ -108,35 +107,6 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  React.useEffect(() => {
-    if (user?.id) {
-      fetch(`${BASE_URL}/Notifications`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}`, 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setNotifications(data);
-            setUnreadCount(data.filter((n: any) => !n.isRead).length);
-          }
-        })
-        .catch(err => console.error("Failed to load notifications", err));
-    }
-  }, [user]);
-
-  const handleMarkAsRead = async (id: string) => {
-    try {
-      await fetch(`${BASE_URL}/Notifications/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}`, 'Content-Type': 'application/json' } });
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const [internalActiveTab, setInternalActiveTab] = useState<string>('dashboard');
   const [qbankResetKey, setQbankResetKey] = useState<number>(0);
   const currentTab = externalActiveTab || internalActiveTab;
@@ -155,8 +125,10 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
   const activeGoalProgress = DEFAULT_SUBJECT_PROGRESS[activeGoalId] || DEFAULT_SUBJECT_PROGRESS['HSC'];
   const unresolvedMistakesCount = (mistakes || []).filter(m => !m.resolved).length;
-  const completedRoutineTasksCount = (routineTasks || []).filter(t => t.done).length;
-  const routinePercentage = Math.round((completedRoutineTasksCount / ((routineTasks || []).length || 1)) * 100);
+  const [localRoutineTasks, setLocalRoutineTasks] = useState(routineTasks);
+
+  const completedRoutineTasksCount = (localRoutineTasks || []).filter((t: any) => t.done).length;
+  const routinePercentage = Math.round((completedRoutineTasksCount / ((localRoutineTasks || []).length || 1)) * 100);
 
   const handleTabClick = (tabId: string) => {
     setMobileMenuOpen(false);
@@ -175,10 +147,29 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskInput.trim()) return;
+    
+    const newTask = {
+      id: `rt-${Date.now()}`,
+      task: newTaskInput.trim(),
+      done: false,
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    setLocalRoutineTasks([...localRoutineTasks, newTask]);
+    
     if (onAddTask) {
       onAddTask(newTaskInput.trim());
     }
     setNewTaskInput('');
+  };
+
+  const handleToggleTask = (id: string) => {
+    setLocalRoutineTasks(localRoutineTasks.map((t: any) => 
+      t.id === id ? { ...t, done: !t.done } : t
+    ));
+    if (onToggleTask) {
+      onToggleTask(id);
+    }
   };
 
   const MENU_ITEMS = [
@@ -212,7 +203,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
           <div className="bg-white p-1 rounded-xl shadow border border-slate-200"><img src="/assets/takeuup_full_brand_logo.png" alt="TakeUp" className="h-7 w-auto object-contain" /></div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-start gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold border border-amber-500/30">
             <Flame size={14} fill="currentColor" /> {user?.streak || 7}d
           </div>
@@ -409,62 +400,24 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
               </div>
 
               <div className="flex items-center gap-4 self-end sm:self-auto">
-                <div className="relative">
-                  <button 
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-2 text-slate-400 hover:text-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 rounded-full shadow-sm border border-slate-100 transition-colors">
-                    <Bell size={18} />
-                    {unreadCount > 0 && (
-                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white dark:border-slate-800 animate-pulse"></span>
-                    )}
-                  </button>
-
-                  {showNotifications && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden">
-                      <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-                        <h3 className="font-bold text-slate-800 dark:text-white">Notifications</h3>
-                        {unreadCount > 0 && <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full">{unreadCount} new</span>}
-                      </div>
-                      <div className="max-h-80 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="p-6 text-center text-slate-500 dark:text-slate-400 text-sm">No notifications yet.</div>
-                        ) : (
-                          notifications.map((notif: any) => (
-                            <div 
-                              key={notif.id} 
-                              className={`p-4 border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer ${!notif.isRead ? 'bg-cyan-50/50 dark:bg-cyan-900/10' : ''}`}
-                              onClick={() => {
-                                if (!notif.isRead) handleMarkAsRead(notif.id);
-                                if (notif.type === 'JobPost') navigate('/jobs');
-                              }}
-                            >
-                              <div className="flex gap-3">
-                                <div className="mt-1 shrink-0">
-                                  {notif.type === 'JobPost' ? <Briefcase size={16} className="text-cyan-500" /> : <Bell size={16} className="text-slate-400" />}
-                                </div>
-                                <div>
-                                  <h4 className={`text-sm font-semibold ${!notif.isRead ? 'text-slate-800 dark:text-white' : 'text-slate-600 dark:text-slate-300'}`}>{notif.title}</h4>
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{notif.message}</p>
-                                  <span className="text-[10px] text-slate-400 mt-2 block">{new Date(notif.createdAt).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <button className="relative p-2 text-slate-400 hover:text-slate-600 bg-white rounded-full shadow-sm border border-slate-100">
+                  <Bell size={18} />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+                </button>
                 <div
                   onClick={() => setShowAccountDrawer(true)}
-                  className="flex items-center gap-2 bg-white pr-4 pl-1 py-1 rounded-full shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
+                  className={`flex items-center gap-2.5 ${theme === 'dark' ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-50'} pr-5 pl-1.5 py-1.5 rounded-full shadow-sm border cursor-pointer transition-all`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                  <div className="w-9 h-9 rounded-full bg-slate-900 dark:bg-slate-700 text-white flex items-center justify-center font-bold text-sm shadow-inner">
                     {user?.name ? user.name.substring(0, 2).toUpperCase() : 'MO'}
                   </div>
-                  <div className="hidden sm:block text-left">
-                    <h4 className="font-bold text-xs text-slate-800 leading-none">{user?.name || user?.displayName || 'Mostafizur Rahman'}</h4>
-                    <span className="text-[9px] text-slate-500">1Boys International-B</span>
+                  <div className="hidden sm:flex flex-col justify-center text-left">
+                    <h4 className={`font-bold text-sm leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+                      {user?.name || user?.displayName || 'Mostafizur Rahman'}
+                    </h4>
+                    <span className={`text-[10px] font-medium leading-tight ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                      1Boys International-B
+                    </span>
                   </div>
                 </div>
               </div>
@@ -689,23 +642,21 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                       const config = configs[idx % configs.length];
 
                       return (
-                        <div key={idx} className={`flex flex-col sm:flex-row sm:items-center gap-4 ${theme === 'dark' ? 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700' : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                        <div key={idx} className={`flex items-center gap-4 ${theme === 'dark' ? 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700' : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                           } border p-4 rounded-2xl transition-colors`}>
-                          {/* Wrap Icon & Details for Mobile */}
-                          <div className="flex items-center gap-4 flex-1 w-full sm:w-auto">
-                            {/* Column 1: Icon */}
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${config.bg}`}>
+                          {/* Column 1: Icon */}
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${config.bg}`}>
                             {config.icon}
                           </div>
 
                           {/* Column 2: Details */}
-                          <div className="flex-1 space-y-1 min-w-0">
+                          <div className="flex-1 space-y-1">
                             <div className="flex items-center gap-2">
-                              <h4 className={`font-bold text-sm truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{subject.name}</h4>
-                              <span className={`text-[11px] font-bold shrink-0 ${config.barColor.split(' ')[1]}`}>Score: {subject.progress}%</span>
+                              <h4 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{subject.name}</h4>
+                              <span className={`text-[11px] font-bold ${config.barColor.split(' ')[1]}`}>Score: {subject.progress}%</span>
                             </div>
-                            <p className={`text-[11px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'} truncate font-medium`}>রানিং টপিক: {subject.topic}</p>
-                            <div className="flex items-center gap-2 text-[10px] flex-wrap">
+                            <p className={`text-[11px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'} font-medium`}>রানিং টপিক: {subject.topic}</p>
+                            <div className="flex items-center gap-2 text-[10px]">
                               <span className={`${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{subject.totalQuestions} প্রশ্ন সমাধান</span>
                               <span className="text-slate-300 dark:text-slate-700">•</span>
                               <span className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-500">
@@ -715,12 +666,8 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                             </div>
                           </div>
 
-                          </div>
-
-                          {/* Wrap Progress & Button for Mobile */}
-                          <div className="flex items-center justify-between gap-4 w-full sm:w-auto sm:shrink-0 mt-2 sm:mt-0">
-                            {/* Column 3: Progress Bar */}
-                          <div className="flex-1 sm:w-40 shrink-0 sm:mr-4">
+                          {/* Column 3: Progress Bar */}
+                          <div className="w-32 sm:w-40 shrink-0 mr-2 sm:mr-4">
                             <div className={`w-full h-2 rounded-full ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'} overflow-hidden relative`}>
                               <div
                                 className={`h-full rounded-full transition-all duration-500 ${config.barColor.split(' ')[0]}`}
@@ -737,7 +684,6 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                             >
                               <span className={config.barColor.split(' ')[1]}>অনুশীলন করুন</span> <ArrowRight size={14} className={config.barColor.split(' ')[1]} />
                             </button>
-                          </div>
                           </div>
                         </div>
                       )
@@ -765,10 +711,10 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                   </div>
 
                   <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                    {routineTasks.map(task => (
+                    {localRoutineTasks.map((task: any) => (
                       <div
                         key={task.id}
-                        onClick={() => onToggleTask && onToggleTask(task.id)}
+                        onClick={() => handleToggleTask(task.id)}
                         className={`p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${task.done
                           ? theme === 'dark' ? 'bg-emerald-955/20 border-emerald-800/40 text-slate-400 line-through' : 'bg-emerald-50 border-emerald-200 text-slate-500 line-through'
                           : theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200 hover:border-cyan-500/40' : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-cyan-500/50'

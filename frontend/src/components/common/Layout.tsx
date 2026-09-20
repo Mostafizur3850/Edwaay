@@ -129,39 +129,43 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
       return `http://localhost:5141${cleanPath}`;
   };
 
-    const MEGA_MENU_ITEMS = [
-    { 
-        name: t('menu_mentors') || 'মেন্টরবৃন্দ', 
-        path: '/mentors', 
-        icon: <Users size={18} />, 
-        desc: t('menu_mentors_desc') || 'অভিজ্ঞ শিক্ষক ও মেন্টর প্যানেল',
-        color: 'text-indigo-500 dark:text-indigo-400',
-        bg: 'bg-indigo-100 dark:bg-indigo-400/10'
-    },
-    { 
-        name: t('menu_blog') || 'ব্লগ ও গাইড', 
-        path: '/blog', 
-        icon: <FileText size={18} />, 
-        desc: t('menu_blog_desc') || 'পড়াশোনা ও পরীক্ষার গাইডলাইন',
-        color: 'text-teal-500 dark:text-teal-400',
-        bg: 'bg-teal-100 dark:bg-teal-400/10'
-    },
-    { 
-        name: t('menu_careers') || 'ক্যারিয়ার সেন্টার', 
-        path: '/career', 
-        icon: <Rocket size={18} />, 
-        desc: t('menu_careers_desc') || 'ক্যারিয়ার কাউন্সেলিং ও জব আপডেট',
-        color: 'text-orange-500 dark:text-orange-400',
-        bg: 'bg-orange-100 dark:bg-orange-400/10'
-    },
-    { 
-        name: 'Resources', 
-        path: '/resources', 
-        icon: <BookOpen size={18} />, 
-        desc: 'Free Study Materials',
-        color: 'text-cyan-500 dark:text-cyan-400',
-        bg: 'bg-cyan-100 dark:bg-cyan-400/10'
-    }
+  const isJobActive = location.pathname.startsWith('/jobs') 
+    ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.1)] border border-violet-500/20' 
+    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5';
+
+  const MEGA_MENU_ITEMS = [
+      { 
+          name: t('menu_mentors') || 'মেন্টরস', 
+          path: '/mentors', 
+          icon: <Users size={18} />, 
+          desc: t('menu_mentors_desc') || 'এক্সপার্টদের সাথে কানেক্ট করুন',
+          color: 'text-teal-500 dark:text-teal-400',
+          bg: 'bg-teal-100 dark:bg-teal-400/10'
+      },
+      { 
+          name: t('menu_blog') || 'ব্লগ ও আর্টিকেল', 
+          path: '/blog', 
+          icon: <FileText size={18} />, 
+          desc: t('menu_blog_desc') || 'নতুন টেকনোলজি সম্পর্কে জানুন',
+          color: 'text-teal-500 dark:text-teal-400',
+          bg: 'bg-teal-100 dark:bg-teal-400/10'
+      },
+      { 
+          name: t('menu_careers') || 'ক্যারিয়ার গাইডলাইন', 
+          path: '/career', 
+          icon: <Rocket size={18} />, 
+          desc: t('menu_careers_desc') || 'ক্যারিয়ার প্ল্যানিং ও গাইডলাইন',
+          color: 'text-teal-500 dark:text-teal-400',
+          bg: 'bg-teal-100 dark:bg-teal-400/10'
+      },
+      { 
+          name: t('menu_resources') || 'স্টাডি রিসোর্স', 
+          path: '/resources', 
+          icon: <BookOpen size={18} />, 
+          desc: t('menu_resources_desc') || 'বই, চিটশিট ও অন্যান্য',
+          color: 'text-teal-500 dark:text-teal-400',
+          bg: 'bg-teal-100 dark:bg-teal-400/10'
+      }
   ];
 
   return (
@@ -200,6 +204,7 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                           const url = menu.url || menu.Url;
                           const title = menu.title || menu.Title;
                           const isMegaQuiz = title.toLowerCase().includes('mega quiz');
+                          const isJobs = url.includes('/jobs');
                           
                           if (isMegaQuiz) {
                               return (
@@ -209,6 +214,14 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                                       </span>
+                                  </Link>
+                              );
+                          }
+                          
+                          if (isJobs) {
+                              return (
+                                  <Link key={url} to={url} className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${isJobActive}`}>
+                                      {title}
                                   </Link>
                               );
                           }
@@ -238,10 +251,10 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.bg} ${item.color} group-hover/item:scale-110 transition-transform shadow-inner`}>
                                               {item.icon}
                                           </div>
-                                          <div>
-                                              <div className="text-slate-900 dark:text-white font-bold text-sm group-hover/item:text-cyan-600 dark:group-hover/item:text-cyan-400 transition-colors">{item.name}</div>
-                                              <div className="text-slate-500 text-xs font-medium">{item.desc}</div>
-                                          </div>
+                                            <div>
+                                                <div className="text-slate-900 dark:text-white font-bold text-sm group-hover/item:text-teal-600 dark:group-hover/item:text-teal-400 transition-colors">{item.name}</div>
+                                                <div className="text-slate-500 text-xs font-medium">{item.desc}</div>
+                                            </div>
                                       </Link>
                                   ))}
                               </div>
@@ -396,6 +409,7 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                         const url = menu.url || menu.Url;
                         const title = menu.title || menu.Title;
                         const isMegaQuiz = title.toLowerCase().includes('mega quiz');
+                        const isJobs = url.includes('/jobs');
                         const isStore = url.includes('/products') || url.includes('/store');
                         
                         if (isMegaQuiz) {
@@ -410,7 +424,13 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                             );
                         }
                         
-
+                        if (isJobs) {
+                            return (
+                                <Link key={url} to={url} onClick={() => setIsOpen(false)} className="block px-4 py-3 text-base font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-2xl transition-colors flex items-center gap-2">
+                                    <Briefcase size={18} /> {title}
+                                </Link>
+                            );
+                        }
                         
                         if (isStore) {
                             return (

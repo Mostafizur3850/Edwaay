@@ -56,9 +56,51 @@ const JobHeroBackground = () => {
     );
 };
 
+const SIDEBAR_CATEGORIES = [
+    {
+        title: { en: 'Latest Updates', bn: 'সর্বশেষ আপডেট' },
+        items: [
+            { id: 'new_circular', label: { en: 'New Circular', bn: 'নতুন সার্কুলার' } }
+        ]
+    },
+    {
+        title: { en: 'Job Category', bn: 'জব ক্যাটাগরি' },
+        items: [
+            { id: 'govt', label: { en: 'Govt Jobs', bn: 'সরকারি চাকরি' } },
+            { id: 'bank', label: { en: 'Bank Jobs', bn: 'ব্যাংক জবস' } },
+            { id: 'ngo', label: { en: 'NGO Jobs', bn: 'এনজিও জবস' } },
+            { id: 'teacher', label: { en: 'Teacher Recruitment', bn: 'শিক্ষক নিয়োগ' } },
+            { id: 'sales', label: { en: 'Sales/Marketing', bn: 'সেলস/মার্কেটিং' } },
+            { id: 'railway', label: { en: 'Railway Jobs', bn: 'রেলওয়ে জবস' } },
+            { id: 'defense', label: { en: 'Defense Jobs', bn: 'ডিফেন্স জবস' } },
+            { id: 'health', label: { en: 'Health/Medical', bn: 'হেলথ/মেডিক্যাল' } },
+            { id: 'newspaper', label: { en: 'Job Newspaper', bn: 'চাকরির পত্রিকা' } },
+            { id: 'private', label: { en: 'Private Jobs', bn: 'বেসরকারি চাকরি' } },
+        ]
+    },
+    {
+        title: { en: 'Special Job Category', bn: 'স্পেশাল জব ক্যাটাগরি' },
+        items: []
+    }
+];
+
 export const JobPortalHome = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+
+  const DUMMY_JOBS = [
+      { id: 1, title: language === 'bn' ? 'সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার' : 'Senior Software Engineer', company: 'bKash', location: language === 'bn' ? 'ঢাকা, বাংলাদেশ' : 'Dhaka, Bangladesh', type: 'Full-time', salary: '৳ 80k - 120k', categoryId: 'govt' },
+      { id: 2, title: language === 'bn' ? 'প্রোডাক্ট ম্যানেজার' : 'Product Manager', company: 'Daraz', location: language === 'bn' ? 'ঢাকা, বাংলাদেশ' : 'Dhaka, Bangladesh', type: 'Full-time', salary: '৳ 60k - 90k', categoryId: 'bank' },
+      { id: 3, title: language === 'bn' ? 'ডিজিটাল মার্কেটিং স্পেশালিস্ট' : 'Digital Marketing Specialist', company: 'Pathao', location: 'Remote', type: 'Contract', salary: '৳ 40k - 70k', categoryId: 'sales' },
+      { id: 4, title: language === 'bn' ? 'ইউএক্স ডিজাইনার' : 'UX Designer', company: 'Foodpanda', location: language === 'bn' ? 'ঢাকা, বাংলাদেশ' : 'Dhaka, Bangladesh', type: 'Full-time', salary: '৳ 50k - 80k', categoryId: 'private' },
+      { id: 5, title: language === 'bn' ? 'অ্যাসিস্ট্যান্ট টিচার' : 'Assistant Teacher', company: 'Govt. School', location: language === 'bn' ? 'চট্টগ্রাম, বাংলাদেশ' : 'Chittagong, Bangladesh', type: 'Full-time', salary: '৳ 20k - 35k', categoryId: 'teacher' },
+      { id: 6, title: language === 'bn' ? 'মেডিকেল অফিসার' : 'Medical Officer', company: 'Square Hospital', location: language === 'bn' ? 'ঢাকা, বাংলাদেশ' : 'Dhaka, Bangladesh', type: 'Full-time', salary: '৳ 50k - 80k', categoryId: 'health' },
+  ];
+
+  const filteredJobs = selectedCategory 
+      ? DUMMY_JOBS.filter(job => job.categoryId === selectedCategory)
+      : DUMMY_JOBS;
 
   const CATEGORIES = [
     { name: t('job_cat_engineering'), icon: <Code size={24} />, jobs: '120+', bg: 'bg-blue-50 dark:bg-blue-900/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-100 dark:border-blue-900/30' },
@@ -140,148 +182,163 @@ export const JobPortalHome = () => {
           <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-slate-50 dark:from-[#050505] to-transparent z-10" />
           <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-slate-50 dark:from-[#050505] to-transparent z-10" />
       </div>
-
-      {/* Bento Grid Navigation */}
-      <section className="max-w-7xl mx-auto px-4 mb-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[240px]">
-              
-              {/* Card 1: Find Jobs (Large) - Purple Contour Style */}
-              <Link to="/jobs/search" className="md:col-span-2 md:row-span-2 group relative bg-white dark:bg-[#111111] rounded-[2rem] border border-slate-200 dark:border-white/5 overflow-hidden hover:border-violet-500/30 transition-all duration-500 shadow-xl dark:shadow-2xl">
-                  {/* Abstract Purple Wave Pattern */}
-                  <div className="absolute inset-0 overflow-hidden opacity-60 group-hover:opacity-80 transition-opacity duration-700">
-                      <svg className="absolute -bottom-20 -right-20 w-[120%] h-[120%]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M350,500 Q450,300 500,150" fill="none" stroke="#8B5CF6" strokeWidth="2" opacity="0.3" />
-                          <path d="M300,500 Q400,300 500,200" fill="none" stroke="#8B5CF6" strokeWidth="2" opacity="0.4" />
-                          <path d="M250,500 Q350,300 500,250" fill="none" stroke="#8B5CF6" strokeWidth="2" opacity="0.5" />
-                          <path d="M200,500 Q300,350 500,300" fill="none" stroke="#8B5CF6" strokeWidth="2" opacity="0.6" />
-                          <path d="M150,500 Q250,400 500,350" fill="none" stroke="#8B5CF6" strokeWidth="2" opacity="0.3" />
-                          <path d="M100,500 Q200,450 500,400" fill="none" stroke="#8B5CF6" strokeWidth="2" opacity="0.2" />
-                      </svg>
-                  </div>
-
-                  <div className="relative h-full p-8 flex flex-col justify-between z-10">
-                      <div className="flex justify-between items-start">
-                          <div className="w-12 h-12 bg-[#8B5CF6] rounded-2xl flex items-center justify-center text-white shadow-[0_0_30px_rgba(139,92,246,0.6)] group-hover:scale-110 transition-transform duration-500">
-                              <Search size={24} />
-                          </div>
-                          <div className="text-right">
-                              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Date</p>
-                              <p className="text-xs font-bold text-slate-800 dark:text-white">{new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                          </div>
+      {/* Small Category Grid */}
+      <section className="max-w-7xl mx-auto px-4 mb-12">
+          <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {language === 'bn' ? 'জনপ্রিয় ক্যাটাগরি' : 'Popular Categories'}
+              </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {CATEGORIES.map((category, idx) => (
+                  <div key={idx} className={`group ${category.bg} border ${category.border} hover:border-violet-500/30 rounded-xl p-4 transition-all duration-300 hover:shadow-md cursor-pointer flex flex-col items-center text-center`}>
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-white/50 dark:bg-black/20 ${category.text} mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                          {React.cloneElement(category.icon as React.ReactElement, { size: 20 })}
                       </div>
-                      
-                      <div>
-                          <div className="mb-2 text-[#8B5CF6] font-bold uppercase tracking-widest text-xs">Winner</div>
-                          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-100 transition-colors whitespace-pre-line">
-                              {t('job_card_dream').replace(' ', '\n')}
-                          </h2>
-                          <div className="flex items-center text-slate-600 dark:text-slate-400 text-sm font-medium">
-                              <span className="mr-2">Dhaka, Bangladesh</span>
-                              <div className="h-1 w-1 bg-slate-400 dark:bg-slate-600 rounded-full mr-2"></div>
-                              <span>Remote Available</span>
-                          </div>
-                      </div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white text-sm mb-1">{category.name}</h3>
+                      <span className={`text-xs font-medium ${category.text}`}>{category.jobs} {language === 'bn' ? 'চাকরি' : 'Jobs'}</span>
                   </div>
-              </Link>
-
-              {/* Card 2: Employers - Blue Dot Matrix Style */}
-              <Link to="/jobs/create" className="group relative bg-white dark:bg-[#111111] rounded-[2rem] border border-slate-200 dark:border-white/5 overflow-hidden hover:border-blue-500/30 transition-all duration-300 shadow-lg dark:shadow-none">
-                  {/* Dot Matrix Pattern */}
-                  <div className="absolute top-0 right-0 h-full w-1/2 overflow-hidden opacity-60 group-hover:opacity-100 transition-opacity duration-500">
-                      <svg width="100%" height="100%" viewBox="0 0 200 400" preserveAspectRatio="none">
-                          <defs>
-                              <pattern id="blue-dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                                  <circle cx="2" cy="2" r="1.5" className="fill-blue-500" />
-                              </pattern>
-                              <linearGradient id="fade-left" x1="0" y1="0" x2="1" y2="0">
-                                  <stop offset="0%" stopColor="black" stopOpacity="1" />
-                                  <stop offset="100%" stopColor="black" stopOpacity="0" />
-                              </linearGradient>
-                              <mask id="fade-mask">
-                                  <rect x="0" y="0" width="100%" height="100%" fill="url(#fade-left)" mask="url(#fade-mask)" />
-                              </mask>
-                          </defs>
-                          <rect x="0" y="0" width="100%" height="100%" fill="url(#blue-dots)" mask="url(#fade-mask)" />
-                      </svg>
-                      {/* Fluid shape overlaying dots */}
-                      <div className="absolute top-1/2 right-0 w-32 h-64 bg-blue-500/20 blur-[60px] rounded-full transform -translate-y-1/2 translate-x-1/2" />
-                  </div>
-
-                  <div className="relative h-full p-6 flex flex-col justify-between z-10">
-                      <div className="w-10 h-10 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-[0_0_25px_rgba(59,130,246,0.5)] group-hover:scale-110 transition-transform duration-300">
-                          <Building2 size={20} />
-                      </div>
-                      
-                      <div>
-                          <div className="mb-1 text-blue-500 dark:text-blue-400 font-bold uppercase tracking-widest text-[10px]">Gold Partner</div>
-                          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">{t('job_card_post')}</h3>
-                          <p className="text-slate-500 text-[10px] uppercase tracking-wide">United States</p>
-                      </div>
-                  </div>
-              </Link>
-
-              {/* Card 3: CV Builder - Yellow Geometric Stripes Style */}
-              <Link to="/jobs/create-cv" className="group relative bg-white dark:bg-[#111111] rounded-[2rem] border border-slate-200 dark:border-white/5 overflow-hidden hover:border-yellow-500/30 transition-all duration-300 shadow-lg dark:shadow-none">
-                  {/* Yellow Stripes Pattern */}
-                  <div className="absolute bottom-0 right-0 w-48 h-48 pointer-events-none">
-                      <svg width="100%" height="100%" viewBox="0 0 200 200">
-                          {[0, 20, 40, 60, 80, 100, 120].map((offset, i) => (
-                              <line 
-                                key={i}
-                                x1={100 + offset} y1="200" 
-                                x2="200" y2={100 + offset} 
-                                stroke="#EAB308" 
-                                strokeWidth="8" 
-                                strokeLinecap="round"
-                                className="group-hover:translate-x-[-5px] group-hover:translate-y-[-5px] transition-transform duration-500"
-                                style={{ transitionDelay: `${i * 50}ms` }}
-                              />
-                          ))}
-                      </svg>
-                  </div>
-
-                  <div className="relative h-full p-6 flex flex-col justify-between z-10">
-                      <div className="w-10 h-10 bg-yellow-500 rounded-2xl flex items-center justify-center text-black shadow-[0_0_25px_rgba(234,179,8,0.5)] group-hover:scale-110 transition-transform duration-300">
-                          <FileText size={20} />
-                      </div>
-                      
-                      <div>
-                          <div className="mb-1 text-yellow-600 dark:text-yellow-500 font-bold uppercase tracking-widest text-[10px]">Asia Pacific</div>
-                          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">{t('job_card_cv')}</h3>
-                          <p className="text-slate-500 text-[10px] uppercase tracking-wide">United Nations</p>
-                      </div>
-                  </div>
-              </Link>
-
+              ))}
           </div>
       </section>
 
-      {/* Explore Categories */}
-      <section className="max-w-7xl mx-auto px-4 mb-24">
-          <div className="flex justify-between items-end mb-10">
-              <div>
-                  <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('job_pop_cat')}</h2>
-                  <p className="text-slate-600 dark:text-slate-500">Explore opportunities by industry.</p>
+      {/* AI CV Builder Banner */}
+      <section className="max-w-7xl mx-auto px-4 mb-12">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 to-indigo-600 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between group">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700"></div>
+              
+              <div className="relative z-10 text-white max-w-xl text-center md:text-left mb-6 md:mb-0">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-sm font-bold mb-4">
+                      <Sparkles size={16} className="text-yellow-300" />
+                      {language === 'bn' ? 'এআই ফিচার' : 'AI Feature'}
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-3">
+                      {language === 'bn' ? 'প্রফেশনাল সিভী তৈরি করুন এআই দিয়ে' : 'Build Your Professional CV with AI'}
+                  </h2>
+                  <p className="text-violet-100 text-lg">
+                      {language === 'bn' 
+                          ? 'মাত্র ৫ মিনিটে একটি আকর্ষণীয় ও প্রফেশনাল সিভী তৈরি করুন আমাদের স্মার্ট এআই সিভী বিল্ডার ব্যবহার করে।' 
+                          : 'Create an attractive and professional CV in just 5 minutes using our smart AI CV builder.'}
+                  </p>
               </div>
-              <Link to="/jobs/search" className="text-slate-900 dark:text-white font-bold hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-2 text-sm border-b border-slate-300 dark:border-white/20 pb-1">
-                  {t('job_view_all')}
-              </Link>
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {CATEGORIES.map((cat, i) => (
+              <div className="relative z-10 flex-shrink-0">
                   <Link 
-                    to="/jobs/search" 
-                    key={i}
-                    className={`rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all duration-300 group shadow-sm hover:shadow-lg hover:-translate-y-1 border ${cat.bg} ${cat.border} dark:bg-opacity-10 dark:border-opacity-10`}
+                      to="/jobs/create-cv"
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-700 font-bold rounded-full hover:bg-slate-50 transition-all hover:scale-105 hover:shadow-xl shadow-lg"
                   >
-                      <div className={`mb-4 ${cat.text} group-hover:scale-110 duration-300 transform`}>
-                          {cat.icon}
-                      </div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1">{cat.name}</h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">{cat.jobs} Jobs</p>
+                      {language === 'bn' ? 'সিভী তৈরি করুন' : 'Create CV Now'}
+                      <ArrowRight size={20} />
                   </Link>
-              ))}
+              </div>
+          </div>
+      </section>
+
+      {/* Main Content Layout with Sidebar */}
+      <section className="max-w-7xl mx-auto px-4 mb-24">
+          <div className="flex flex-col lg:flex-row gap-8">
+              {/* Sidebar */}
+              <div className="w-full lg:w-72 flex-shrink-0">
+                  <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/5 rounded-2xl p-4 shadow-sm sticky top-24">
+                      {SIDEBAR_CATEGORIES.map((section, idx) => (
+                          <div key={idx} className="mb-6 last:mb-0">
+                              <h3 className="text-slate-900 dark:text-white font-bold mb-3 px-2 border-l-2 border-violet-500">
+                                  {language === 'bn' ? section.title.bn : section.title.en}
+                              </h3>
+                              <ul className="space-y-1">
+                                  {section.items.map((item) => {
+                                      const isSelected = selectedCategory === item.id;
+                                      return (
+                                      <li key={item.id}>
+                                          <button 
+                                              onClick={() => setSelectedCategory(isSelected ? null : item.id)}
+                                              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group
+                                                  ${isSelected 
+                                                      ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-medium' 
+                                                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-violet-600 dark:hover:text-violet-400'
+                                                  }`}
+                                          >
+                                              <span>{language === 'bn' ? item.label.bn : item.label.en}</span>
+                                              <ArrowRight size={14} className={`transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                                          </button>
+                                      </li>
+                                      )
+                                  })}
+                                  {section.items.length === 0 && (
+                                      <p className="text-xs text-slate-400 dark:text-slate-600 px-3 italic">
+                                          {language === 'bn' ? 'শীঘ্রই আসছে...' : 'Coming soon...'}
+                                      </p>
+                                  )}
+                              </ul>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+
+              {/* Main Job Listing Area */}
+              <div className="flex-1 flex flex-col gap-4">
+                  <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                          {selectedCategory 
+                              ? (language === 'bn' ? 'বাছাইকৃত চাকরি' : 'Filtered Jobs') 
+                              : (language === 'bn' ? 'সব সার্কুলার' : 'All Circulars')}
+                      </h2>
+                      <span className="text-slate-500 dark:text-slate-400 text-sm">{filteredJobs.length} {language === 'bn' ? 'টি চাকরি পাওয়া গেছে' : 'jobs found'}</span>
+                  </div>
+
+                  {filteredJobs.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {filteredJobs.map(job => (
+                              <Link 
+                                  key={job.id} 
+                                  to={`/jobs/search`} 
+                                  className="group bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/5 hover:border-violet-500/30 dark:hover:border-violet-500/30 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all duration-300"
+                              >
+                                  <div className="flex justify-between items-start mb-4">
+                                      <div>
+                                          <h3 className="font-bold text-lg text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-1">{job.title}</h3>
+                                          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{job.company}</p>
+                                      </div>
+                                      <div className="w-10 h-10 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-400 group-hover:text-violet-500 transition-colors">
+                                          <Building2 size={20} />
+                                      </div>
+                                  </div>
+                                  
+                                  <div className="flex flex-wrap gap-2 mb-4">
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-medium">
+                                          <MapPin size={12} /> {job.location}
+                                      </span>
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-medium">
+                                          <Briefcase size={12} /> {job.type}
+                                      </span>
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
+                                      <span className="font-bold text-slate-900 dark:text-white">{job.salary}</span>
+                                      <span className="text-violet-600 dark:text-violet-400 text-sm font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                                          {language === 'bn' ? 'বিস্তারিত' : 'Apply'} <ArrowRight size={14} />
+                                      </span>
+                                  </div>
+                              </Link>
+                          ))}
+                      </div>
+                  ) : (
+                      <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/5 rounded-2xl p-8 shadow-sm h-full min-h-[400px] flex flex-col items-center justify-center text-center">
+                          <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-400 mb-6">
+                              <Search size={32} />
+                          </div>
+                          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                              {language === 'bn' ? 'কোন চাকরি পাওয়া যায়নি' : 'No jobs found'}
+                          </h3>
+                          <p className="text-slate-500 dark:text-slate-400 max-w-md">
+                              {language === 'bn' 
+                                  ? 'এই ক্যাটাগরিতে বর্তমানে কোন সার্কুলার নেই। অন্য ক্যাটাগরি চেষ্টা করুন।' 
+                                  : 'There are no circulars in this category right now. Please try another category.'}
+                          </p>
+                      </div>
+                  )}
+              </div>
           </div>
       </section>
 

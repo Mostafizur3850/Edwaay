@@ -33,6 +33,8 @@ const translations: Record<string, Record<Language, string>> = {
   'menu_blog_desc': { en: 'Study tips & news', bn: 'পড়াশোনার টিপস ও খবর' },
   'menu_careers': { en: 'Careers', bn: 'ক্যারিয়ার' },
   'menu_careers_desc': { en: 'Join the TakeUUp team', bn: 'আমাদের টিমে জয়েন করুন' },
+  'menu_resources': { en: 'Resources', bn: 'রিসোর্স' },
+  'menu_resources_desc': { en: 'Books, cheat sheets & more', bn: 'বই, চিটশিট ও অন্যান্য' },
   'menu_demo': { en: 'Live Demo', bn: 'লাইভ ডেমো' },
   'menu_demo_desc': { en: 'Try premium features', bn: 'প্রিমিয়াম ফিচার দেখুন' },
   'menu_about': { en: 'About Us', bn: 'আমাদের সম্পর্কে' },
