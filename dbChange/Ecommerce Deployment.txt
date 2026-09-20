@@ -1,0 +1,60 @@
+db: ECommerceDB
+db_user: oct_ecommercedb
+password: yejr7obvpgqinfsxduml
+
+
+"Server=103.125.252.243;Database=ECommerceDB;User Id=oct_ecommercedb;Password=yejr7obvpgqinfsxduml;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+
+
+dotnet ef migrations script --idempotent -o migrate.sql -s ECommerce.API -p ECommerce.Infrastructure
+
+dotnet ef migrations script --idempotent -o migrate.sql -p ECommerce.Infrastructure -s ECommerce.API
+
+
+
+New Migration If Need Notun Migration
+dotnet ef migrations add AddNewFeature -p ECommerce.Infrastructure -s ECommerce.API
+
+Safe Migaration Script Generate ডাটাবেজ এ যেগুলা আছে সেগুলা বাদ দিয়ে শুধু নতুন গুলা তৈরী করে ।
+
+dotnet ef migrations script --idempotent -o migrate.sql -p ECommerce.Infrastructure -s ECommerce.API
+
+userName চলে আসলে সেটা এভাবে সেট করলে আর আসবে না default schema
+
+ALTER USER [oct_ecommercedb] WITH DEFAULT_SCHEMA=[dbo];
+
+
+https://uat.trelectromart.com/swagger
+https://uat.trelectromart.com/swagger
+.../api/auth/ping
+
+Jwt__Key Generate
+Windows PowerCell
+
+[Convert]::ToBase64String((1..64 | ForEach-Object {Get-Random -Maximum 256}))
+
+
+
+
+
+appsetting.json
+
+
+
+{
+  "AllowedHosts": "*",
+
+  "Jwt": {
+    "Issuer": "ECommerce",
+    "Audience": "ECommerce",
+    "AccessTokenMinutes": 15,
+    "RefreshTokenDays": 15
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}

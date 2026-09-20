@@ -1,0 +1,147 @@
+-----------------------------
+-----------14-02-2026--------
+-----------------------------
+
+/* ================================
+   PRODUCTS TABLE INDEXES
+================================ */
+
+/* CategoryId */
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Products_CategoryId'
+    AND object_id = OBJECT_ID('dbo.Products')
+)
+BEGIN
+    CREATE INDEX IX_Products_CategoryId
+    ON dbo.Products(CategoryId);
+END
+
+
+/* BrandId */
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Products_BrandId'
+    AND object_id = OBJECT_ID('dbo.Products')
+)
+BEGIN
+    CREATE INDEX IX_Products_BrandId
+    ON dbo.Products(BrandId);
+END
+
+
+/* IsPublished + CreatedAt (VERY IMPORTANT) */
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Products_IsPublished_CreatedAt'
+    AND object_id = OBJECT_ID('dbo.Products')
+)
+BEGIN
+    CREATE INDEX IX_Products_IsPublished_CreatedAt
+    ON dbo.Products(IsPublished, CreatedAt DESC);
+END
+
+
+
+/* ================================
+   PRODUCT VARIANTS INDEXES
+================================ */
+
+/* ProductId */
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_ProductVariants_ProductId'
+    AND object_id = OBJECT_ID('dbo.ProductVariants')
+)
+BEGIN
+    CREATE INDEX IX_ProductVariants_ProductId
+    ON dbo.ProductVariants(ProductId);
+END
+
+
+/* ProductId + IsActive (CRITICAL FOR JOIN + FILTER) */
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_ProductVariants_ProductId_IsActive'
+    AND object_id = OBJECT_ID('dbo.ProductVariants')
+)
+BEGIN
+    CREATE INDEX IX_ProductVariants_ProductId_IsActive
+    ON dbo.ProductVariants(ProductId, IsActive);
+END
+
+
+/* Price (for filtering + sorting) */
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_ProductVariants_Price'
+    AND object_id = OBJECT_ID('dbo.ProductVariants')
+)
+BEGIN
+    CREATE INDEX IX_ProductVariants_Price
+    ON dbo.ProductVariants(Price);
+END
+
+
+-----------------------------
+-----------14-02-2026--------
+-----------------------------
+
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Products_IsPublished'
+)
+CREATE INDEX IX_Products_IsPublished ON Products(IsPublished);
+
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_ProductVariants_ProductId'
+)
+CREATE INDEX IX_ProductVariants_ProductId ON ProductVariants(ProductId);
+
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_ProductVariants_Price'
+)
+CREATE INDEX IX_ProductVariants_Price ON ProductVariants(Price);
+
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_ProductVariants_IsActive'
+)
+CREATE INDEX IX_ProductVariants_IsActive ON ProductVariants(IsActive);
+
+
+
+
+
+SELECT name
+FROM sys.indexes
+WHERE object_id = OBJECT_ID('Products');
+
+
+-----------------------------
+-----------14-02-2026--------
+-----------------------------
+
+INSERT INTO FaqCategories (Id, Name, IsActive, CreatedAt, UpdatedAt)
+VALUES (
+    NEWID(),
+    'General',
+    1,
+    GETUTCDATE(),
+    GETUTCDATE()
+);
+
+
+INSERT INTO FaqCategories (Id, Name, IsActive, CreatedAt, UpdatedAt)
+VALUES
+(NEWID(), 'General',   1, GETUTCDATE(), GETUTCDATE()),
+(NEWID(), 'Technical', 1, GETUTCDATE(), GETUTCDATE()),
+(NEWID(), 'Billing',   1, GETUTCDATE(), GETUTCDATE()),
+(NEWID(), 'Account',   1, GETUTCDATE(), GETUTCDATE()),
+(NEWID(), 'Support',   1, GETUTCDATE(), GETUTCDATE());

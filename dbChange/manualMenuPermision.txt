@@ -1,0 +1,168 @@
+/* =========================================================
+   0) (Optional) Quick check: Permissions টেবিলে ডাটা আছে কিনা
+   ========================================================= */
+-- SELECT TOP 50 * FROM dbo.Permissions;
+
+
+/* =========================================================
+   1) OLD Unique Index/Constraint drop (RoleId, MenuId)
+      Name: UX_RoleMenuPermissions_Role_Menu
+   ========================================================= */
+
+-- যদি UNIQUE CONSTRAINT হিসেবে থাকে
+IF EXISTS (
+    SELECT 1
+    FROM sys.key_constraints kc
+    WHERE kc.name = 'UX_RoleMenuPermissions_Role_Menu'
+      AND kc.parent_object_id = OBJECT_ID('dbo.RoleMenuPermissions')
+)
+BEGIN
+    ALTER TABLE dbo.RoleMenuPermissions
+    DROP CONSTRAINT UX_RoleMenuPermissions_Role_Menu;
+END
+GO
+
+-- যদি UNIQUE INDEX হিসেবে থাকে
+IF EXISTS (
+    SELECT 1
+    FROM sys.indexes i
+    WHERE i.name = 'UX_RoleMenuPermissions_Role_Menu'
+      AND i.object_id = OBJECT_ID('dbo.RoleMenuPermissions')
+)
+BEGIN
+    DROP INDEX UX_RoleMenuPermissions_Role_Menu ON dbo.RoleMenuPermissions;
+END
+GO
+
+
+/* =========================================================
+   2) (Optional but recommended) Deduplicate (যদি একই RoleId+MenuId+PermissionId
+      একাধিকবার থেকে থাকে, তাহলে নতুন index create করতে সমস্যা হবে)
+   ========================================================= */
+;WITH d AS (
+    SELECT *,
+           rn = ROW_NUMBER() OVER (
+                    PARTITION BY RoleId, MenuId, PermissionId
+                    ORDER BY (SELECT 1)
+                )
+    FROM dbo.RoleMenuPermissions
+)
+DELETE FROM d WHERE rn > 1;
+GO
+
+
+/* =========================================================
+   3) Create NEW Unique Index: (RoleId, MenuId, PermissionId)
+   ========================================================= */
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes i
+    WHERE i.name = 'UX_RoleMenuPermissions_Role_Menu_Perm'
+      AND i.object_id = OBJECT_ID('dbo.RoleMenuPermissions')
+)
+BEGIN
+    CREATE UNIQUE INDEX UX_RoleMenuPermissions_Role_Menu_Perm
+    ON dbo.RoleMenuPermissions(RoleId, MenuId, PermissionId);
+END
+GO
+
+
+/* =========================================================
+   4) Stored Procedure (Final, IsAllowed ছাড়া)
+   ========================================================= */
+CREATE OR ALTER PROC dbo.SyncRoleMenusAndPermissions
+    @RoleName NVARCHAR(256),
+    @EmailOrUserName NVARCHAR(256) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRAN;
+
+        /* -------- RoleId -------- */
+        DECLARE @RoleId NVARCHAR(450) =
+        (
+          SELECT TOP 1 Id
+          FROM dbo.AspNetRoles
+          WHERE NormalizedName = UPPER(@RoleName) OR Name = @RoleName
+        );
+
+        IF @RoleId IS NULL
+            THROW 50002, 'Role not found in AspNetRoles', 1;
+
+        /* -------- Optional: assign user -> role -------- */
+        IF @EmailOrUserName IS NOT NULL
+        BEGIN
+            DECLARE @UserId NVARCHAR(450) =
+            (
+              SELECT TOP 1 Id
+              FROM dbo.AspNetUsers
+              WHERE Email = @EmailOrUserName OR UserName = @EmailOrUserName
+            );
+
+            IF @UserId IS NULL
+                THROW 50001, 'User not found in AspNetUsers', 1;
+
+            IF NOT EXISTS (SELECT 1 FROM dbo.AspNetUserRoles WHERE UserId=@UserId AND RoleId=@RoleId)
+                INSERT INTO dbo.AspNetUserRoles(UserId, RoleId) VALUES (@UserId, @RoleId);
+        END
+
+        /* -------- A) Insert missing role-menu -------- */
+        INSERT INTO dbo.ApplicationRoleMenus (RoleId, MenuId)
+        SELECT @RoleId, m.Id
+        FROM dbo.MenuItems m
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM dbo.ApplicationRoleMenus arm
+          WHERE arm.RoleId = @RoleId AND arm.MenuId = m.Id
+        );
+
+        /* -------- Guard: Permissions must have rows -------- */
+        IF NOT EXISTS (SELECT 1 FROM dbo.Permissions)
+            THROW 50003, 'Permissions table is empty. Seed dbo.Permissions first.', 1;
+
+        /* -------- B) Insert missing (RoleId, MenuId, PermissionId) --------
+           প্রতি menu এর জন্য সব Permission row ঢুকবে
+        */
+        INSERT INTO dbo.RoleMenuPermissions (RoleId, MenuId, PermissionId)
+        SELECT
+            @RoleId,
+            arm.MenuId,
+            p.Id
+        FROM dbo.ApplicationRoleMenus arm
+        CROSS JOIN dbo.Permissions p
+        WHERE arm.RoleId = @RoleId
+          AND NOT EXISTS (
+              SELECT 1
+              FROM dbo.RoleMenuPermissions rmp
+              WHERE rmp.RoleId = @RoleId
+                AND rmp.MenuId = arm.MenuId
+                AND rmp.PermissionId = p.Id
+          );
+
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK;
+        THROW;
+    END CATCH
+END
+GO
+
+
+/* =========================================================
+   5) Execute example
+   ========================================================= */
+EXEC dbo.SyncRoleMenusAndPermissions
+    @RoleName = 'Admin',
+    @EmailOrUserName = 'admin@objectcanvas.com';
+GO
+
+
+/* =========================================================
+   6) Verify
+   ========================================================= */
+-- SELECT * FROM dbo.ApplicationRoleMenus WHERE RoleId = (SELECT TOP 1 Id FROM dbo.AspNetRoles WHERE Name='Admin');
+-- SELECT * FROM dbo.RoleMenuPermissions WHERE RoleId = (SELECT TOP 1 Id FROM dbo.AspNetRoles WHERE Name='Admin');

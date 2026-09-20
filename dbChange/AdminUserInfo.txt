@@ -1,0 +1,26 @@
+user: admin@objectcanvas.com
+pass: #Motiur@2026
+#Motiur@2016
+
+user: mostafizur
+pass: #Motiur@2016
+
+
+
+[Authorize(Policy="permission:products.read")]
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("permission:products.read",
+        p => p.RequireClaim("permission", "products.read"));
+
+    options.AddPolicy("permission:products.create",
+        p => p.RequireClaim("permission", "products.create"));
+
+    options.AddPolicy("permission:products.update",
+        p => p.RequireClaim("permission", "products.update"));
+
+    options.AddPolicy("permission:products.delete",
+        p => p.RequireClaim("permission", "products.delete"));
+});

@@ -1,0 +1,48 @@
+
+
+DECLARE @RoleId NVARCHAR(450);
+SELECT @RoleId = Id
+FROM AspNetRoles
+WHERE NormalizedName = 'ADMIN' OR Name = 'Admin';
+
+IF @RoleId IS NULL
+BEGIN
+    RAISERROR('Admin role not found in AspNetRoles', 16, 1);
+    RETURN;
+END
+
+
+IF NOT EXISTS (
+    SELECT 1 FROM AspNetRoleClaims
+    WHERE RoleId=@RoleId AND ClaimType='permission' AND ClaimValue='products.read'
+)
+INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue)
+VALUES (@RoleId, 'permission', 'products.read');
+
+IF NOT EXISTS (
+    SELECT 1 FROM AspNetRoleClaims
+    WHERE RoleId=@RoleId AND ClaimType='permission' AND ClaimValue='products.create'
+)
+INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue)
+VALUES (@RoleId, 'permission', 'products.create');
+
+
+IF NOT EXISTS (
+    SELECT 1 FROM AspNetRoleClaims
+    WHERE RoleId=@RoleId AND ClaimType='permission' AND ClaimValue='products.update'
+)
+INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue)
+VALUES (@RoleId, 'permission', 'products.update');
+
+IF NOT EXISTS (
+    SELECT 1 FROM AspNetRoleClaims
+    WHERE RoleId=@RoleId AND ClaimType='permission' AND ClaimValue='products.delete'
+)
+INSERT INTO AspNetRoleClaims (RoleId, ClaimType, ClaimValue)
+VALUES (@RoleId, 'permission', 'products.delete');
+
+-- 3) verify
+SELECT RoleId, ClaimType, ClaimValue
+FROM AspNetRoleClaims
+WHERE RoleId=@RoleId
+ORDER BY Id DESC;

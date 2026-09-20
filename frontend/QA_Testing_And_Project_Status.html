@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TakeUUp Portal - Project Status & QA Tester's Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #090d16;
+            --bg-secondary: #0f1424;
+            --bg-tertiary: #171e36;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --cyan: #06b6d4;
+            --purple: #a855f7;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --border: #1e293b;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .card, pre, code {
+                border: 1px solid #ddd !important;
+                background: #f9f9f9 !important;
+                color: black !important;
+            }
+            h1, h2, h3, h4 {
+                color: black !important;
+                page-break-after: avoid;
+            }
+            tr {
+                page-break-inside: avoid;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2rem;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .download-notice {
+            background-color: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: var(--cyan);
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--cyan);
+            padding-left: 0.75rem;
+            color: #ffffff;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--cyan);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .badge-dynamic { background-color: rgba(16, 185, 129, 0.1); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-mocked { background-color: rgba(245, 158, 11, 0.1); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-static { background-color: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.2); }
+        .badge-pending { background-color: rgba(244, 63, 94, 0.1); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.2); }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-header h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        table th, table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table th {
+            background-color: var(--bg-tertiary);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        ul, ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--bg-tertiary);
+            color: var(--cyan);
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+        }
+
+        .print-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .status-summary {
+            display: grid;
+            grid-template-cols: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-box {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .status-box .num {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-box.done { border-color: rgba(16, 185, 129, 0.3); color: var(--emerald); }
+        .status-box.mock { border-color: rgba(245, 158, 11, 0.3); color: var(--amber); }
+        .status-box.pending { border-color: rgba(244, 63, 94, 0.3); color: var(--rose); }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="download-notice no-print">
+            💾 This document is saved locally on your computer at: <code>E:\Source\takeuup\takeuupfront\trunk\QA_Testing_And_Project_Status.html</code>.<br>
+            You can double-click this file to open it in any browser, email it to your tester, or press <strong>Ctrl + P</strong> to save/print as PDF.
+        </div>
+
+        <header>
+            <h1>TakeUUp Portal - Project Status & QA Tester's Guide</h1>
+            <p>Comprehensive Status Report, Module Dynamic States, and QA Test Scenarios</p>
+            <div style="margin-top: 1.5rem;" class="no-print">
+                <button class="print-btn" onclick="window.print()">Print or Save as PDF</button>
+            </div>
+        </header>
+
+        <!-- SECTION 1: OVERVIEW -->
+        <section>
+            <h2>1. System Architecture Overview</h2>
+            <p>
+                The TakeUUp portal is built using a modern 3-Tier Clean Architecture stack:
+            </p>
+            <ul>
+                <li><strong>Frontend:</strong> React.js, TypeScript, Tailwind CSS, Lucide icons, Vite bundling.</li>
+                <li><strong>Backend:</strong> ASP.NET Core Web API (.NET 8/9), Entity Framework Core (EF Core) Object-Relational Mapper.</li>
+                <li><strong>Database:</strong> SQL Server (Express/MSSQL) database engine.</li>
+            </ul>
+            <div class="status-summary">
+                <div class="status-box done">
+                    <div class="num">13</div>
+                    <div>Completed Modules</div>
+                </div>
+                <div class="status-box mock">
+                    <div class="num">2</div>
+                    <div>Mocked Modules</div>
+                </div>
+                <div class="status-box pending">
+                    <div class="num">3</div>
+                    <div>Future Tasks</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DYNAMIC STATUS -->
+        <section>
+            <h2>2. Detailed Feature Catalog & Dynamic Status</h2>
+            <p>
+                Below is the detailed state of each module in the Student Portal, highlighting what is connected to the database and what remains static or mocked.
+            </p>
+
+            <!-- Authentication -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Authentication & Role Redirection</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> User registration, login verification using email/phone and OTP.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Connected to `AuthController` and `OtpVerifications` table. Students are automatically redirected to <code>/dashboard</code> on success.
+                </p>
+            </div>
+
+            <!-- Dashboard Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Target Goals & Subject Progress Tracker</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Allows selecting multiple preparation goals, shows subjects in each goal, displays progress badges, and contains range sliders to adjust progress manually.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Synchronized with the backend <code>userProfiles</code> table via <code>UserProfileController</code> using serialized JSON strings (<code>TargetGoalsJson</code>, <code>UnlockedGoalsJson</code>, <code>GoalProgressJson</code>). Actions are debounced by 1.5s.
+                </p>
+            </div>
+
+            <!-- Daily Routine -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Daily Routine Checklist</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Students can list daily study tasks, mark tasks done, and track completion percentage.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Renders dynamically and syncs checklist actions automatically to <code>RoutineTasksJson</code> in the SQL Server database.
+                </p>
+            </div>
+
+            <!-- Courses tab -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Offered Courses & Category Exploration</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Shows active courses, module completion checks, and category cards (HSC, Admission, BCS, Job Prep) with dynamic navigation.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Course listings are dynamic. Added "Explore All Categories" section mapping to dynamic learning paths.
+                </p>
+            </div>
+
+            <!-- Quiz tab -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Quizzes & Mock Exams Workspace</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Practice quizzes, chapter-wise MCQs, mock tests.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Embedded inside the dashboard layout with dark theme. Fetches questions dynamically from <code>QuizzesController</code> and matches user category.
+                </p>
+            </div>
+
+            <!-- Friday Mega Quiz -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Friday Mega Quiz Arena</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Weekly live mega quiz showdown held every Friday at 8 PM.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Renders in-dashboard. Integrates with the backend leaderboard and registration endpoints.
+                </p>
+            </div>
+
+            <!-- Question Bank -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Question Bank Archive & Horizontal Selector</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Archive of previous years' exams and boards. Features a top horizontal scrolling tab bar in place of vertical sidebars.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Parses database questions dynamically to map them to years and boards (e.g. 45th BCS, HSC 2023). Automatically pulls custom subjects from DB questions.
+                </p>
+            </div>
+
+            <!-- Find Mentor -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Find a Mentor</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Mentor directory where students can search and filter mentors by subject and institution.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Embedded inside the dashboard. Pulls data dynamically from `MentorsController` and database `Mentors` table.
+                </p>
+            </div>
+
+            <!-- Payment Gateway -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Mobile Wallet Checkout Payment Gateway</h4>
+                    <span class="badge badge-mocked">Interactive Simulation</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Secure billing flow to unlock premium goal tracks.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Simulated bKash, Nagad, and Rocket checkouts with wallet verification, OTP, and PIN confirmation. Updates database unlocked status on success.
+                </p>
+            </div>
+
+            <!-- Subject Activities -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Subject Action Hub (Preparation Room & Mock Tests)</h4>
+                    <span class="badge badge-dynamic">Fully Dynamic</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Action selector popup when clicking on a subject progress card, displaying two options (Preparation Room and Mock Test Practice).
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Renders matching layout, color gradients, and icons from the reference screenshot. Routes internally to correct tabs.
+                </p>
+            </div>
+
+            <!-- Study Circles -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Study Circles & Messaging (Groups)</h4>
+                    <span class="badge badge-static">Static Mock</span>
+                </div>
+                <p>
+                    <strong>Description:</strong> Collaboration workspace and group chat.
+                </p>
+                <p>
+                    <strong>Implementation:</strong> Front-end renders a dummy UI. Messaging data is currently stored in local state and does not post to backend database.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: TESTER'S QA GUIDE -->
+        <section>
+            <h2>3. QA Tester's Guide (Step-by-Step Test Cases)</h2>
+            <p>
+                Please provide the following test scenarios to your tester to verify all functions and data persistence.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">ID</th>
+                        <th style="width: 25%;">Test Scenario</th>
+                        <th style="width: 42%;">Steps to Perform</th>
+                        <th style="width: 25%;">Expected Pass Criteria</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TC-01</td>
+                        <td><strong>Student Login Redirection</strong></td>
+                        <td>
+                            1. Go to <code>/login</code>.<br>
+                            2. Log in with role 'student' (or enter OTP code on sign-up).
+                        </td>
+                        <td>Lands on <code>/dashboard</code> page. Sidebar and dark theme are visible.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-02</td>
+                        <td><strong>Explore Categories</strong></td>
+                        <td>
+                            1. Click <strong>Offered Courses & Lessons</strong> in sidebar.<br>
+                            2. Scroll down to "Explore All Categories".<br>
+                            3. Click any category card.
+                        </td>
+                        <td>Redirects to <code>/details/:id</code> matching the category ID.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-03</td>
+                        <td><strong>Embedded Quiz Workspace</strong></td>
+                        <td>
+                            1. Click <strong>Quizzes & Mock Exams</strong> in sidebar.<br>
+                            2. Verify layout.<br>
+                            3. Start and complete a quick quiz.
+                        </td>
+                        <td>Quiz renders inside the dashboard container. Left sidebar remains fully visible. No page refresh occurs.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-04</td>
+                        <td><strong>Embedded Friday Mega Quiz</strong></td>
+                        <td>
+                            1. Click <strong>Friday Mega Quiz (8 PM)</strong> in sidebar.<br>
+                            2. Check the header bar.
+                        </td>
+                        <td>Contest lobby loads inside the dashboard. External back navigation is hidden.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-05</td>
+                        <td><strong>Embedded Question Bank</strong></td>
+                        <td>
+                            1. Click <strong>Question Bank Archive</strong> in sidebar.<br>
+                            2. Verify there is no duplicate sidebar.<br>
+                            3. Use the horizontal pills to filter by Category, target, and board.
+                        </td>
+                        <td>Left vertical categories sidebar is hidden. Top horizontal scrollable tabs let you drill down to specific year/board questions.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-06</td>
+                        <td><strong>Embedded Mentors Directory</strong></td>
+                        <td>
+                            1. Click <strong>Find a Mentor</strong> in sidebar.<br>
+                            2. Search for a mentor name.<br>
+                            3. Filter by department.
+                        </td>
+                        <td>Mentor cards render in a grid. Card background, buttons, and badges match the dark dashboard theme.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-07</td>
+                        <td><strong>Goals & Progress Tracker</strong></td>
+                        <td>
+                            1. Go to <strong>Dashboard Overview</strong>.<br>
+                            2. View "My Target Goals & Prep Progress" card.<br>
+                            3. Switch tabs between active goals.
+                        </td>
+                        <td>Subject list below tabs changes dynamically. Progress percentages are displayed.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-08</td>
+                        <td><strong>Interactive Progress Slider</strong></td>
+                        <td>
+                            1. Hover over any subject card (e.g. Physics).<br>
+                            2. Grab the slider knob and drag to adjust (e.g. to 85%).
+                        </td>
+                        <td>Percentage updates, status badge changes color/text. The subject popup does NOT open.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-09</td>
+                        <td><strong>Checkout Payment flow</strong></td>
+                        <td>
+                            1. On Overview, click <strong>+ Add Goal</strong>.<br>
+                            2. Choose a locked goal (e.g. BCS if user is HSC).<br>
+                            3. Select package -> Select bKash -> Enter phone -> Enter OTP (<code>123456</code>) -> Enter PIN (<code>1234</code>).
+                        </td>
+                        <td>Shows Payment Success screen. The goal is unlocked and added as an active tab.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-10</td>
+                        <td><strong>Subject Activity Hub</strong></td>
+                        <td>
+                            1. Click on the title area of a subject card (e.g. Chemistry).<br>
+                            2. Verify cards match design screenshot.<br>
+                            3. Click **Preparation Room** (check if redirects to Courses).<br>
+                            4. Click **Mock Test Practice** (check if redirects to Quizzes).
+                        </td>
+                        <td>Displays popup modal with two cards (Preparation Room & Mock Test Practice) in violet/blue gradients. Switches tabs correctly on click.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-11</td>
+                        <td><strong>End-to-End Database Sync</strong></td>
+                        <td>
+                            1. Add a goal, complete checkout, or adjust progress sliders.<br>
+                            2. Wait 2 seconds.<br>
+                            3. Reload page (Press <code>F5</code>).
+                        </td>
+                        <td>All settings (new goals, unlocked status, progress bars) persist and reload correctly from backend SQL Server.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-12</td>
+                        <td><strong>Admin Exam & Board Question Upload</strong></td>
+                        <td>
+                            1. Log into the Admin Panel.<br>
+                            2. Go to the Questions tab -> Add Single Question.<br>
+                            3. Fill in Category, Subject, and enter an <strong>Exam Board / Year / Set Name</strong> (e.g. <code>46th BCS</code> or <code>HSC 2024 Dhaka Board</code>).<br>
+                            4. Enter question details and submit.<br>
+                            5. Open the Student Portal -> Question Bank Archive.<br>
+                            6. Filter by the category and check the new exam board.
+                        </td>
+                        <td>The question is added with the specific Exam Name. The Student Question Bank detects it dynamically and lists the new exam board option under the category.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-13</td>
+                        <td><strong>Admin Collapsible Question Bank Submenu</strong></td>
+                        <td>
+                            1. Log into the Admin Panel.<br>
+                            2. Look at the left sidebar menu.<br>
+                            3. Click on the <strong>Question Bank</strong> menu item.<br>
+                            4. Verify that the subtabs slide open as a nested list.<br>
+                            5. Click different sub-menu links (e.g. Teacher Approvals, Categories & Subjects).<br>
+                            6. Confirm that the main view changes to display the selected section, and horizontal tabs are hidden.
+                        </td>
+                        <td>The Question Bank tab displays a dropdown arrow, toggles open/closed smoothly, displays nested items with correct item count badges, and eliminates horizontal tab clutter in the content view.</td>
+                    </tr>
+                    <tr>
+                        <td>TC-14</td>
+                        <td><strong>Dynamic DB-Driven Sidebar & Users Submenu</strong></td>
+                        <td>
+                            1. Log into the Admin Panel.<br>
+                            2. Verify that all sidebar menus load dynamically (first run seeds default admin menus to database).<br>
+                            3. Click on the <strong>Users</strong> menu in the sidebar.<br>
+                            4. Verify that the subtabs (User Accounts, Teacher Registrations, Roles, Menus, Permissions) open in a nested dropdown.<br>
+                            5. Go to Users -> Menus and edit/add/delete a menu item.<br>
+                            6. Verify that the sidebar immediately refreshes dynamically to match database changes.
+                        </td>
+                        <td>Sidebar menus are dynamically synced with the database. Deleting or renaming a menu from the Menus manager updates the sidebar instantly, with perfect URL-view routing mapping.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 4: FUTURE ROADMAP & ADDITIONS -->
+        <section>
+            <h2>4. Recommended Future Features</h2>
+            <p>
+                To make the portal even more competitive, we suggest adding the following features in subsequent updates:
+            </p>
+            <div class="card">
+                <h4>1. AI Smart Study Companion (Chatbot)</h4>
+                <p>
+                    An AI study tutor embedded on the sidebar that students can chat with to resolve doubts in specific subjects (e.g. solve a physics math or translate a sentence).
+                </p>
+            </div>
+            <div class="card">
+                <h4>2. Student Gamification (Leaderboards & Streaks)</h4>
+                <p>
+                    Display a global leaderboard on the dashboard overview showing students ranked by points. Add weekly challenges (e.g., "Solve 5 Math Quizzes") to earn reward badges.
+                </p>
+            </div>
+            <div class="card">
+                <h4>3. Interactive Live Study Board</h4>
+                <p>
+                    A digital whiteboard inside study circles where multiple students can draw, solve equations, and share notes in real-time using WebSockets.
+                </p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+npm install -g pm2
+pm2 start npm --name "oct-ecommerce" -- start
+pm2 save
+
+
+cd C:\ui\Ecommerce
+pm2 start "npm run start" --name oct-ecommerce

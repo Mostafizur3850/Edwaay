@@ -1,0 +1,97 @@
+Find Fixed Folder
+
+dotnet ef dbcontext list --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+dotnet ef migrations add InitialCreate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef database update --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef database update --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add AddFullNameIsActive --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+dotnet ef migrations add AddFullNameIsActive --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef database update --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add AddUserNo --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+
+dotnet ef migrations add MenuRolePermission_StringRoleId --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef database update --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add EcommerceDomainAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+dotnet ef migrations add BrandTableUpdate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add FixCategoryParent --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add TaxTableAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add ProductMetaKeywordAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add UpGradeDb --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add CategoryMetaDataAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add CartDataAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add UpdateSSLCommerceTable --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add UpdateOrderTable--project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add OfferServiceAddTable --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add CouponTableUpdate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+dotnet ef migrations add GeneralSettingRelatedTableAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add LogoPathAddInConctractTable --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add HomeHeroBannerAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add HomeSliderTableAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add UserProfileAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add UpdateUserProfile --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add FaqAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+dotnet ef migrations add BlogAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add BlogTagAndMetaKeywordUpdate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add BlogCategoryUpdate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add UpdateCoupon --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add AddorderAddressUpdate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add AddorderAddressUpdate --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+
+dotnet ef migrations add ProductPartnumberAdd --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef migrations add Enents --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+dotnet ef database update --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+
+dotnet ef migrations add AddErrorLogs
+dotnet ef database update
+
+
+ভুল migrations hole 
+dotnet ef migrations remove --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+Migration apply হয়ে গেলে undo করতে চাইলে
+
+dotnet ef database update PreviousMigrationName --project .\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj --startup-project .\ECommerce.API\ECommerce.API.csproj
+
+Migration নামটা পরিবর্তন অনুযায়ী দিন: AddOrdersTable, AddCustomerPhone, UpdateProductPricePrecision
+
+
+
+[Authorize]
+[Authorize(Roles="Admin")]
+
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+
+
