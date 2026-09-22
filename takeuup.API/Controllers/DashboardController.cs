@@ -106,5 +106,57 @@ namespace takeuup.API.Controllers
                 subjects = results
             });
         }
+
+        [HttpGet("get-routine")]
+        public async Task<IActionResult> GetRoutine()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdStr))
+                return Unauthorized();
+
+            ECommerce.Domain.Entities.UserProfile profile = null;
+            if (Guid.TryParse(userIdStr, out var parsedGuid))
+            {
+                profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.UserId == parsedGuid);
+            }
+            if (profile == null)
+            {
+                profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.Email == userIdStr);
+            }
+
+            if (profile == null) return NotFound();
+
+            return Ok(new { routineTasks = profile.RoutineTasksJson });
+        }
+
+        public class UpdateRoutineDto
+        {
+            public string routineTasksJson { get; set; }
+        }
+
+        [HttpPut("update-routine")]
+        public async Task<IActionResult> UpdateRoutine([FromBody] UpdateRoutineDto dto)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdStr))
+                return Unauthorized();
+
+            ECommerce.Domain.Entities.UserProfile profile = null;
+            if (Guid.TryParse(userIdStr, out var parsedGuid))
+            {
+                profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.UserId == parsedGuid);
+            }
+            if (profile == null)
+            {
+                profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.Email == userIdStr);
+            }
+
+            if (profile == null) return NotFound();
+
+            profile.RoutineTasksJson = dto.routineTasksJson;
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Routine updated" });
+        }
     }
 }

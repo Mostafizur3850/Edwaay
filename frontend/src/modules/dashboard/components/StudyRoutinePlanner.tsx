@@ -100,7 +100,7 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
     fetch(`${BASE_URL}/Dashboard/get-routine`, { credentials: 'include', headers: getHeaders() })
       .then(res => res.json())
       .then(data => {
-        if (data.routineTasks && data.routineTasks !== "[]" && data.routineTasks !== "") {
+        if (data.routineTasks) {
           try {
             setTasks(JSON.parse(data.routineTasks));
           } catch(e) {}
@@ -141,11 +141,19 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
   const [newPriority, setNewPriority] = useState<'high' | 'medium' | 'low'>('medium');
 
   const toggleTaskDone = (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
+    setTasks(prev => {
+      const updated = prev.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      syncRoutineToDb(updated);
+      return updated;
+    });
   };
 
   const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
+    setTasks(prev => {
+      const updated = prev.filter(t => t.id !== id);
+      syncRoutineToDb(updated);
+      return updated;
+    });
   };
 
   const handleAddNewTask = (e: React.FormEvent) => {
@@ -163,7 +171,11 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
       day: selectedDay
     };
 
-    setTasks(prev => [...prev, newTaskItem]);
+    setTasks(prev => {
+      const updated = [...prev, newTaskItem];
+      syncRoutineToDb(updated);
+      return updated;
+    });
     setNewTaskTitle('');
     setShowAddForm(false);
   };

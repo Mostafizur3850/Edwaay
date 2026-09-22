@@ -7711,8 +7711,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         
         {/* Main Content */}
         <main className="flex-1 p-8 overflow-y-auto h-screen bg-slate-950">
-            {activeView === 'news' && <ManageNews />}
-            {activeView === 'affairs' && <ManageCurrentAffairs />}
+
             {activeView === 'dashboard' && (
                 <div className="space-y-6 animate-in fade-in">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -7764,8 +7763,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                     </div>
                 </div>
             )}
-            {activeView === 'news' && <ManageNews />}
-            {activeView === 'current_affairs' && <ManageCurrentAffairs />}
+            {activeView === 'news_mgr' && <ManageNews />}
+            {activeView === 'affairs_mgr' && <ManageCurrentAffairs />}
             {activeView === 'monitoring' && <AdminMessageMonitoring defaultTab={monitoringSubTab} />}
             {activeView === 'users' && renderUsers()}
             {activeView === 'students' && renderStudentManagement()}

@@ -23,8 +23,11 @@ export const LandingPage: React.FC = () => {
 
   const [newsList, setNewsList] = useState<any[]>([]);
   const [currentAffairsList, setCurrentAffairsList] = useState<any[]>([]);
-  const [activeNewsIndex, setActiveNewsIndex] = useState<number>(-1);
+  const [selectedNews, setSelectedNews] = useState<any>(null);
   const [activeAffairIndex, setActiveAffairIndex] = useState<number>(0);
+  const [activeNewsIndex, setActiveNewsIndex] = useState<number>(0);
+  const [selectedAffairOption, setSelectedAffairOption] = useState<string | null>(null);
+  const [isNewsHovered, setIsNewsHovered] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,12 +44,20 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (currentAffairsList.length <= 1) return;
+    if (currentAffairsList.length <= 1 || selectedAffairOption) return;
     const interval = setInterval(() => {
       setActiveAffairIndex(prev => (prev + 1) % currentAffairsList.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [currentAffairsList.length]);
+  }, [currentAffairsList.length, selectedAffairOption]);
+
+  useEffect(() => {
+    if (newsList.length <= 1 || isNewsHovered) return;
+    const interval = setInterval(() => {
+      setActiveNewsIndex(prev => (prev + 1) % newsList.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [newsList.length, isNewsHovered]);
 
   const leaderboardData: Record<string, any[]> = {
     Today: [
@@ -640,24 +651,72 @@ export const LandingPage: React.FC = () => {
                     </h3>
                     <div className="space-y-2">
                       {[
-                        currentAffairsList[activeAffairIndex]?.optionA,
-                        currentAffairsList[activeAffairIndex]?.optionB,
-                        currentAffairsList[activeAffairIndex]?.optionC,
-                        currentAffairsList[activeAffairIndex]?.optionD,
-                      ].map((option, idx) => (
-                        <div key={idx} className={`p-2 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${isDark ? 'border-slate-700 hover:border-slate-500 hover:bg-slate-800' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
-                          <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center border text-sm font-medium ${isDark ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-white text-slate-600 shadow-sm'}`}>
-                            {isBn ? ['ক', 'খ', 'গ', 'ঘ'][idx] : ['A', 'B', 'C', 'D'][idx]}
+                        { text: currentAffairsList[activeAffairIndex]?.optionA, val: 'A' },
+                        { text: currentAffairsList[activeAffairIndex]?.optionB, val: 'B' },
+                        { text: currentAffairsList[activeAffairIndex]?.optionC, val: 'C' },
+                        { text: currentAffairsList[activeAffairIndex]?.optionD, val: 'D' },
+                      ].map((option, idx) => {
+                        const isCorrect = currentAffairsList[activeAffairIndex]?.correctOption === option.val;
+                        const isSelected = selectedAffairOption === option.val;
+                        
+                        let optBgClass = isDark ? 'border-slate-700 hover:border-slate-500 hover:bg-slate-800' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50';
+                        let badgeClass = isDark ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-white text-slate-600 shadow-sm';
+                        
+                        if (selectedAffairOption) {
+                          optBgClass = isDark ? 'border-slate-700 bg-slate-800/50 opacity-60' : 'border-slate-200 bg-slate-50 opacity-60';
+                          if (isCorrect) {
+                            optBgClass = isDark ? 'border-emerald-500/50 bg-emerald-900/20' : 'border-emerald-500 bg-emerald-50';
+                            badgeClass = isDark ? 'border-emerald-500/50 bg-emerald-900/50 text-emerald-400' : 'border-emerald-500 bg-emerald-100 text-emerald-700';
+                          } else if (isSelected && !isCorrect) {
+                            optBgClass = isDark ? 'border-red-500/50 bg-red-900/20' : 'border-red-500 bg-red-50';
+                            badgeClass = isDark ? 'border-red-500/50 bg-red-900/50 text-red-400' : 'border-red-500 bg-red-100 text-red-700';
+                          }
+                        }
+
+                        return (
+                          <div 
+                            key={idx} 
+                            onClick={() => {
+                              if (!selectedAffairOption) setSelectedAffairOption(option.val);
+                            }}
+                            className={`p-2 rounded-lg border flex items-center gap-2.5 transition-colors ${!selectedAffairOption ? 'cursor-pointer' : ''} ${optBgClass}`}
+                          >
+                            <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center border text-sm font-medium transition-colors ${badgeClass}`}>
+                              {isBn ? ['ক', 'খ', 'গ', 'ঘ'][idx] : ['A', 'B', 'C', 'D'][idx]}
+                            </div>
+                            <span className={`text-base font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{option.text}</span>
                           </div>
-                          <span className={`text-base font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{option}</span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
-                    <div className="mt-4 flex gap-2 justify-center">
-                      {currentAffairsList.map((_, i) => (
-                        <button key={i} onClick={() => setActiveAffairIndex(i)} className={`w-2 h-2 rounded-full transition-colors ${i === activeAffairIndex ? 'bg-red-500' : (isDark ? 'bg-slate-700' : 'bg-slate-300')}`} />
-                      ))}
-                    </div>
+
+                    {/* Explanation and Next Button */}
+                    {selectedAffairOption && (
+                      <div className="mt-4 animate-fade-in">
+                        {currentAffairsList[activeAffairIndex]?.explanation && (
+                          <p className={`text-sm mb-4 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                            {currentAffairsList[activeAffairIndex].explanation}
+                          </p>
+                        )}
+                        <button 
+                          onClick={() => {
+                            setSelectedAffairOption(null);
+                            setActiveAffairIndex(prev => (prev + 1) % currentAffairsList.length);
+                          }}
+                          className="w-full flex items-center justify-center gap-2 bg-[#047857] hover:bg-[#065f46] text-white py-2.5 rounded-lg font-medium transition-colors"
+                        >
+                          {isBn ? 'পরবর্তী প্রশ্ন' : 'New question'} <ArrowRight size={16} />
+                        </button>
+                      </div>
+                    )}
+
+                    {!selectedAffairOption && (
+                      <div className="mt-4 flex gap-2 justify-center">
+                        {currentAffairsList.map((_, i) => (
+                          <button key={i} onClick={() => { setActiveAffairIndex(i); setSelectedAffairOption(null); }} className={`w-2 h-2 rounded-full transition-colors ${i === activeAffairIndex ? 'bg-red-500' : (isDark ? 'bg-slate-700' : 'bg-slate-300')}`} />
+                        ))}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
@@ -687,48 +746,69 @@ export const LandingPage: React.FC = () => {
                   {isBn ? 'সাম্প্রতিক নিউজ' : 'Recent News'}
                 </div>
               </div>
-              <div className="flex-1 p-3 md:p-4 overflow-y-auto max-h-[340px] space-y-2">
-                {newsList.length > 0 ? newsList.map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setActiveNewsIndex(activeNewsIndex === idx ? -1 : idx)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all ${idx === activeNewsIndex ? (isDark ? 'border-blue-500/50 bg-blue-500/10' : 'border-blue-200 bg-blue-50') : (isDark ? 'border-slate-800 hover:border-slate-700 hover:bg-slate-800/50' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50')}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
-                        <FileText size={15} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className={`text-sm font-bold leading-tight hover:underline ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{item.title}</h4>
-                        {idx === activeNewsIndex && (
-                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.content}</p>
-                        )}
-                        <span className={`text-[10px] mt-1.5 block ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                          {new Date(item.createdAt).toLocaleDateString()}
-                        </span>
+              <div 
+                className="flex-1 p-3 md:p-4 flex flex-col justify-center"
+                onMouseEnter={() => setIsNewsHovered(true)}
+                onMouseLeave={() => setIsNewsHovered(false)}
+              >
+                {newsList.length > 0 ? (
+                  <>
+                    <div 
+                      onClick={() => {
+                        const item = newsList[activeNewsIndex];
+                        if (item.newsLink) {
+                          window.open(item.newsLink, '_blank', 'noopener,noreferrer');
+                        } else {
+                          setSelectedNews(item);
+                        }
+                      }}
+                      className={`cursor-pointer rounded-xl border overflow-hidden flex flex-col transition-all hover:-translate-y-1 hover:shadow-md ${isDark ? 'bg-slate-800 border-slate-700 hover:border-blue-500/50 hover:shadow-blue-900/20' : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-blue-100'} w-full`}
+                    >
+                      <img 
+                        src={newsList[activeNewsIndex].imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=600&auto=format&fit=crop"} 
+                        alt={newsList[activeNewsIndex].title} 
+                        className="w-full h-40 sm:h-48 object-cover" 
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=600&auto=format&fit=crop";
+                        }}
+                      />
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h4 className={`font-bold text-lg mb-2 leading-snug line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {newsList[activeNewsIndex].title}
+                          </h4>
+                          <p className={`text-sm line-clamp-2 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                            {newsList[activeNewsIndex].content}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                          <p className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            {new Date(newsList[activeNewsIndex].createdAt).toLocaleDateString()}
+                          </p>
+                          {newsList[activeNewsIndex].newsLink && (
+                            <span className="text-sm font-semibold text-blue-500 hover:text-blue-600 flex items-center gap-1">
+                              {isBn ? 'বিস্তারিত' : 'Read More'} <ArrowRight size={14} />
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
-                      <img src="https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=600&auto=format&fit=crop" alt="News 1" className="w-full h-24 object-cover" />
-                      <div className="p-3">
-                        <h4 className={`font-bold text-sm mb-1 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                          {isBn ? 'তীব্বতের গুরুত্বপূর্ণ খনিজ আহরণে জো...' : 'Focus on extracting important minerals in Tibet...'}
-                        </h4>
-                        <p className={`text-[10px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
-                      </div>
+
+                    <div className="mt-4 flex gap-2 justify-center">
+                      {newsList.map((_, i) => (
+                        <button 
+                          key={i} 
+                          onClick={() => setActiveNewsIndex(i)} 
+                          className={`w-2 h-2 rounded-full transition-colors ${i === activeNewsIndex ? 'bg-blue-500' : (isDark ? 'bg-slate-700' : 'bg-slate-300')}`} 
+                        />
+                      ))}
                     </div>
-                    <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
-                      <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=600&auto=format&fit=crop" alt="News 2" className="w-full h-24 object-cover" />
-                      <div className="p-3">
-                        <h4 className={`font-bold text-sm mb-1 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                          {isBn ? 'জাতীয় বেতন স্কেলের গেজেট প্রকাশ...' : 'Gazette issued for National Pay...'}
-                        </h4>
-                        <p className={`text-[10px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
-                      </div>
-                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center min-h-[250px]">
+                    <p className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {isBn ? 'কোন সাম্প্রতিক নিউজ পাওয়া যায়নি।' : 'No recent news available.'}
+                    </p>
                   </div>
                 )}
               </div>
@@ -2170,6 +2250,50 @@ export const LandingPage: React.FC = () => {
               >
                 {isBn ? 'ড্যাশবোর্ডে যান' : 'Go to Dashboard'}
               </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NEWS DETAILS MODAL */}
+      {selectedNews && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setSelectedNews(null)}
+          ></div>
+          <div className={`relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
+            <div className={`flex items-center justify-between p-4 border-b ${isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-white'}`}>
+              <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                {isBn ? 'খবর বিস্তারিত' : 'News Details'}
+              </h3>
+              <button 
+                onClick={() => setSelectedNews(null)}
+                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isDark ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800'}`}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-0">
+              <img 
+                src={selectedNews.imageUrl || "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=600&auto=format&fit=crop"} 
+                alt={selectedNews.title} 
+                className="w-full h-48 sm:h-64 object-cover" 
+              />
+              <div className="p-5 sm:p-8">
+                <p className={`text-sm font-medium mb-3 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                  {new Date(selectedNews.createdAt).toLocaleDateString()}
+                </p>
+                <h2 className={`text-xl sm:text-2xl font-bold mb-4 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {selectedNews.title}
+                </h2>
+                <div className={`prose prose-sm sm:prose-base max-w-none ${isDark ? 'prose-invert text-slate-300' : 'text-slate-600'}`}>
+                  {selectedNews.content?.split('\n').map((paragraph: string, i: number) => (
+                    <p key={i} className="mb-4 leading-relaxed">{paragraph}</p>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -129,6 +129,35 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const [dynamicSubjects, setDynamicSubjects] = useState<any[]>([]);
   const [trackerGoalName, setTrackerGoalName] = useState('');
   const [loadingSubjects, setLoadingSubjects] = useState(true);
+  
+  const [liveStats, setLiveStats] = useState({ streak: user?.streak || 0, points: user?.points || 0, rank: user?.rank || '-' });
+
+  React.useEffect(() => {
+    if (user) {
+      // Fetch latest user profile to get up-to-date points and streak
+      fetch(`${BASE_URL}/UserProfile`, { credentials: 'include', headers: getHeaders() })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.points !== undefined) {
+             setLiveStats(prev => ({ ...prev, streak: data.streak, points: data.points }));
+          }
+        })
+        .catch(err => console.error("Failed to fetch user profile", err));
+        
+      // Fetch leaderboard to get rank
+      fetch(`${BASE_URL}/UserProfile/leaderboard`, { credentials: 'include', headers: getHeaders() })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const myRankEntry = data.find((x: any) => x.name === user.name || x.id === user.id);
+            if (myRankEntry) {
+              setLiveStats(prev => ({ ...prev, rank: myRankEntry.rank }));
+            }
+          }
+        })
+        .catch(err => console.error("Failed to fetch leaderboard", err));
+    }
+  }, [user]);
 
   React.useEffect(() => {
     if (user) {
@@ -148,7 +177,29 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
   const activeGoalProgress = dynamicSubjects;
   const unresolvedMistakesCount = (mistakes || []).filter(m => !m.resolved).length;
-  const [localRoutineTasks, setLocalRoutineTasks] = useState(routineTasks);
+  const [localRoutineTasks, setLocalRoutineTasks] = useState<any[]>(routineTasks);
+
+  React.useEffect(() => {
+    fetch(`${BASE_URL}/Dashboard/get-routine`, { credentials: 'include', headers: getHeaders() })
+      .then(res => res.json())
+      .then(data => {
+        if (data.routineTasks) {
+          try {
+            setLocalRoutineTasks(JSON.parse(data.routineTasks));
+          } catch(e) {}
+        }
+      })
+      .catch(err => console.error("Failed to load routine", err));
+  }, []);
+
+  const syncLocalRoutineToDb = (newTasks: any[]) => {
+      fetch(`${BASE_URL}/Dashboard/update-routine`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ routineTasksJson: JSON.stringify(newTasks) })
+      }).catch(err => console.error("Failed to save routine", err));
+  };
 
   const completedRoutineTasksCount = (localRoutineTasks || []).filter((t: any) => t.done).length;
   const routinePercentage = Math.round((completedRoutineTasksCount / ((localRoutineTasks || []).length || 1)) * 100);
@@ -178,7 +229,11 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     };
 
-    setLocalRoutineTasks([...localRoutineTasks, newTask]);
+    setLocalRoutineTasks(prev => {
+      const updated = [...prev, newTask];
+      syncLocalRoutineToDb(updated);
+      return updated;
+    });
 
     if (onAddTask) {
       onAddTask(newTaskInput.trim());
@@ -187,9 +242,11 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   };
 
   const handleToggleTask = (id: string) => {
-    setLocalRoutineTasks(localRoutineTasks.map((t: any) =>
-      t.id === id ? { ...t, done: !t.done } : t
-    ));
+    setLocalRoutineTasks(prev => {
+      const updated = prev.map((t: any) => t.id === id ? { ...t, done: !t.done } : t);
+      syncLocalRoutineToDb(updated);
+      return updated;
+    });
     if (onToggleTask) {
       onToggleTask(id);
     }
@@ -197,7 +254,11 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
   const handleDeleteTask = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    setLocalRoutineTasks(localRoutineTasks.filter((t: any) => t.id !== id));
+    setLocalRoutineTasks(prev => {
+      const updated = prev.filter((t: any) => t.id !== id);
+      syncLocalRoutineToDb(updated);
+      return updated;
+    });
   };
 
   const MENU_ITEMS = [
@@ -233,7 +294,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold border border-amber-500/30">
-            <Flame size={14} fill="currentColor" /> {user?.streak || 7}d
+            <Flame size={14} fill="currentColor" /> {liveStats.streak}d
           </div>
           <button onClick={toggleTheme} className="p-2 bg-slate-800 text-slate-300 rounded-xl">
             {theme === 'dark' ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
@@ -469,7 +530,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                     <Flame size={20} className="text-orange-500 fill-orange-500" />
                   </div>
                   <div>
-                    <h4 className="font-black text-lg text-slate-800 leading-none">{user?.streak || 7} দিন</h4>
+                    <h4 className="font-black text-lg text-slate-800 leading-none">{liveStats.streak} দিন</h4>
                     <p className="text-[10px] text-slate-500 font-medium mt-1">স্ট্রিক বজায়</p>
                   </div>
                 </div>
@@ -479,7 +540,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                     <Star size={20} className="text-yellow-400 fill-yellow-400" />
                   </div>
                   <div>
-                    <h4 className="font-black text-lg text-slate-800 leading-none">{(user?.points || 23400).toLocaleString()}</h4>
+                    <h4 className="font-black text-lg text-slate-800 leading-none">{liveStats.points.toLocaleString()}</h4>
                     <p className="text-[10px] text-slate-500 font-medium mt-1">মোট পয়েন্ট</p>
                   </div>
                 </div>
@@ -489,7 +550,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                     <Crown size={20} className="text-emerald-500" />
                   </div>
                   <div>
-                    <h4 className="font-black text-lg text-slate-800 leading-none">#{user?.rank || 12}</h4>
+                    <h4 className="font-black text-lg text-slate-800 leading-none">#{liveStats.rank}</h4>
                     <p className="text-[10px] text-slate-500 font-medium mt-1">Top 1% অবস্থান</p>
                   </div>
                 </div>

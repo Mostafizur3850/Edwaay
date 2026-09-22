@@ -201,8 +201,8 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                   {dynamicMenus.map((menu: any) => {
                     const url = menu.url || menu.Url;
                     const title = menu.title || menu.Title;
-                    const isMegaQuiz = title.toLowerCase().includes('mega quiz');
-                    const isJobs = url.includes('/jobs');
+                    const isMegaQuiz = title?.toLowerCase()?.includes('mega quiz');
+                    const isJobs = url?.includes('/jobs');
 
                     if (isMegaQuiz) {
                       return (
@@ -406,9 +406,9 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                   {dynamicMenus.map((menu: any) => {
                     const url = menu.url || menu.Url;
                     const title = menu.title || menu.Title;
-                    const isMegaQuiz = title.toLowerCase().includes('mega quiz');
-                    const isJobs = url.includes('/jobs');
-                    const isStore = url.includes('/products') || url.includes('/store');
+                    const isMegaQuiz = title?.toLowerCase()?.includes('mega quiz');
+                    const isJobs = url?.includes('/jobs');
+                    const isStore = url?.includes('/products') || url?.includes('/store');
 
                     if (isMegaQuiz) {
                       return (

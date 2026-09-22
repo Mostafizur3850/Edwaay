@@ -1,4 +1,4 @@
-﻿using ECommerce.Domain.Entities;
+using ECommerce.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -42,6 +42,21 @@ namespace takeuup.API.Controllers
             _context.News.Remove(news);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Deleted successfully" });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateNews(int id, [FromBody] News updatedNews)
+        {
+            var existingNews = await _context.News.FindAsync(id);
+            if (existingNews == null) return NotFound();
+
+            existingNews.Title = updatedNews.Title;
+            existingNews.Content = updatedNews.Content;
+            existingNews.ImageUrl = updatedNews.ImageUrl;
+            existingNews.NewsLink = updatedNews.NewsLink;
+
+            await _context.SaveChangesAsync();
+            return Ok(existingNews);
         }
     }
 }
