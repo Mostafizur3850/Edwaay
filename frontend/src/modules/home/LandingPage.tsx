@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { callApi } from '../../services/api';
 
 export const LandingPage: React.FC = () => {
   const { theme } = useTheme();
@@ -19,7 +20,34 @@ export const LandingPage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'hsc' | 'engineering' | 'medical' | 'varsity' | 'bcs'>('hsc');
   const [activeLeaderboardTab, setActiveLeaderboardTab] = useState('Today');
-  
+
+  const [newsList, setNewsList] = useState<any[]>([]);
+  const [currentAffairsList, setCurrentAffairsList] = useState<any[]>([]);
+  const [activeNewsIndex, setActiveNewsIndex] = useState<number>(-1);
+  const [activeAffairIndex, setActiveAffairIndex] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const n = await callApi<any[]>('News', { method: 'GET' });
+        if (Array.isArray(n) && n.length > 0) setNewsList(n);
+        const a = await callApi<any[]>('CurrentAffairs', { method: 'GET' });
+        if (Array.isArray(a) && a.length > 0) setCurrentAffairsList(a);
+      } catch(e) {
+        console.error(e);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (currentAffairsList.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveAffairIndex(prev => (prev + 1) % currentAffairsList.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [currentAffairsList.length]);
+
   const leaderboardData: Record<string, any[]> = {
     Today: [
       { rank: 1, name: 'Tanvir Hasan', score: '98.4%' },
@@ -596,57 +624,113 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
             
-            {/* Left Side: Current Affairs Quiz */}
+            {/* Left Side: Current Affairs Quiz - Dynamic */}
             <div className={`rounded-xl border overflow-hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-red-50 shadow-sm'}`}>
               <div className="flex justify-center border-b border-transparent relative">
                 <div className={`absolute top-0 w-full h-8 ${isDark ? 'bg-red-900/10' : 'bg-[#faebe8]'}`}></div>
                 <div className={`relative px-4 py-1 mt-0.5 rounded-t-lg font-bold text-sm ${isDark ? 'bg-red-900/30 text-red-400' : 'bg-[#f4e6e3] text-[#8b3a33]'}`}>
-                  {isBn ? 'কারেন্ট অ্যাফেয়ার্স' : 'Current Affairs'}
+                  {isBn ? 'কারেন্ট অ্যাফেয়ার্স' : 'Current Affairs'}
                 </div>
               </div>
               <div className="p-3 md:p-4">
-                <h3 className={`text-base md:text-lg font-bold mb-3 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {isBn ? 'বাংলা ভাষায় প্রকাশিত প্রথম সংবাদপত্র কোনটি?' : 'Which was the first newspaper published in the Bengali language?'}
-                </h3>
-                <div className="space-y-2">
-                  {(isBn ? ['দিগদর্শন', 'তত্ত্ববোধিনী', 'সংবাদ প্রভাকর', 'বঙ্গদর্শন'] : ['Digdarshan', 'Tattwabodhini', 'Sambad Prabhakar', 'Bangadarshan']).map((option, idx) => (
-                    <div key={idx} className={`p-2 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${isDark ? 'border-slate-700 hover:border-slate-500 hover:bg-slate-800' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
-                      <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center border text-sm font-medium ${isDark ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-white text-slate-600 shadow-sm'}`}>
-                        {isBn ? ['ক', 'খ', 'গ', 'ঘ'][idx] : ['A', 'B', 'C', 'D'][idx]}
-                      </div>
-                      <span className={`text-base font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{option}</span>
+                {currentAffairsList.length > 0 ? (
+                  <>
+                    <h3 className={`text-base md:text-lg font-bold mb-3 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {currentAffairsList[activeAffairIndex]?.questionText}
+                    </h3>
+                    <div className="space-y-2">
+                      {[
+                        currentAffairsList[activeAffairIndex]?.optionA,
+                        currentAffairsList[activeAffairIndex]?.optionB,
+                        currentAffairsList[activeAffairIndex]?.optionC,
+                        currentAffairsList[activeAffairIndex]?.optionD,
+                      ].map((option, idx) => (
+                        <div key={idx} className={`p-2 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${isDark ? 'border-slate-700 hover:border-slate-500 hover:bg-slate-800' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
+                          <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center border text-sm font-medium ${isDark ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-white text-slate-600 shadow-sm'}`}>
+                            {isBn ? ['ক', 'খ', 'গ', 'ঘ'][idx] : ['A', 'B', 'C', 'D'][idx]}
+                          </div>
+                          <span className={`text-base font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{option}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                    <div className="mt-4 flex gap-2 justify-center">
+                      {currentAffairsList.map((_, i) => (
+                        <button key={i} onClick={() => setActiveAffairIndex(i)} className={`w-2 h-2 rounded-full transition-colors ${i === activeAffairIndex ? 'bg-red-500' : (isDark ? 'bg-slate-700' : 'bg-slate-300')}`} />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className={`text-base md:text-lg font-bold mb-3 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {isBn ? 'বাংলা ভাষায় প্রকাশিত প্রথম সংবাদপত্র কোনটি?' : 'Which was the first newspaper published in the Bengali language?'}
+                    </h3>
+                    <div className="space-y-2">
+                      {(isBn ? ['দিগদর্শন', 'তত্ত্ববোধিনী', 'সংবাদ প্রভাকর', 'বঙ্গদর্শন'] : ['Digdarshan', 'Tattwabodhini', 'Sambad Prabhakar', 'Bangadarshan']).map((option, idx) => (
+                        <div key={idx} className={`p-2 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${isDark ? 'border-slate-700 hover:border-slate-500 hover:bg-slate-800' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
+                          <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center border text-sm font-medium ${isDark ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-white text-slate-600 shadow-sm'}`}>
+                            {isBn ? ['ক', 'খ', 'গ', 'ঘ'][idx] : ['A', 'B', 'C', 'D'][idx]}
+                          </div>
+                          <span className={`text-base font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{option}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Right Side: Recent News */}
-            <div className="flex flex-col h-full">
-              <h3 className={`text-base md:text-lg font-bold mb-3 pl-2 border-l-4 ${isDark ? 'border-blue-500 text-white' : 'border-blue-600 text-slate-900'}`}>
-                {isBn ? 'সাম্প্রতিক নিউজ' : 'Recent News'}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-grow">
-                {/* News Card 1 */}
-                <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-                  <img src="https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=600&auto=format&fit=crop" alt="News 1" className="w-full h-24 sm:h-32 object-cover" />
-                  <div className="p-3 flex-grow flex flex-col justify-between">
-                    <h4 className={`font-bold text-sm md:text-base mb-1.5 leading-snug line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {isBn ? 'তীব্বতের গুরুত্বপূর্ণ খনিজ আহরণে জো...' : 'Focus on extracting important minerals in Tibet...'}
-                    </h4>
-                    <p className={`text-[10px] md:text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
-                  </div>
+            {/* Right Side: Recent News - Dynamic & Clickable */}
+            <div className={`rounded-xl border flex flex-col overflow-hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50 shadow-sm'}`}>
+              <div className="flex justify-center border-b border-transparent relative">
+                <div className={`absolute top-0 w-full h-8 ${isDark ? 'bg-blue-900/10' : 'bg-[#eef2f6]'}`}></div>
+                <div className={`relative px-4 py-1 mt-0.5 rounded-t-lg font-bold text-sm ${isDark ? 'bg-blue-900/30 text-blue-400' : 'bg-[#e1e9f0] text-[#2c5282]'}`}>
+                  {isBn ? 'সাম্প্রতিক নিউজ' : 'Recent News'}
                 </div>
-                {/* News Card 2 */}
-                <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-                  <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=600&auto=format&fit=crop" alt="News 2" className="w-full h-24 sm:h-32 object-cover" />
-                  <div className="p-3 flex-grow flex flex-col justify-between">
-                    <h4 className={`font-bold text-sm md:text-base mb-1.5 leading-snug line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {isBn ? 'জাতীয় বেতন স্কেলের গেজেট প্রকাশ...' : 'Gazette issued for National Pay...'}
-                    </h4>
-                    <p className={`text-[10px] md:text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
+              </div>
+              <div className="flex-1 p-3 md:p-4 overflow-y-auto max-h-[340px] space-y-2">
+                {newsList.length > 0 ? newsList.map((item, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => setActiveNewsIndex(activeNewsIndex === idx ? -1 : idx)}
+                    className={`p-3 rounded-lg border cursor-pointer transition-all ${idx === activeNewsIndex ? (isDark ? 'border-blue-500/50 bg-blue-500/10' : 'border-blue-200 bg-blue-50') : (isDark ? 'border-slate-800 hover:border-slate-700 hover:bg-slate-800/50' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50')}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                        <FileText size={15} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`text-sm font-bold leading-tight hover:underline ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{item.title}</h4>
+                        {idx === activeNewsIndex && (
+                          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.content}</p>
+                        )}
+                        <span className={`text-[10px] mt-1.5 block ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
+                      <img src="https://images.unsplash.com/photo-1599839619722-39751411ea63?q=80&w=600&auto=format&fit=crop" alt="News 1" className="w-full h-24 object-cover" />
+                      <div className="p-3">
+                        <h4 className={`font-bold text-sm mb-1 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          {isBn ? 'তীব্বতের গুরুত্বপূর্ণ খনিজ আহরণে জো...' : 'Focus on extracting important minerals in Tibet...'}
+                        </h4>
+                        <p className={`text-[10px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
+                      </div>
+                    </div>
+                    <div className={`rounded-xl border overflow-hidden flex flex-col ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
+                      <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=600&auto=format&fit=crop" alt="News 2" className="w-full h-24 object-cover" />
+                      <div className="p-3">
+                        <h4 className={`font-bold text-sm mb-1 leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          {isBn ? 'জাতীয় বেতন স্কেলের গেজেট প্রকাশ...' : 'Gazette issued for National Pay...'}
+                        </h4>
+                        <p className={`text-[10px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>New • 5m read</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

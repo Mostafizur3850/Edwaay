@@ -24,6 +24,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+## Local Environment Files
+*.local
+.env.local
+.env.*.local
+
 ## OS / IDE
 .DS_Store
 Thumbs.db

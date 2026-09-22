@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, Clock, CheckCircle2, Plus, Trash2, 
   Sun, Moon, Sunset, Check
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { BASE_URL, getHeaders } from '../../../services/api';
+import { generateDynamicStudyRoutine } from '../../../services/geminiService';
+import { Sparkles } from 'lucide-react';
 
 interface RoutineTask {
   id: string;
@@ -89,6 +92,45 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
   const { theme } = useTheme();
   const [selectedDay, setSelectedDay] = useState<string>('Saturday');
   const [tasks, setTasks] = useState<RoutineTask[]>(INITIAL_ROUTINE_TASKS);
+  const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
+  const [aiPromptText, setAiPromptText] = useState("আমার BCS exam 120 দিন পর। আমি প্রতিদিন 3 ঘণ্টা পড়তে পারি। আমার ইংরেজি ও গণিতে দুর্বলতা আছে।");
+  const [showAiConfig, setShowAiConfig] = useState(false);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/Dashboard/get-routine`, { credentials: 'include', headers: getHeaders() })
+      .then(res => res.json())
+      .then(data => {
+        if (data.routineTasks && data.routineTasks !== "[]" && data.routineTasks !== "") {
+          try {
+            setTasks(JSON.parse(data.routineTasks));
+          } catch(e) {}
+        }
+      })
+      .catch(err => console.error("Failed to load routine", err));
+  }, []);
+
+  const syncRoutineToDb = (newTasks: RoutineTask[]) => {
+      fetch(`${BASE_URL}/Dashboard/update-routine`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ routineTasksJson: JSON.stringify(newTasks) })
+      }).catch(err => console.error("Failed to save routine", err));
+  };
+
+  const handleGenerateAiRoutine = async () => {
+    setIsGeneratingRoutine(true);
+    const aiTasks = await generateDynamicStudyRoutine(aiPromptText, "120", "3", "None", tasks, []);
+    setIsGeneratingRoutine(false);
+    setShowAiConfig(false);
+    if (aiTasks && aiTasks.length > 0) {
+      setTasks(aiTasks);
+      syncRoutineToDb(aiTasks);
+    } else {
+      alert("AI failed to generate routine. Please check API key.");
+    }
+  };
+
   
   // New Task Form State
   const [showAddForm, setShowAddForm] = useState(false);
@@ -214,6 +256,33 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
           );
         })}
       </div>
+
+      
+      <div className="w-full flex justify-center mb-4 mt-2">
+        <button onClick={() => setShowAiConfig(!showAiConfig)} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-full font-bold flex items-center gap-2 hover:shadow-xl hover:scale-105 transition-all">
+            <Sparkles size={16}/> {tasks.length > 0 ? "Regenerate AI Plan" : "Create AI Study Plan"}
+        </button>
+      </div>
+      
+      {showAiConfig && (
+        <div className={`p-5 rounded-2xl border mb-6 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'} animate-in fade-in slide-in-from-top-4`}>
+            <h4 className="font-bold text-lg mb-4 flex items-center gap-2 text-purple-500"><Sparkles size={20} /> Configure Your AI Tutor</h4>
+            <div className="mb-4">
+                <label className="text-sm font-bold text-slate-500 block mb-2">আপনি কীভাবে পড়তে চান তা লিখুন</label>
+                <textarea 
+                  value={aiPromptText} 
+                  onChange={e=>setAiPromptText(e.target.value)} 
+                  rows={3}
+                  className={`w-full text-sm p-4 rounded-xl border resize-none focus:ring-2 focus:ring-purple-500 transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200'}`} 
+                  placeholder="যেমন: আমার BCS exam 120 দিন পর। আমি প্রতিদিন 3 ঘণ্টা পড়তে পারি..." 
+                />
+            </div>
+            <button disabled={isGeneratingRoutine} onClick={handleGenerateAiRoutine} className="w-full bg-slate-900 dark:bg-black text-white text-sm font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all">
+                {isGeneratingRoutine ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Sparkles size={18}/>}
+                {isGeneratingRoutine ? "AI is generating your perfect plan..." : "Generate AI Routine Now"}
+            </button>
+        </div>
+      )}
 
       {/* 3. TIME SLOT SECTIONS */}
       <div className="space-y-6">

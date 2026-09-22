@@ -309,6 +309,7 @@ const App = () => {
               <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
               <Route path="/profile" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
               <Route path="/smart-lessons" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
+              <Route path="/my-weakness" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
               <Route path="/courses" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
               <Route path="/quizzes" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
               <Route path="/messages" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />

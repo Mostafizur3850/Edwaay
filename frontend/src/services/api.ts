@@ -1,6 +1,6 @@
 // TakeUUp Unified Frontend API Client
 
-const BASE_URL = 'http://localhost:5141/api';
+export const BASE_URL = 'http://localhost:5141/api';
 
 // Helper to determine if backend is online
 let isBackendOnline = false;
@@ -30,7 +30,7 @@ export async function checkBackendStatus(): Promise<boolean> {
 checkBackendStatus();
 
 // Helper to get authenticated headers
-function getHeaders(): HeadersInit {
+export function getHeaders(): HeadersInit {
     const token = localStorage.getItem('takeuup_token');
     const isValidJwt = token && token !== 'cookie-auth' && token !== 'simulated-social-token' && token.startsWith('eyJ');
     const headers: Record<string, string> = {
@@ -43,10 +43,11 @@ function getHeaders(): HeadersInit {
 }
 
 // Generic API caller with fallback logic
-async function callApi<T>(path: string, options: RequestInit, fallbackAction: () => T | Promise<T>): Promise<T> {
+export async function callApi<T>(path: string, options: RequestInit, fallbackAction?: () => T | Promise<T>): Promise<T> {
     const online = await checkBackendStatus();
     if (!online) {
-        return await fallbackAction();
+        if (fallbackAction) return await fallbackAction();
+        return [] as unknown as T;
     }
     try {
         const headers = { ...getHeaders(), ...options.headers } as any;
@@ -69,8 +70,9 @@ async function callApi<T>(path: string, options: RequestInit, fallbackAction: ()
         }
         return {} as T;
     } catch (e) {
-        console.warn(`Backend call to ${path} failed, using local storage fallback.`, e);
-        return await fallbackAction();
+        console.warn(`Backend call to ${path} failed.`, e);
+        if (fallbackAction) return await fallbackAction();
+        throw e; // Throw error so UI can display proper validation messages
     }
 }
 
@@ -92,7 +94,7 @@ export async function loginUser(emailOrPhone: string, password: string): Promise
     if (!isOnline) {
         return {
             success: false,
-            message: '⚠️ সার্ভারে সংযোগ করা যাচ্ছে না। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।'
+            message: 'âš ï¸ à¦¸à¦¾à¦°à§à¦­à¦¾à¦°à§‡ à¦¸à¦‚à¦¯à§‹à¦— à¦•à¦°à¦¾ à¦¯à¦¾à¦šà§à¦›à§‡ à¦¨à¦¾à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦•à¦¿à¦›à§à¦•à§à¦·à¦£ à¦ªà¦° à¦†à¦¬à¦¾à¦° à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤'
         };
     }
     try {
@@ -106,7 +108,7 @@ export async function loginUser(emailOrPhone: string, password: string): Promise
         const data = await parseResponseJson(response);
 
         if (!response.ok) {
-            throw new Error(data.message || data.rawText || 'মোবাইল নম্বর বা পাসওয়ার্ড ভুল হয়েছে। (Invalid credentials)');
+            throw new Error(data.message || data.rawText || 'à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° à¦¬à¦¾ à¦ªà¦¾à¦¸à¦“à§Ÿà¦¾à¦°à§à¦¡ à¦­à§à¦² à¦¹à§Ÿà§‡à¦›à§‡à¥¤ (Invalid credentials)');
         }
 
         if (data.tokens && data.tokens.accessToken) {
@@ -148,7 +150,7 @@ export async function loginUser(emailOrPhone: string, password: string): Promise
         return { success: true, user: userData };
     } catch (err: any) {
         console.error("Login Error:", err);
-        throw new Error(err.message || 'মোবাইল নম্বর বা পাসওয়ার্ড ভুল হয়েছে।');
+        throw new Error(err.message || 'à¦®à§‹à¦¬à¦¾à¦‡à¦² à¦¨à¦®à§à¦¬à¦° à¦¬à¦¾ à¦ªà¦¾à¦¸à¦“à§Ÿà¦¾à¦°à§à¦¡ à¦­à§à¦² à¦¹à§Ÿà§‡à¦›à§‡à¥¤');
     }
 }
 
@@ -1437,9 +1439,10 @@ export async function fetchQuizCategories(): Promise<any[]> {
 }
 
 export async function createQuizCategory(category: any): Promise<any> {
+    const { id, ...dataToSend } = category;
     return await callApi('QuizSettings/categories', {
         method: 'POST',
-        body: JSON.stringify(category)
+        body: JSON.stringify(dataToSend)
     }, () => {
         const stored = localStorage.getItem('takeuup_quiz_categories');
         const cats = stored ? JSON.parse(stored) : [];
@@ -1500,9 +1503,10 @@ export async function fetchQuizSubjects(categoryId?: string): Promise<any[]> {
 }
 
 export async function createQuizSubject(subject: any): Promise<any> {
+    const { id, ...dataToSend } = subject;
     return await callApi('QuizSettings/subjects', {
         method: 'POST',
-        body: JSON.stringify(subject)
+        body: JSON.stringify(dataToSend)
     }, () => {
         const stored = localStorage.getItem('takeuup_quiz_subjects');
         const subs = stored ? JSON.parse(stored) : [];
@@ -2361,7 +2365,7 @@ export async function selectInitialGoal(userId: string, goalCategoryId: string):
     });
     const data = await parseResponseJson(response);
     if (!response.ok) {
-        throw new Error(data.message || data.rawText || 'লক্ষ্য নির্বাচন করতে ব্যর্থ হয়েছে।');
+        throw new Error(data.message || data.rawText || 'à¦²à¦•à§à¦·à§à¦¯ à¦¨à¦¿à¦°à§à¦¬à¦¾à¦šà¦¨ à¦•à¦°à¦¤à§‡ à¦¬à§à¦¯à¦°à§à¦¥ à¦¹à§Ÿà§‡à¦›à§‡à¥¤');
     }
     return data;
 }
@@ -2404,7 +2408,7 @@ export async function requestGoalChange(userId: string, requestedGoalCategoryId:
 
     const data = await parseResponseJson(response);
     if (!response.ok) {
-        throw new Error(data.message || data.rawText || 'গোল পরিবর্তনের আবেদন পাঠানো সম্ভব হয়নি।');
+        throw new Error(data.message || data.rawText || 'à¦—à§‹à¦² à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨à§‡à¦° à¦†à¦¬à§‡à¦¦à¦¨ à¦ªà¦¾à¦ à¦¾à¦¨à§‹ à¦¸à¦®à§à¦­à¦¬ à¦¹à§Ÿà¦¨à¦¿à¥¤');
     }
 
     return data;
@@ -2419,7 +2423,7 @@ export async function createGoalCategory(data: any): Promise<any> {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-    }, () => ({ success: true }));
+    });
 }
 
 export async function updateGoalCategory(id: string, data: any): Promise<any> {
@@ -2427,13 +2431,13 @@ export async function updateGoalCategory(id: string, data: any): Promise<any> {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-    }, () => ({ success: true }));
+    });
 }
 
 export async function deleteGoalCategory(id: string): Promise<any> {
     return await callApi(`GoalCategories/admin/${id}`, {
         method: 'DELETE'
-    }, () => ({ success: true }));
+    });
 }
 
 export async function reorderGoalCategories(items: any[]): Promise<any> {
@@ -2441,7 +2445,7 @@ export async function reorderGoalCategories(items: any[]): Promise<any> {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(items)
-    }, () => ({ success: true }));
+    });
 }
 
 export async function fetchAdminGoalRequests(status?: string): Promise<any[]> {
@@ -2479,7 +2483,7 @@ export async function approveGoalRequest(id: string, adminNote?: string): Promis
 
     const data = await parseResponseJson(response);
     if (!response.ok) {
-        throw new Error(data.message || data.rawText || 'আবেদন অনুমোদন করা যায়নি।');
+        throw new Error(data.message || data.rawText || 'à¦†à¦¬à§‡à¦¦à¦¨ à¦…à¦¨à§à¦®à§‹à¦¦à¦¨ à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤');
     }
     return data;
 }
@@ -2504,7 +2508,7 @@ export async function rejectGoalRequest(id: string, adminNote?: string): Promise
 
     const data = await parseResponseJson(response);
     if (!response.ok) {
-        throw new Error(data.message || data.rawText || 'আবেদন বাতিল করা যায়নি।');
+        throw new Error(data.message || data.rawText || 'à¦†à¦¬à§‡à¦¦à¦¨ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤');
     }
     return data;
 }
@@ -2524,10 +2528,11 @@ export async function directSetStudentGoal(userId: string, goalCategoryId: strin
 
     const data = await parseResponseJson(response);
     if (!response.ok) {
-        throw new Error(data.message || data.rawText || 'শিক্ষার্থীর গোল সরাসরি পরিবর্তন করা যায়নি।');
+        throw new Error(data.message || data.rawText || 'à¦¶à¦¿à¦•à§à¦·à¦¾à¦°à§à¦¥à§€à¦° à¦—à§‹à¦² à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦ªà¦°à¦¿à¦¬à¦°à§à¦¤à¦¨ à¦•à¦°à¦¾ à¦¯à¦¾à§Ÿà¦¨à¦¿à¥¤');
     }
     return data;
 }
+
 
 
 

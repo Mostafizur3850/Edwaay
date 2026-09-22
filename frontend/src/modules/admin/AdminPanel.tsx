@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import ManageNews from './components/ManageNews';
+import ManageCurrentAffairs from './components/ManageCurrentAffairs';
+
 import { typesetMath } from '../../utils/mathJax';
 import { 
   LayoutDashboard, 
@@ -86,6 +89,8 @@ const DEFAULT_ADMIN_MENUS = [
     { id: 8, title: 'Products', url: '/admin/products', parentId: null, sequence: 8, icon: 'ShoppingBag' },
     { id: 81, title: 'Orders', url: '/admin/orders', parentId: null, sequence: 9, icon: 'ClipboardList' },
     { id: 9, title: 'Newsletter', url: '/admin/newsletter', parentId: null, sequence: 10, icon: 'Mail' },
+    { id: 12, title: 'Recent News', url: '/admin/news', parentId: null, sequence: 13, icon: 'FileText' },
+    { id: 13, title: 'Current Affairs', url: '/admin/current-affairs', parentId: null, sequence: 14, icon: 'Target' },
     { id: 10, title: 'Question Bank', url: '/admin/qbank', parentId: null, sequence: 11, icon: 'Upload' },
     { id: 101, title: 'Single & Bulk Upload', url: '/admin/qbank/upload', parentId: 10, sequence: 1 },
     { id: 102, title: 'Teacher Approvals', url: '/admin/qbank/teacher-approvals', parentId: 10, sequence: 2 },
@@ -107,6 +112,12 @@ const getMenuAction = (url: string, title: string) => {
     const path = (url || '').toLowerCase();
     const name = (title || '').toLowerCase();
     
+    if (path.includes('news') || name.includes('news')) {
+        return { view: 'news' };
+    }
+    if (path.includes('current-affairs') || path.includes('current_affairs') || name.includes('affairs')) {
+        return { view: 'current_affairs' };
+    }
     if (path.includes('dashboard') || name === 'dashboard') {
         return { view: 'dashboard' };
     }
@@ -1268,7 +1279,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           const isOk = res && (res.isSuccess || res.IsSuccess || res.success || res.id || res.data || res.Data || typeof res === 'string');
           
           if (isOk) {
-              alert(isEdit ? "🎉 Product updated successfully!" : "🎉 Product uploaded successfully!");
+              alert(isEdit ? "ðŸŽ‰ Product updated successfully!" : "ðŸŽ‰ Product uploaded successfully!");
               setShowProductModal(false);
               setProductForm({
                   id: '',
@@ -1743,7 +1754,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           const { approveQuestion } = await import('../../services/api');
           const res = await approveQuestion(qId);
           if (res && res.success !== false) {
-              alert("🎉 Action approved and completed successfully!");
+              alert("ðŸŽ‰ Action approved and completed successfully!");
               loadPendingQuestions();
               loadApprovedQuestions();
           } else {
@@ -2167,7 +2178,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               locationMsg = `Location: ${scheduleData.location}`;
           }
 
-          alert(`📧 Email Sent Successfully to ${reviewTestApp.email}!\n\nSubject: Interview Invitation for ${reviewTestApp.jobTitle}\n\n"Hi ${reviewTestApp.name},\nWe are pleased to invite you for an ${scheduleData.type} interview.\nDate: ${scheduleData.date}\nTime: ${scheduleData.time}\n${locationMsg}\n\n${scheduleData.message}"`);
+          alert(`ðŸ“§ Email Sent Successfully to ${reviewTestApp.email}!\n\nSubject: Interview Invitation for ${reviewTestApp.jobTitle}\n\n"Hi ${reviewTestApp.name},\nWe are pleased to invite you for an ${scheduleData.type} interview.\nDate: ${scheduleData.date}\nTime: ${scheduleData.time}\n${locationMsg}\n\n${scheduleData.message}"`);
           
           setReviewTestApp(null);
           setShowScheduleModal(false);
@@ -2443,7 +2454,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
           const { approveTeacherRegistration } = await import('../../services/api');
           const res = await approveTeacherRegistration(userId);
           if (res && res.success !== false) {
-              alert("🎉 Teacher registration approved successfully!");
+              alert("ðŸŽ‰ Teacher registration approved successfully!");
               await loadRBACData();
           } else {
               alert(res?.message || "Failed to approve teacher.");
@@ -2597,13 +2608,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                   </div>
                                   <div className="flex flex-wrap gap-2 text-xs">
                                       <span className="bg-slate-950 text-slate-400 px-2.5 py-1 rounded-lg border border-slate-850">
-                                          📚 {m.subject || m.Subject}
+                                          ðŸ“š {m.subject || m.Subject}
                                       </span>
                                       <span className="bg-slate-950 text-orange-400 px-2.5 py-1 rounded-lg border border-slate-850">
-                                          ⭐️ {m.rating || m.Rating} Rating
+                                          â­ï¸ {m.rating || m.Rating} Rating
                                       </span>
                                       <span className="bg-slate-950 text-green-400 px-2.5 py-1 rounded-lg border border-slate-850">
-                                          ৳{m.bookingPrice || m.BookingPrice} / session
+                                          à§³{m.bookingPrice || m.BookingPrice} / session
                                       </span>
                                   </div>
                                   <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
@@ -2611,7 +2622,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                   </p>
                                   {m.email || m.Email ? (
                                       <p className="text-[10px] text-slate-500">
-                                          📧 Account: <span className="font-semibold text-slate-400">{m.email || m.Email}</span>
+                                          ðŸ“§ Account: <span className="font-semibold text-slate-400">{m.email || m.Email}</span>
                                       </p>
                                   ) : null}
                               </div>
@@ -2641,7 +2652,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                               <h3 className="text-lg font-bold text-white">
                                   {selectedMentor ? `Edit Profile: ${mentorForm.name}` : "Add New Mentor Profile & Login"}
                               </h3>
-                              <button onClick={() => setShowMentorModal(false)} className="text-slate-400 hover:text-white font-bold text-xl">×</button>
+                              <button onClick={() => setShowMentorModal(false)} className="text-slate-400 hover:text-white font-bold text-xl">Ã—</button>
                           </div>
                           
                           <form onSubmit={handleMentorSubmit} className="p-6 overflow-y-auto space-y-4 text-left">
@@ -3025,7 +3036,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                               <h3 className="text-base font-bold text-white">
                                   {selectedMember ? `Edit Leader: ${memberForm.name}` : "Add Board Leader"}
                               </h3>
-                              <button onClick={() => setShowMemberModal(false)} className="text-slate-400 hover:text-white font-bold text-xl">×</button>
+                              <button onClick={() => setShowMemberModal(false)} className="text-slate-400 hover:text-white font-bold text-xl">Ã—</button>
                           </div>
                           
                           <form onSubmit={handleMemberSubmit} className="p-6 overflow-y-auto space-y-4 text-left">
@@ -3242,8 +3253,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                           </span>
                                       </td>
                                       <td className="px-6 py-4">
-                                          <div className="text-xs text-slate-300 font-semibold flex items-center gap-1">🏆 {s.points ?? 0} Points</div>
-                                          <div className="text-[10px] text-orange-400 font-bold mt-1">🔥 {s.streak ?? 0} Days streak</div>
+                                          <div className="text-xs text-slate-300 font-semibold flex items-center gap-1">ðŸ† {s.points ?? 0} Points</div>
+                                          <div className="text-[10px] text-orange-400 font-bold mt-1">ðŸ”¥ {s.streak ?? 0} Days streak</div>
                                       </td>
                                       <td className="px-6 py-4 space-y-1.5">
                                           <div>
@@ -3490,8 +3501,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col gap-0.5">
-                                                    <div className="text-white font-bold text-xs">⭐ {user.points ?? 0} Points</div>
-                                                    <div className="text-[10px] text-orange-400 font-semibold">🔥 {user.streak ?? 0} Day Streak</div>
+                                                    <div className="text-white font-bold text-xs">â­ {user.points ?? 0} Points</div>
+                                                    <div className="text-[10px] text-orange-400 font-semibold">ðŸ”¥ {user.streak ?? 0} Day Streak</div>
                                                 </div>
                                             </td>
                                         </>
@@ -3499,7 +3510,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                     {userRoleFilter === 'teacher' && (
                                         <td className="px-6 py-4">
                                             <span className="inline-flex items-center gap-1.5 bg-cyan-950/40 text-cyan-400 text-xs font-bold px-2.5 py-1 rounded-full border border-cyan-800/40">
-                                                📝 {user.questionsCount ?? 0} Questions
+                                                ðŸ“ {user.questionsCount ?? 0} Questions
                                             </span>
                                         </td>
                                     )}
@@ -4011,7 +4022,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                           <option value="custom">-- Custom / Unlisted Company --</option>
                                           {adminCompanies.map(c => (
                                               <option key={c.id || c.Id} value={(c.id || c.Id)?.toString()}>
-                                                  {c.name || c.Name} {(c.isVerified || c.IsVerified) ? '✓' : '(Pending)'}
+                                                  {c.name || c.Name} {(c.isVerified || c.IsVerified) ? 'âœ“' : '(Pending)'}
                                               </option>
                                           ))}
                                       </select>
@@ -4107,15 +4118,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <div>
                                       <label className="block text-sm font-medium text-slate-400 mb-1">Requirements (one per line)</label>
-                                      <textarea rows={3} value={jobRequirements} onChange={e => setJobRequirements(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-violet-500 outline-none resize-none" placeholder="• Requirement 1&#10;• Requirement 2" />
+                                      <textarea rows={3} value={jobRequirements} onChange={e => setJobRequirements(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-violet-500 outline-none resize-none" placeholder="â€¢ Requirement 1&#10;â€¢ Requirement 2" />
                                   </div>
                                   <div>
                                       <label className="block text-sm font-medium text-slate-400 mb-1">Responsibilities (one per line)</label>
-                                      <textarea rows={3} value={jobResponsibilities} onChange={e => setJobResponsibilities(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-violet-500 outline-none resize-none" placeholder="• Responsibility 1&#10;• Responsibility 2" />
+                                      <textarea rows={3} value={jobResponsibilities} onChange={e => setJobResponsibilities(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-violet-500 outline-none resize-none" placeholder="â€¢ Responsibility 1&#10;â€¢ Responsibility 2" />
                                   </div>
                                   <div>
                                       <label className="block text-sm font-medium text-slate-400 mb-1">Benefits (one per line)</label>
-                                      <textarea rows={3} value={jobBenefits} onChange={e => setJobBenefits(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-violet-500 outline-none resize-none" placeholder="• Benefit 1&#10;• Benefit 2" />
+                                      <textarea rows={3} value={jobBenefits} onChange={e => setJobBenefits(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-violet-500 outline-none resize-none" placeholder="â€¢ Benefit 1&#10;â€¢ Benefit 2" />
                                   </div>
                               </div>
 
@@ -4135,7 +4146,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       <div className="flex justify-between items-start">
                                           <div>
                                               <h4 className="font-bold text-white text-sm">{job.title || job.Title}</h4>
-                                              <p className="text-xs text-slate-400">{job.company || job.Company} • {job.type || job.Type}</p>
+                                              <p className="text-xs text-slate-400">{job.company || job.Company} â€¢ {job.type || job.Type}</p>
                                               <span className={`text-[10px] px-1.5 py-0.5 rounded border mt-1.5 inline-flex items-center gap-1 font-bold ${(job.destination || job.Destination) === 'Career' ? 'border-pink-500/50 text-pink-400 bg-pink-500/10' : 'border-blue-500/50 text-blue-400 bg-blue-500/10'}`}>
                                                   {(job.destination || job.Destination) === 'Career' ? <Rocket size={10} /> : <Globe size={10} />}
                                                   {(job.destination || job.Destination) === 'Career' ? 'Internal Career' : 'Job Portal'}
@@ -4455,7 +4466,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 bg-slate-900/40 border border-slate-800 p-6 rounded-2xl space-y-4">
-                      <h3 className="font-bold text-white text-base">{editingPostId ? '✏️ Edit Post' : '✍️ Create New Post'}</h3>
+                      <h3 className="font-bold text-white text-base">{editingPostId ? 'âœï¸ Edit Post' : 'âœï¸ Create New Post'}</h3>
                       <form id="blog-form" onSubmit={handlePublishBlog} className="space-y-5">
                           <div className="space-y-1.5">
                               <label className="text-xs font-bold text-slate-400 uppercase">Blog Title</label>
@@ -4559,7 +4570,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       
                                       <div className="w-[1px] h-6 bg-slate-800 mx-1" />
                                       
-                                      <button type="button" onClick={() => insertBlogFormat('<ul>\n  <li>', '</li>\n</ul>')} className="px-2 h-8 flex items-center justify-center text-xs text-slate-350 hover:bg-slate-800 rounded hover:text-white" title="Bullet List">● List</button>
+                                      <button type="button" onClick={() => insertBlogFormat('<ul>\n  <li>', '</li>\n</ul>')} className="px-2 h-8 flex items-center justify-center text-xs text-slate-350 hover:bg-slate-800 rounded hover:text-white" title="Bullet List">â— List</button>
                                       <button type="button" onClick={() => insertBlogFormat('<ol>\n  <li>', '</li>\n</ol>')} className="px-2 h-8 flex items-center justify-center text-xs text-slate-350 hover:bg-slate-800 rounded hover:text-white" title="Numbered List">1. List</button>
                                       
                                       <div className="w-[1px] h-6 bg-slate-800 mx-1" />
@@ -4593,7 +4604,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
                   <div className="space-y-6">
                       <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl overflow-y-auto max-h-[480px] space-y-4">
-                          <h3 className="font-bold text-white text-base">📚 Published Posts ({blogs.length})</h3>
+                          <h3 className="font-bold text-white text-base">ðŸ“š Published Posts ({blogs.length})</h3>
                           <div className="space-y-3">
                               {blogs.map((blog: any) => {
                                   const id = blog.id || blog.Id;
@@ -4629,7 +4640,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
                       {/* Blog Category Manager */}
                       <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl space-y-4 text-left">
-                          <h3 className="font-bold text-white text-base">🏷️ Blog Categories</h3>
+                          <h3 className="font-bold text-white text-base">ðŸ·ï¸ Blog Categories</h3>
                           <form onSubmit={handleSaveBlogCategory} className="flex gap-2">
                               <input 
                                   type="text" 
@@ -4651,7 +4662,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       onClick={() => { setEditingBlogCategoryId(null); setBlogCategoryNameInput(''); }} 
                                       className="bg-slate-800 text-slate-400 hover:text-white px-2.5 py-2 rounded-xl text-xs font-bold"
                                   >
-                                      ×
+                                      Ã—
                                   </button>
                               )}
                           </form>
@@ -4765,25 +4776,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                           <div className="flex items-center gap-2.5 font-sans">
                               <BookOpen className="text-cyan-400" size={20} />
                               <div>
-                                  <h4 className="font-extrabold text-white text-sm font-sans font-sans">📐 Math Equation & LaTeX Formatting Guide (গাণিতিক সমীকরণ গাইডলাইন)</h4>
+                                  <h4 className="font-extrabold text-white text-sm font-sans font-sans">ðŸ“ Math Equation & LaTeX Formatting Guide (à¦—à¦¾à¦£à¦¿à¦¤à¦¿à¦• à¦¸à¦®à§€à¦•à¦°à¦£ à¦—à¦¾à¦‡à¦¡à¦²à¦¾à¦‡à¦¨)</h4>
                                   <p className="text-[11px] text-slate-400 font-sans">Click to view cheat-sheet codes for fractions, roots, sums, integrals, matrices, etc.</p>
                               </div>
                           </div>
                           <span className="text-xs text-cyan-400 font-bold bg-cyan-500/10 px-2.5 py-1 rounded-lg font-sans">
-                              {showGuide ? "Hide Guide 🔼" : "Show Guide 🔽"}
+                              {showGuide ? "Hide Guide ðŸ”¼" : "Show Guide ðŸ”½"}
                           </span>
                       </div>
 
                       {showGuide && (
                           <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300 leading-relaxed animate-in slide-in-from-top-4 duration-300 font-sans">
                               <div className="space-y-3 font-sans">
-                                  <h5 className="font-bold text-white uppercase text-[10px] text-cyan-400 font-sans">1. Delimiters (সমীকরণ লেখার নিয়ম)</h5>
+                                  <h5 className="font-bold text-white uppercase text-[10px] text-cyan-400 font-sans">1. Delimiters (à¦¸à¦®à§€à¦•à¦°à¦£ à¦²à§‡à¦–à¦¾à¦° à¦¨à¦¿à§Ÿà¦®)</h5>
                                   <ul className="list-disc pl-4 space-y-1.5 text-slate-300 font-sans">
-                                      <li><strong>Inline Math (লাইনের মাঝে সমীকরণ):</strong> Use <code>{"\\\\( ... \\\\)"}</code> or <code>{"$ ... $"}</code>. Example: <code>{"Solve for \\\\(x\\\\): \\\\(x^2 + y^2 = r^2\\\\)"}</code>.</li>
-                                      <li><strong>Block Math (আলাদা ব্লকে বড় সমীকরণ):</strong> Use <code>{"\\\\[ ... \\\\]"}</code> or <code>{"$ ... $"}</code>. Example: <code>{"\\\\[E = mc^2\\\\]"}</code>.</li>
+                                      <li><strong>Inline Math (à¦²à¦¾à¦‡à¦¨à§‡à¦° à¦®à¦¾à¦à§‡ à¦¸à¦®à§€à¦•à¦°à¦£):</strong> Use <code>{"\\\\( ... \\\\)"}</code> or <code>{"$ ... $"}</code>. Example: <code>{"Solve for \\\\(x\\\\): \\\\(x^2 + y^2 = r^2\\\\)"}</code>.</li>
+                                      <li><strong>Block Math (à¦†à¦²à¦¾à¦¦à¦¾ à¦¬à§à¦²à¦•à§‡ à¦¬à§œ à¦¸à¦®à§€à¦•à¦°à¦£):</strong> Use <code>{"\\\\[ ... \\\\]"}</code> or <code>{"$ ... $"}</code>. Example: <code>{"\\\\[E = mc^2\\\\]"}</code>.</li>
                                   </ul>
 
-                                  <h5 className="font-bold text-white uppercase text-[10px] text-cyan-400 mt-4 font-sans font-sans font-sans">2. Common Math Symbols Cheat Sheet (কপি-পেস্ট কোড)</h5>
+                                  <h5 className="font-bold text-white uppercase text-[10px] text-cyan-400 mt-4 font-sans font-sans font-sans">2. Common Math Symbols Cheat Sheet (à¦•à¦ªà¦¿-à¦ªà§‡à¦¸à§à¦Ÿ à¦•à§‹à¦¡)</h5>
                                   <div className="overflow-x-auto bg-slate-950 p-2.5 rounded-xl border border-slate-855">
                                       <table className="w-full text-left text-[11px] text-slate-400 font-sans">
                                           <thead>
@@ -4903,7 +4914,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                           
                            {/* Live Preview Panel */}
                            <div className="mt-4 p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
-                               <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block font-sans">📝 Live Question Preview</span>
+                               <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block font-sans">ðŸ“ Live Question Preview</span>
                                <div className="space-y-1.5 text-xs text-slate-300">
                                    <div className="font-semibold text-slate-100 leading-relaxed font-sans">
                                        {questionText || "Start typing your question text..."}
@@ -4949,14 +4960,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                   onClick={downloadExcelTemplate}
                                   className="bg-green-600/10 hover:bg-green-600/20 border border-green-500/20 text-green-400 font-bold px-3 py-2 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 font-sans font-sans"
                               >
-                                  📊 Excel Template (.xlsx)
+                                  ðŸ“Š Excel Template (.xlsx)
                               </button>
                               <button 
                                   type="button"
                                   onClick={downloadWordTemplate}
                                   className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 font-bold px-3 py-2 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 font-sans"
                               >
-                                  📝 Word Template (.doc)
+                                  ðŸ“ Word Template (.doc)
                               </button>
                           </div>
                           <p className="text-[10px] text-slate-500 leading-relaxed pt-1 font-sans">
@@ -4977,13 +4988,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
                       {isParsing && (
                           <div className="text-xs text-cyan-400 animate-pulse py-2 font-sans">
-                              ⌛ Parsing upload file... please wait.
+                              âŒ› Parsing upload file... please wait.
                           </div>
                       )}
 
                       {uploadError && (
                           <div className="text-xs text-red-400 bg-red-500/5 border border-red-500/20 p-2.5 rounded-xl font-sans">
-                              ⚠️ Error: {uploadError}
+                              âš ï¸ Error: {uploadError}
                           </div>
                       )}
 
@@ -5712,7 +5723,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               <div className="flex gap-2 border-b border-slate-800 pb-3">
                   {[
                       { id: 'general', label: 'General & Courses' },
-                      { id: 'firebase', label: '🔥 Firebase & Social OAuth' },
+                      { id: 'firebase', label: 'ðŸ”¥ Firebase & Social OAuth' },
                       { id: 'sms', label: 'SMS Gateway Settings' },
                       { id: 'payment', label: 'Payment Gateways' },
                       { id: 'smtp', label: 'SMTP Email Config' },
@@ -5774,11 +5785,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                                       {plan.featured && <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded border border-cyan-500/20">Featured</span>}
                                                   </div>
                                                   <p className="text-slate-400 text-xs mt-2 italic">{plan.desc}</p>
-                                                  <h6 className="text-xl font-black text-cyan-400 mt-3">৳{plan.price} <span className="text-xs text-slate-500 font-normal">{plan.period}</span></h6>
+                                                  <h6 className="text-xl font-black text-cyan-400 mt-3">à§³{plan.price} <span className="text-xs text-slate-500 font-normal">{plan.period}</span></h6>
                                                   <ul className="mt-4 space-y-1.5 text-xs text-slate-350">
                                                       {(plan.features || []).map((f: string, i: number) => (
                                                           <li key={i} className="flex items-center gap-1.5">
-                                                              <span className="text-emerald-400">✔</span> {f}
+                                                              <span className="text-emerald-400">âœ”</span> {f}
                                                           </li>
                                                       ))}
                                                   </ul>
@@ -5802,7 +5813,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                               <div>
                                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                      🔥 Firebase & Social OAuth Authentication Manager
+                                      ðŸ”¥ Firebase & Social OAuth Authentication Manager
                                   </h3>
                                   <p className="text-xs text-slate-400 mt-1">
                                       Manage Firebase App SDK Keys for Google & Facebook 1-Click Social Sign-In directly from Admin Panel without touching source code.
@@ -5816,7 +5827,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                           {fbSaveMsg && (
                               <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-bold flex items-center justify-between">
                                   <span>{fbSaveMsg}</span>
-                                  <button onClick={() => setFbSaveMsg(null)} className="text-emerald-400 hover:text-white font-bold ml-2">✕</button>
+                                  <button onClick={() => setFbSaveMsg(null)} className="text-emerald-400 hover:text-white font-bold ml-2">âœ•</button>
                               </div>
                           )}
 
@@ -5930,7 +5941,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                           measurementId: fbMeasurementId
                                       };
                                       localStorage.setItem('takeuup_firebase_config', JSON.stringify(configObj));
-                                      setFbSaveMsg('✓ Firebase OAuth Settings saved successfully! Changes active live.');
+                                      setFbSaveMsg('âœ“ Firebase OAuth Settings saved successfully! Changes active live.');
                                   }}
                                   className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
                               >
@@ -6327,7 +6338,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   </div>
                   <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl">
                       <p className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Total Sales Revenue</p>
-                      <h3 className="text-2xl font-black text-cyan-400 mt-1.5">৳ {totalRevenue.toLocaleString()}</h3>
+                      <h3 className="text-2xl font-black text-cyan-400 mt-1.5">à§³ {totalRevenue.toLocaleString()}</h3>
                   </div>
               </div>
 
@@ -6400,7 +6411,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                                   <div className="text-xs text-slate-500">{email}</div>
                                               </td>
                                               <td className="px-6 py-4 text-slate-400">{date}</td>
-                                              <td className="px-6 py-4 text-right font-semibold text-white">৳ {amount.toLocaleString()}</td>
+                                              <td className="px-6 py-4 text-right font-semibold text-white">à§³ {amount.toLocaleString()}</td>
                                               <td className="px-6 py-4 text-center">
                                                   <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPaymentColor(payment)}`}>
                                                       {payment}
@@ -6479,16 +6490,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                               <div key={idx} className="flex justify-between items-center py-2 first:pt-0 last:pb-0">
                                                   <div>
                                                       <p className="font-bold text-white text-sm">{title}</p>
-                                                      <p className="text-xs text-slate-500">Qty: {qty} × ৳ {price.toLocaleString()}</p>
+                                                      <p className="text-xs text-slate-500">Qty: {qty} Ã— à§³ {price.toLocaleString()}</p>
                                                   </div>
-                                                  <p className="font-semibold text-white text-sm">৳ {(qty * price).toLocaleString()}</p>
+                                                  <p className="font-semibold text-white text-sm">à§³ {(qty * price).toLocaleString()}</p>
                                               </div>
                                           );
                                       });
                                   })()}
                                   <div className="flex justify-between items-center pt-3 border-t border-slate-800 font-bold text-white">
                                       <span>Total Amount</span>
-                                      <span className="text-cyan-400 text-lg">৳ {(selectedOrderDetails.totalAmount || selectedOrderDetails.TotalAmount || 0).toLocaleString()}</span>
+                                      <span className="text-cyan-400 text-lg">à§³ {(selectedOrderDetails.totalAmount || selectedOrderDetails.TotalAmount || 0).toLocaleString()}</span>
                                   </div>
                               </div>
                           </div>
@@ -6602,7 +6613,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                           </td>
                                           <td className="px-6 py-4 font-bold text-white">{name}</td>
                                           <td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-400">{catName}</span></td>
-                                          <td className="px-6 py-4 font-black text-cyan-400">৳{price}</td>
+                                          <td className="px-6 py-4 font-black text-cyan-400">à§³{price}</td>
                                           <td className="px-6 py-4">
                                               <span className={`font-bold ${stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                                   {stock > 0 ? `${stock} In Stock` : 'Out of Stock'}
@@ -6826,7 +6837,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                           
                                           <div className="w-[1px] h-6 bg-slate-800 mx-1" />
                                           
-                                          <button type="button" onClick={() => insertFormat('<ul>\n  <li>', '</li>\n</ul>')} className="px-2 h-8 flex items-center justify-center text-xs text-slate-350 hover:bg-slate-800 rounded hover:text-white" title="Bullet List">● List</button>
+                                          <button type="button" onClick={() => insertFormat('<ul>\n  <li>', '</li>\n</ul>')} className="px-2 h-8 flex items-center justify-center text-xs text-slate-350 hover:bg-slate-800 rounded hover:text-white" title="Bullet List">â— List</button>
                                           <button type="button" onClick={() => insertFormat('<ol>\n  <li>', '</li>\n</ol>')} className="px-2 h-8 flex items-center justify-center text-xs text-slate-350 hover:bg-slate-800 rounded hover:text-white" title="Numbered List">1. List</button>
                                           
                                           <div className="w-[1px] h-6 bg-slate-800 mx-1" />
@@ -6844,7 +6855,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       {productTagsList.map((tag, idx) => (
                                           <span key={idx} className="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-cyan-500/20">
                                               {tag}
-                                              <button type="button" onClick={() => removeTag(idx)} className="text-cyan-400 hover:text-cyan-300 font-bold text-xs select-none">×</button>
+                                              <button type="button" onClick={() => removeTag(idx)} className="text-cyan-400 hover:text-cyan-300 font-bold text-xs select-none">Ã—</button>
                                           </span>
                                       ))}
                                       <input 
@@ -6864,7 +6875,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       {metaKeywordsList.map((kw, idx) => (
                                           <span key={idx} className="bg-purple-500/10 text-purple-400 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-purple-500/20">
                                               {kw}
-                                              <button type="button" onClick={() => removeKeyword(idx)} className="text-purple-400 hover:text-purple-300 font-bold text-xs select-none">×</button>
+                                              <button type="button" onClick={() => removeKeyword(idx)} className="text-purple-400 hover:text-purple-300 font-bold text-xs select-none">Ã—</button>
                                           </span>
                                       ))}
                                       <input 
@@ -7325,7 +7336,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                       <tr key={id} className="hover:bg-slate-850/40 transition-colors">
                                           <td className="px-6 py-4">
                                               <div className="flex gap-1 text-amber-400 font-bold text-sm">
-                                                  {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+                                                  {'â˜…'.repeat(rating)}{'â˜†'.repeat(5 - rating)}
                                               </div>
                                           </td>
                                           <td className="px-6 py-4 text-xs font-semibold text-slate-500">{prodId}</td>
@@ -7527,6 +7538,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                         ]
                     },
                     { id: 'students', label: 'Student Hub', icon: GraduationCap, type: 'link' },
+                      { id: 'news_mgr', label: 'Recent News', icon: FileText, view: 'news', type: 'link' },
+                      { id: 'affairs_mgr', label: 'Current Affairs', icon: HelpCircle, view: 'affairs', type: 'link' },
+
                     { 
                         id: 'goals_group', 
                         label: 'Goal Management', 
@@ -7697,6 +7711,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         
         {/* Main Content */}
         <main className="flex-1 p-8 overflow-y-auto h-screen bg-slate-950">
+            {activeView === 'news' && <ManageNews />}
+            {activeView === 'affairs' && <ManageCurrentAffairs />}
             {activeView === 'dashboard' && (
                 <div className="space-y-6 animate-in fade-in">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -7748,6 +7764,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                     </div>
                 </div>
             )}
+            {activeView === 'news' && <ManageNews />}
+            {activeView === 'current_affairs' && <ManageCurrentAffairs />}
             {activeView === 'monitoring' && <AdminMessageMonitoring defaultTab={monitoringSubTab} />}
             {activeView === 'users' && renderUsers()}
             {activeView === 'students' && renderStudentManagement()}
@@ -7848,11 +7866,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <div className="flex gap-4">
                                     <div className="bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-800 text-center min-w-[100px]">
                                         <div className="text-[10px] text-slate-400 font-bold uppercase">Points</div>
-                                        <div className="text-lg font-extrabold text-cyan-400">⭐ {studentDetails.profile.points ?? 0}</div>
+                                        <div className="text-lg font-extrabold text-cyan-400">â­ {studentDetails.profile.points ?? 0}</div>
                                     </div>
                                     <div className="bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-800 text-center min-w-[100px]">
                                         <div className="text-[10px] text-slate-400 font-bold uppercase">Streak</div>
-                                        <div className="text-lg font-extrabold text-orange-400">🔥 {studentDetails.profile.streak ?? 0} days</div>
+                                        <div className="text-lg font-extrabold text-orange-400">ðŸ”¥ {studentDetails.profile.streak ?? 0} days</div>
                                     </div>
                                 </div>
                             </div>
@@ -7929,3 +7947,4 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     </div>
   );
 };
+

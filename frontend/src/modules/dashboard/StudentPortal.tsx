@@ -271,6 +271,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ user, onUpdateUser
     if (hash.includes('/certificates')) return 'certificates';
     if (hash.includes('/routine')) return 'routine';
     if (hash.includes('/profile')) return 'profile';
+    if (hash.includes('/my-weakness')) return 'my-weakness';
     return 'overview';
   };
 
@@ -661,6 +662,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ user, onUpdateUser
           'premium': '/premium',
           'qbank': '/question-bank',
           'courses': '/smart-lessons',
+          'my-weakness': '/my-weakness',
           'quizzes': '/quizzes',
           'messages': '/messages',
           'study-groups': '/study-groups',

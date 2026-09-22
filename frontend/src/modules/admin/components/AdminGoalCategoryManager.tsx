@@ -80,6 +80,7 @@ export const AdminGoalCategoryManager: React.FC = () => {
       title: title.trim(),
       subtitle: subtitle.trim() || null,
       parentId: parentId ? parentId : null,
+      iconUrl: null,
       iconName,
       sequence: Number(sequence),
       isActive

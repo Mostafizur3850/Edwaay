@@ -6,8 +6,9 @@ import {
   ChevronRight, ChevronLeft, Users, Play, FileText, CheckCircle2, Info, User, Settings, Sparkles, ExternalLink,
   Target, Plus, Check, RotateCcw, Calendar, ArrowRight, ShieldCheck, Flame as FlameIcon, Sparkle,
   Clock, AlertCircle, HelpCircle, GraduationCap, Briefcase, Calculator as CalcIcon, X, Menu, Bookmark, BarChart3,
-  Atom, FlaskConical, Ruler, Dna, Globe
+  Atom, FlaskConical, Ruler, Dna, Globe, Trash2
 } from 'lucide-react';
+import { BASE_URL, getHeaders } from '../../../services/api';
 import { useTheme } from '../../../context/ThemeContext';
 import { StudentCourse, StudentMistakeItem, StudentCertificate } from '../../../types/types';
 import { QuestionBank } from '../../quiz/QuestionBank';
@@ -49,36 +50,6 @@ const GOAL_OPTIONS = [
   { id: 'Job', name: 'Govt Job & Bank Prep', badge: 'Job', color: 'from-amber-500 to-orange-500' }
 ];
 
-const DEFAULT_SUBJECT_PROGRESS: Record<string, { name: string; progress: number; topic: string; totalQuestions: number }[]> = {
-  HSC: [
-    { name: 'Physics 1st & 2nd', progress: 75, topic: 'Vector & Thermodynamics', totalQuestions: 420 },
-    { name: 'Chemistry', progress: 60, topic: 'Organic Chemistry & Periodic Trends', totalQuestions: 380 },
-    { name: 'Higher Math', progress: 82, topic: 'Calculus & Matrix', totalQuestions: 510 },
-    { name: 'Biology', progress: 45, topic: 'Cell Structure & Genetics', totalQuestions: 290 },
-    { name: 'ICT & Computer', progress: 90, topic: 'HTML, C Programming & Logic Gates', totalQuestions: 340 }
-  ],
-  Admission: [
-    { name: 'Physics', progress: 68, topic: 'Mechanics & Waves', totalQuestions: 600 },
-    { name: 'Chemistry', progress: 55, topic: 'Chemical Equilibrium & Reactions', totalQuestions: 550 },
-    { name: 'Mathematics', progress: 72, topic: 'Integration & Coordinate Geometry', totalQuestions: 620 },
-    { name: 'Biology', progress: 50, topic: 'Human Physiology & Botany', totalQuestions: 480 },
-    { name: 'English & GK', progress: 85, topic: 'Vocabulary & Current World', totalQuestions: 700 }
-  ],
-  BCS: [
-    { name: 'Bangladesh Affairs', progress: 80, topic: 'Liberation War & Constitution', totalQuestions: 850 },
-    { name: 'International Affairs', progress: 65, topic: 'Global Treaties & Geopolitics', totalQuestions: 620 },
-    { name: 'Bangla Language & Lit', progress: 70, topic: 'Modern Poets & Grammar Rules', totalQuestions: 790 },
-    { name: 'English Language & Lit', progress: 58, topic: 'Grammar Hacks & Classic Authors', totalQuestions: 730 },
-    { name: 'General Science & ICT', progress: 88, topic: 'Daily Science & Networking', totalQuestions: 690 },
-    { name: 'Mental Ability & Math', progress: 78, topic: 'Algebra, Geometry & Puzzles', totalQuestions: 810 }
-  ],
-  Job: [
-    { name: 'Mathematical Reasoning', progress: 70, topic: 'Percentage, Profit-Loss & Interest', totalQuestions: 500 },
-    { name: 'English Language', progress: 64, topic: 'Idioms, Prepositions & Correction', totalQuestions: 610 },
-    { name: 'General Knowledge', progress: 76, topic: 'Recent Economy & Org Affairs', totalQuestions: 540 },
-    { name: 'Computer & Banking', progress: 82, topic: 'Financial Literacy & Software', totalQuestions: 480 }
-  ]
-};
 
 const LEADERBOARD_TOPPERS = [
   { rank: 1, name: 'Tanvir Hossain', points: '28,450', goal: 'BCS 46th', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=60' },
@@ -107,11 +78,43 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  React.useEffect(() => {
+    if (user) {
+      fetch(`${BASE_URL}/Notifications`, { credentials: 'include', headers: getHeaders() })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setNotifications(data);
+            setUnreadCount(data.filter((n: any) => !n.isRead).length);
+          }
+        })
+        .catch(err => console.error("Failed to load notifications", err));
+    }
+  }, [user]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await fetch(`${BASE_URL}/Notifications/${id}/read`, { credentials: 'include', method: 'PUT', headers: getHeaders() });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+
+
   const [internalActiveTab, setInternalActiveTab] = useState<string>('dashboard');
   const [qbankResetKey, setQbankResetKey] = useState<number>(0);
   const currentTab = externalActiveTab || internalActiveTab;
 
-  const [activeGoalId, setActiveGoalId] = useState<string>(user?.studentClass?.includes('BCS') ? 'BCS' : user?.studentClass?.includes('Admission') ? 'Admission' : 'HSC');
+  const activeGoalId = user?.activeGoalName || user?.targetGoal || (user?.studentClass?.includes('BCS') ? 'BCS' : user?.studentClass?.includes('Admission') ? 'Admission' : user?.studentClass) || 'HSC';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newTaskInput, setNewTaskInput] = useState('');
@@ -123,7 +126,27 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const [showAccountDrawer, setShowAccountDrawer] = useState(false);
   const [messengerOpen, setMessengerOpen] = useState(false);
 
-  const activeGoalProgress = DEFAULT_SUBJECT_PROGRESS[activeGoalId] || DEFAULT_SUBJECT_PROGRESS['HSC'];
+  const [dynamicSubjects, setDynamicSubjects] = useState<any[]>([]);
+  const [trackerGoalName, setTrackerGoalName] = useState('');
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+
+  React.useEffect(() => {
+    if (user) {
+      setLoadingSubjects(true);
+      fetch(`${BASE_URL}/Dashboard/student-tracker?goal=${encodeURIComponent(activeGoalId)}`, { credentials: 'include', headers: getHeaders() })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.subjects) {
+            setDynamicSubjects(data.subjects);
+            setTrackerGoalName(data.goalName);
+          }
+        })
+        .catch(err => console.error("Failed to fetch tracker data", err))
+        .finally(() => setLoadingSubjects(false));
+    }
+  }, [user, activeGoalId]);
+
+  const activeGoalProgress = dynamicSubjects;
   const unresolvedMistakesCount = (mistakes || []).filter(m => !m.resolved).length;
   const [localRoutineTasks, setLocalRoutineTasks] = useState(routineTasks);
 
@@ -147,16 +170,16 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskInput.trim()) return;
-    
+
     const newTask = {
       id: `rt-${Date.now()}`,
       task: newTaskInput.trim(),
       done: false,
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     };
-    
+
     setLocalRoutineTasks([...localRoutineTasks, newTask]);
-    
+
     if (onAddTask) {
       onAddTask(newTaskInput.trim());
     }
@@ -164,12 +187,17 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   };
 
   const handleToggleTask = (id: string) => {
-    setLocalRoutineTasks(localRoutineTasks.map((t: any) => 
+    setLocalRoutineTasks(localRoutineTasks.map((t: any) =>
       t.id === id ? { ...t, done: !t.done } : t
     ));
     if (onToggleTask) {
       onToggleTask(id);
     }
+  };
+
+  const handleDeleteTask = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setLocalRoutineTasks(localRoutineTasks.filter((t: any) => t.id !== id));
   };
 
   const MENU_ITEMS = [
@@ -431,7 +459,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                   স্বাগতম, {user?.name?.split(' ')[0] || 'Mostafiz'}! 🚀
                 </h1>
                 <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'} leading-relaxed font-medium max-w-xl`}>
-                  তোমার <strong className="text-slate-700">{user?.targetGoal || 'BCS & Admission Preparation'}</strong> টার্গেটের আজকের সিলেবাস আপডেট প্রস্তুত। প্রস্তুতি যাচাই করতে মক টেস্ট অথবা মিস্টেক ব্যাংক রিভিশন শুরু করো।
+                  তোমার <strong className={`text-slate-700 ${theme === 'dark' ? 'text-slate-200' : ''}`}>{trackerGoalName || user?.activeGoalName || user?.targetGoal || 'BCS & Admission Preparation'}</strong> টার্গেটের আজকের সিলেবাস আপডেট প্রস্তুত। প্রস্তুতি যাচাই করতে মক টেস্ট অথবা মিস্টেক ব্যাংক রিভিশন শুরু করো।
                 </p>
               </div>
 
@@ -617,7 +645,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                     <div>
                       <h3 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'} flex items-center gap-2`}>
                         <Target size={18} className="text-cyan-600 dark:text-cyan-400" />
-                        বিষয়ভিত্তিক প্রস্তুতি ট্র্যাকার ({user?.activeGoalName || 'বিসিএস প্রিলিমিনারি'})
+                        বিষয়ভিত্তিক প্রস্তুতি ট্র্যাকার ({trackerGoalName || user?.activeGoalName || 'বিসিএস প্রিলিমিনারি'})
                       </h3>
                       <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>তোমার টার্গেটের অন্তর্গত প্রতিটি বিষয়ের রিভিশন এবং প্র্যাকটিস অগ্রগতি</p>
                     </div>
@@ -630,7 +658,17 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                   </div>
 
                   <div className="space-y-4">
-                    {activeGoalProgress.map((subject, idx) => {
+                    {loadingSubjects ? (
+                      <div className={`p-8 text-center rounded-2xl border ${theme === 'dark' ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-200'} animate-pulse`}>
+                        <p className={`text-sm font-bold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>বিষয় লোড হচ্ছে...</p>
+                      </div>
+                    ) : activeGoalProgress.length === 0 ? (
+                      <div className={`p-8 text-center rounded-2xl border ${theme === 'dark' ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                        <Target size={48} className={`mx-auto mb-3 ${theme === 'dark' ? 'text-slate-700' : 'text-slate-300'}`} />
+                        <h4 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>কোনো বিষয় পাওয়া যায়নি</h4>
+                        <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>আপনার বর্তমান গোলের অধীনে কোনো সাবজেক্ট যুক্ত করা হয়নি। দয়া করে এডমিন প্যানেল থেকে ক্যাটাগরি ও সাবজেক্ট যুক্ত করুন অথবা গোল পরিবর্তন করুন।</p>
+                      </div>
+                    ) : activeGoalProgress.map((subject, idx) => {
                       const configs = [
                         { icon: <Atom size={24} className="text-purple-500" />, bg: "bg-purple-100 dark:bg-purple-500/20", barColor: "bg-purple-500 text-purple-600 dark:text-purple-400" },
                         { icon: <FlaskConical size={24} className="text-teal-500" />, bg: "bg-teal-100 dark:bg-teal-500/20", barColor: "bg-teal-500 text-teal-600 dark:text-teal-400" },
@@ -727,9 +765,18 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                           </div>
                           <span className="text-xs font-medium truncate">{task.task}</span>
                         </div>
-                        <span className={`text-[9px] font-bold ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'} shrink-0 whitespace-nowrap`}>
-                          {task.time}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-bold ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'} shrink-0 whitespace-nowrap`}>
+                            {task.time}
+                          </span>
+                          <button
+                            onClick={(e) => handleDeleteTask(e, task.id)}
+                            className={`p-1.5 rounded-md transition-colors ${theme === 'dark' ? 'text-slate-600 hover:text-red-400 hover:bg-red-950/30' : 'text-slate-400 hover:text-red-500 hover:bg-red-50'}`}
+                            title="টাস্ক মুছুন"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

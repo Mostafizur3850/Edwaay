@@ -113,6 +113,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole, str
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<GoalCategory> GoalCategories => Set<GoalCategory>();
     public DbSet<GoalChangeRequest> GoalChangeRequests => Set<GoalChangeRequest>();
+        public DbSet<News> News => Set<News>();
+    public DbSet<CurrentAffairQuestion> CurrentAffairQuestions => Set<CurrentAffairQuestion>();
     public DbSet<Notification> Notifications => Set<Notification>();
 
     #endregion

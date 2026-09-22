@@ -25,8 +25,15 @@ namespace takeuup.API.Controllers
         public async Task<IActionResult> GetUserNotifications()
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            if (string.IsNullOrEmpty(userIdStr))
                 return Unauthorized();
+
+            if (!Guid.TryParse(userIdStr, out var userId))
+            {
+                var profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.Email == userIdStr);
+                if (profile == null) return Unauthorized();
+                userId = profile.UserId;
+            }
 
             var notifications = await _db.Notifications
                 .Where(n => n.UserId == userId)
@@ -53,7 +60,15 @@ namespace takeuup.API.Controllers
             if (notification == null) return NotFound();
 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (notification.UserId.ToString() != userIdStr) return Forbid();
+            if (!Guid.TryParse(userIdStr, out var userId))
+            {
+                var profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.Email == userIdStr);
+                if (profile == null || notification.UserId != profile.UserId) return Forbid();
+            }
+            else if (notification.UserId != userId)
+            {
+                return Forbid();
+            }
 
             notification.IsRead = true;
             await _db.SaveChangesAsync();
