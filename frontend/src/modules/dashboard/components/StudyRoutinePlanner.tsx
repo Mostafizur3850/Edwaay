@@ -97,7 +97,7 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
   const [showAiConfig, setShowAiConfig] = useState(false);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/Dashboard/get-routine`, { credentials: 'include', headers: getHeaders() })
+    fetch(`${BASE_URL}/Dashboard/get-routine?t=${Date.now()}`, { credentials: 'include', headers: getHeaders(), cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.routineTasks) {

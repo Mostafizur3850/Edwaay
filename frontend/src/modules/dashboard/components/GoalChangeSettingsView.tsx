@@ -95,8 +95,8 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
             <Target size={26} />
           </div>
           <div>
-            <h2 className="text-xl font-bold">গোল পরিবর্তন সেটিং (Goal Change Settings)</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h2 className="text-xl font-bold leading-tight">গোল পরিবর্তন সেটিং (Goal Change Settings)</h2>
+            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
               রেজিস্ট্রেশনের সময় নির্বাচিত গোলটি অপরিবর্তনীয়। পরিবর্তন করতে হলে এডমিনের অনুমোদনের জন্য আবেদন করুন।
             </p>
           </div>
@@ -111,10 +111,10 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
           <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500 flex items-center gap-1">
             <CheckCircle2 size={13} /> বর্তমান সক্রিয় প্রস্তুতি টার্গেট (Active Running Goal)
           </span>
-          <h3 className="text-xl font-black text-white dark:text-white">
+          <h3 className="text-xl font-black leading-tight break-words">
             🎯 {activeGoalName || user?.activeGoalName || user?.studentClass || 'সাধারণ শিক্ষা'}
           </h3>
-          <p className="text-xs text-slate-400 font-medium">
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
             রেজিস্ট্রেশন বা প্রথম লগইনের সময় আপনার সেট করা প্রধান শিক্ষা বিষয়।
           </p>
         </div>
@@ -148,18 +148,18 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
       <div className={`p-6 sm:p-8 rounded-3xl border ${
         isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
       } space-y-6`}>
-        <div className="border-b border-slate-800 pb-4">
-          <h3 className="text-base font-bold flex items-center gap-2">
-            <Send size={18} className="text-cyan-400" /> নতুন গোল পরিবর্তনের আবেদন ফরম
+        <div className={`border-b pb-4 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+          <h3 className="text-base font-bold flex items-center gap-2 leading-tight">
+            <Send size={18} className={isDark ? "text-cyan-400" : "text-cyan-600"} /> নতুন গোল পরিবর্তনের আবেদন ফরম
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             আপনি বর্তমানে যে বিষয় নিয়ে পড়াশোনা করছেন তা থেকে অন্য কোনো বিভাগে বা নতুন লক্ষ্যে সুইচ করতে চাইলে নিচে নির্বাচন করুন।
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-2">
+            <label className={`block text-xs font-bold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               ১. বর্তমান লক্ষ্য (Present Goal)
             </label>
             <input
@@ -174,12 +174,12 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-2">
+            <label className={`block text-xs font-bold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               ২. নতুন কাঙ্ক্ষিত গোল ক্যাটাগরি নির্বাচন করুন (Requested New Goal) *
             </label>
             {isLoading ? (
-              <div className="p-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                <RefreshCw size={16} className="animate-spin text-cyan-400" /> ক্যাটাগরি লোড হচ্ছে...
+              <div className={`p-4 text-center text-xs flex items-center justify-center gap-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <RefreshCw size={16} className={`animate-spin ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`} /> ক্যাটাগরি লোড হচ্ছে...
               </div>
             ) : (
               <select
@@ -209,7 +209,7 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-2">
+            <label className={`block text-xs font-bold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
               ৩. গোল পরিবর্তনের কারণ (Reason) *
             </label>
             <textarea
@@ -224,9 +224,9 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
             />
           </div>
 
-          <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl flex items-start gap-3 text-xs text-cyan-300">
-            <Info size={18} className="shrink-0 text-cyan-400 mt-0.5" />
-            <span>
+          <div className={`p-4 rounded-2xl flex items-start gap-3 text-xs leading-relaxed ${isDark ? 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-300' : 'bg-cyan-50 border border-cyan-200 text-cyan-700'}`}>
+            <Info size={18} className={`shrink-0 mt-0.5 ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`} />
+            <span className="block">
               আপনার আবেদন পাঠানোর পর এডমিন রিভিউ করবেন। এডমিন অনুমোদন দিলে ড্যাশবোর্ডের বিষয়বস্তু ও কুইজ নতুন গোল অনুযায়ী নিজে থেকে কনফিগার হয়ে যাবে।
             </span>
           </div>
@@ -234,7 +234,7 @@ export const GoalChangeSettingsView: React.FC<GoalChangeSettingsViewProps> = ({ 
           <button
             type="submit"
             disabled={isSubmitting || !selectedCategoryId}
-            className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm rounded-2xl transition-all shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl transition-all shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

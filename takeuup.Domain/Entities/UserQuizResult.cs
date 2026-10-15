@@ -9,6 +9,9 @@ namespace ECommerce.Domain.Entities
         public string Subject { get; set; } = default!;
         public int Score { get; set; }
         public int TotalQuestions { get; set; }
+        public string? ExamTitle { get; set; }
+        public int? TimeSpentMinutes { get; set; }
+        public string? DetailsJson { get; set; }
         public DateTimeOffset CompletedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }

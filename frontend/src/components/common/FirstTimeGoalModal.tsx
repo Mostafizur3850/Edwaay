@@ -41,47 +41,47 @@ export const FirstTimeGoalModal: React.FC<FirstTimeGoalModalProps> = ({ isOpen, 
 
   const getDefaultFallbackTree = () => [
     {
-      id: 'cat-68',
+      id: '3d14b8d2-c49f-4db8-a5bf-222248bc4151',
       title: 'ক্লাস ৬-৮',
       subtitle: 'মাধ্যমিক ৬ষ্ঠ থেকে ৮ম শ্রেণী',
       iconName: 'BookOpen',
       subCategories: [
-        { id: 'sub-68-gen', title: 'সাধারণ বিভাগ', subtitle: 'General Group', iconName: 'BookOpen' }
+        { id: '3d14b8d2-c49f-4db8-a5bf-222248bc4151', title: 'সাধারণ বিভাগ', subtitle: 'General Group', iconName: 'BookOpen' }
       ]
     },
     {
-      id: 'cat-ssc',
+      id: 'f573cf61-0357-4d82-8049-b24768a132fb',
       title: 'এসএসসি (SSC)',
       subtitle: 'মাধ্যমিক স্কুল সার্টিফিকেট পরীক্ষা',
       iconName: 'GraduationCap',
       subCategories: [
-        { id: 'sub-ssc-sc', title: 'বিজ্ঞান বিভাগ', subtitle: 'SSC Science Group', iconName: 'FlaskConical' },
-        { id: 'sub-ssc-com', title: 'বাণিজ্য বিভাগ', subtitle: 'SSC Business Studies', iconName: 'Calculator' },
-        { id: 'sub-ssc-arts', title: 'মানবিক বিভাগ', subtitle: 'SSC Humanities Group', iconName: 'Globe' }
+        { id: 'e6d70851-1801-42df-812a-90f96472c7db', title: 'বিজ্ঞান বিভাগ', subtitle: 'SSC Science Group', iconName: 'FlaskConical' },
+        { id: 'ac3a57d6-4001-4041-accf-aa8c74ea1e68', title: 'বাণিজ্য বিভাগ', subtitle: 'SSC Business Studies', iconName: 'Calculator' },
+        { id: 'e6286e96-9091-4a2e-9a39-4bc4696291c1', title: 'মানবিক বিভাগ', subtitle: 'SSC Humanities Group', iconName: 'Globe' }
       ]
     },
     {
-      id: 'cat-hsc',
+      id: '9eb4ba0d-72e0-4078-88de-05976d15381a',
       title: 'এইচএসসি / এডমিশন',
       subtitle: 'উচ্চ মাধ্যমিক ও বিশ্ববিদ্যালয় ভর্তি প্রস্তুতি',
       iconName: 'Award',
       subCategories: [
-        { id: 'sub-hsc-sc', title: 'বিজ্ঞান বিভাগ', subtitle: 'HSC Science Group', iconName: 'Atom' },
-        { id: 'sub-hsc-com', title: 'বাণিজ্য বিভাগ', subtitle: 'HSC Business Studies', iconName: 'TrendingUp' },
-        { id: 'sub-hsc-eng', title: 'ইঞ্জিনিয়ারিং এডমিশন (BUET)', subtitle: 'বুয়েট ও প্রযুক্তি বিশ্ববিদ্যালয় ভর্তি', iconName: 'Cpu' },
-        { id: 'sub-hsc-med', title: 'মেডিকেল এডমিশন (DMC)', subtitle: 'মেডিকেল ও ডেন্টাল ভর্তি প্রস্তুতি', iconName: 'Stethoscope' },
-        { id: 'sub-hsc-du', title: 'ভার্সিটি ক-ইউনিট ও গুচ্ছ', subtitle: 'ঢাকা বিশ্ববিদ্যালয় ক-ইউনিট প্রস্তুতি', iconName: 'Building2' }
+        { id: 'eb62cfb5-3b31-4e0b-bbe0-8dffd4d30bd1', title: 'বিজ্ঞান বিভাগ', subtitle: 'HSC Science Group', iconName: 'Atom' },
+        { id: 'a1284dcb-eff3-496c-8d67-3db5e9276286', title: 'বাণিজ্য বিভাগ', subtitle: 'HSC Business Studies', iconName: 'TrendingUp' },
+        { id: '6385cd9e-e4d2-4e5b-b3cc-ddfa715b6950', title: 'ইঞ্জিনিয়ারিং এডমিশন (BUET)', subtitle: 'বুয়েট ও প্রযুক্তি বিশ্ববিদ্যালয় ভর্তি', iconName: 'Cpu' },
+        { id: '311ca984-640e-49b3-b598-f00849efecd9', title: 'মেডিকেল এডমিশন (DMC)', subtitle: 'মেডিকেল ও ডেন্টাল ভর্তি প্রস্তুতি', iconName: 'Stethoscope' },
+        { id: 'd33fafe5-cb19-40e5-b3cb-80b63b31d19c', title: 'ভার্সিটি ক-ইউনিট ও গুচ্ছ', subtitle: 'ঢাকা বিশ্ববিদ্যালয় ক-ইউনিট প্রস্তুতি', iconName: 'Building2' }
       ]
     },
     {
-      id: 'cat-bcs',
+      id: 'a5cd26db-1c29-40e8-a24b-4b502f098b06',
       title: 'বিসিএস / জবস',
       subtitle: 'বিসিএস প্রিলি ও সরকারি চাকরি প্রস্তুতি',
       iconName: 'Briefcase',
       subCategories: [
-        { id: 'sub-bcs-pre', title: 'বিসিএস প্রিলিমিনারি', subtitle: 'BCS Preliminary Exam', iconName: 'CheckCircle2' },
-        { id: 'sub-bank-jobs', title: 'ব্যাংক জবস', subtitle: 'Bank Recruitment Exam', iconName: 'Landmark' },
-        { id: 'sub-primary', title: 'প্রাথমিক শিক্ষক নিয়োগ', subtitle: 'Primary Assistant Teacher', iconName: 'Users' }
+        { id: '853b2f4a-fe11-44c1-b386-6b94ad352cfe', title: 'বিসিএস প্রিলিমিনারি', subtitle: 'BCS Preliminary Exam', iconName: 'CheckCircle2' },
+        { id: 'af6d9064-f435-431d-92a5-f61b4edddf97', title: 'ব্যাংক জবস', subtitle: 'Bank Recruitment Exam', iconName: 'Landmark' },
+        { id: '00003f5d-bb92-4768-b490-23953cc70ee5', title: 'প্রাথমিক শিক্ষক নিয়োগ', subtitle: 'Primary Assistant Teacher', iconName: 'Users' }
       ]
     }
   ];
@@ -126,7 +126,7 @@ export const FirstTimeGoalModal: React.FC<FirstTimeGoalModalProps> = ({ isOpen, 
 
     try {
       const res = await selectInitialGoal(userIdToPass, cat.id);
-      
+
       const local = localStorage.getItem('takeuup_user');
       let userDataToUpdate = local ? JSON.parse(local) : { ...user };
 
@@ -159,18 +159,18 @@ export const FirstTimeGoalModal: React.FC<FirstTimeGoalModalProps> = ({ isOpen, 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300">
-      
+
       <div className="relative w-full max-w-lg bg-[#0b101b] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-center text-slate-100 flex flex-col items-center">
-        
+
         {/* Background Ambient Glow */}
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Mascot & Speech Bubble Banner */}
         <div className="relative flex flex-col items-center mb-6 w-full">
-          
+
           {/* Back Button if in sub-category step */}
           {selectedParent && (
-            <button 
+            <button
               onClick={() => setSelectedParent(null)}
               className="absolute left-0 top-0 p-2 text-slate-400 hover:text-white bg-slate-900/80 rounded-xl border border-slate-800 transition-colors flex items-center gap-1.5 text-xs font-bold"
             >
@@ -187,9 +187,9 @@ export const FirstTimeGoalModal: React.FC<FirstTimeGoalModalProps> = ({ isOpen, 
 
           {/* Cute Mascot Avatar */}
           <div className="w-24 h-24 rounded-full bg-gradient-to-b from-cyan-500/20 to-blue-600/20 border-2 border-cyan-500/40 p-1 flex items-center justify-center shadow-xl shadow-cyan-950/40 relative group">
-            <img 
-              src="https://img.freepik.com/free-vector/cute-fox-reading-book-cartoon-vector-icon-illustration-animal-education-icon-concept-isolated_138676-5867.jpg" 
-              alt="TakeUUp Learning Mascot" 
+            <img
+              src="https://img.freepik.com/free-vector/cute-fox-reading-book-cartoon-vector-icon-illustration-animal-education-icon-concept-isolated_138676-5867.jpg"
+              alt="TakeUUp Learning Mascot"
               className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform"
             />
             <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-cyan-500 text-slate-950 font-extrabold rounded-full flex items-center justify-center text-xs shadow-md border border-white">
@@ -236,7 +236,7 @@ export const FirstTimeGoalModal: React.FC<FirstTimeGoalModalProps> = ({ isOpen, 
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="text-slate-500 group-hover:text-cyan-400 transition-colors font-bold text-xs">
                     নির্বাচন করুন &rarr;
                   </div>

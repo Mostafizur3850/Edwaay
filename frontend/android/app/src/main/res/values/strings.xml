@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TakeUUp</string>
+    <string name="title_activity_main">TakeUUp</string>
+    <string name="package_name">com.takeuup.app</string>
+    <string name="custom_url_scheme">com.takeuup.app</string>
+</resources>

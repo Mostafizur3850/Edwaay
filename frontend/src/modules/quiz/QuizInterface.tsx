@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Clock, ArrowRight, CheckCircle2, XCircle, RefreshCcw, Trophy, Target, Zap, 
   GraduationCap, ChevronLeft, ChevronDown, ChevronUp, Lock, Crown, Play, Sparkles, 
-  Check, X, Layers, BookOpen, FileText, Settings, ShieldCheck, Flame
+  Check, X, Layers, BookOpen, FileText, Settings, ShieldCheck, Flame, Bookmark
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Question } from '../../types/types';
@@ -10,10 +10,11 @@ import { useTheme } from '../../context/ThemeContext';
 
 interface QuizInterfaceProps {
   isEmbedded?: boolean;
+  user?: any;
 }
 
 // --- STEP 0: SUBJECTS LIST DATA (Screenshot 4 Match) ---
-const QUIZ_SUBJECTS = [
+const ALL_QUIZ_SUBJECTS = [
   { id: 'bangla', name: 'বাংলা', engName: 'Bangla', symbol: 'অ', color: 'bg-red-50 text-rose-600 border-rose-200 dark:bg-rose-955/30 dark:text-rose-400' },
   { id: 'english', name: 'English', engName: 'English', symbol: 'Aa', color: 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-955/30 dark:text-indigo-400' },
   { id: 'gk', name: 'সাধারণ জ্ঞান', engName: 'General Knowledge', symbol: '🧠', color: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-955/30 dark:text-blue-400' },
@@ -29,6 +30,26 @@ const QUIZ_SUBJECTS = [
   { id: 'mental_ability', name: 'মানসিক দক্ষতা', engName: 'Mental Ability', symbol: '🧠', color: 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200 dark:bg-fuchsia-955/30 dark:text-fuchsia-400' },
   { id: 'iba', name: 'IBA', engName: 'IBA Aptitude', symbol: 'IBA', color: 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-955/30 dark:text-rose-400' }
 ];
+
+const getQuizSubjects = (userClass?: string) => {
+  if (!userClass) return ALL_QUIZ_SUBJECTS;
+  
+  const cls = userClass.toUpperCase();
+  
+  if (cls.includes('BCS') || cls.includes('JOB') || cls.includes('বিসিএস') || cls.includes('জব')) {
+    return ALL_QUIZ_SUBJECTS.filter(s => ['bangla', 'english', 'gk', 'ict', 'mental_ability'].includes(s.id));
+  }
+  
+  if (cls.includes('HSC') || cls.includes('SSC') || cls.includes('এইচএসসি') || cls.includes('এসএসসি')) {
+    return ALL_QUIZ_SUBJECTS.filter(s => ['bangla', 'english', 'physics', 'chemistry', 'biology', 'higher_math', 'ict', 'agri', 'home_econ', 'statistics', 'psychology'].includes(s.id));
+  }
+  
+  if (cls.includes('ADMISSION') || cls.includes('এডমিশন')) {
+    return ALL_QUIZ_SUBJECTS.filter(s => ['bangla', 'english', 'physics', 'chemistry', 'biology', 'higher_math', 'gk', 'iba'].includes(s.id));
+  }
+  
+  return ALL_QUIZ_SUBJECTS;
+};
 
 // --- PRESET EXAMS LIST (Screenshot 4 Match) ---
 const PRESET_EXAMS_PILLS = [
@@ -133,18 +154,151 @@ const MOCK_QUIZ_QUESTIONS = [
   }
 ];
 
-export const QuizInterface: React.FC<QuizInterfaceProps> = ({ isEmbedded = false }) => {
+export const QuizInterface: React.FC<QuizInterfaceProps> = ({ isEmbedded = false, user }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const activeGoalId = user?.activeGoalName || user?.targetGoal || (user?.studentClass?.includes('BCS') ? 'BCS' : user?.studentClass?.includes('Admission') ? 'Admission' : user?.studentClass) || 'HSC';
+  
+  const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [apiSubjects, setApiSubjects] = useState<any[]>([]);
+  const [quizSubjects, setQuizSubjects] = useState<any[]>(getQuizSubjects(activeGoalId));
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadApiData = async () => {
+      try {
+        const { fetchQuizCategories, fetchQuizSubjects } = await import('../../services/api');
+        const cats = await fetchQuizCategories();
+        const subs = await fetchQuizSubjects();
+        if (isMounted) {
+          setApiCategories(cats || []);
+          setApiSubjects(subs || []);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    
+    loadApiData();
+
+    const handleUpdate = () => {
+        loadApiData();
+    };
+    
+    window.addEventListener('takeuup_quiz_settings_updated', handleUpdate);
+    return () => {
+        isMounted = false;
+        window.removeEventListener('takeuup_quiz_settings_updated', handleUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (apiCategories.length === 0 || apiSubjects.length === 0) return;
+
+    const cls = activeGoalId.toUpperCase();
+    
+    // 1. Find matching category
+    let matchedCat = apiCategories.find(c => c.name.toLowerCase() === activeGoalId.toLowerCase());
+    if (!matchedCat) {
+      if (cls.includes('BCS') || cls.includes('JOB') || cls.includes('বিসিএস') || cls.includes('জব')) {
+        matchedCat = apiCategories.find(c => c.name.toUpperCase().includes('BCS'));
+      }
+      else if (cls.includes('HSC') || cls.includes('SSC') || cls.includes('এইচএসসি') || cls.includes('এসএসসি')) {
+        matchedCat = apiCategories.find(c => c.name.toUpperCase().includes('HSC') || c.name.toUpperCase().includes('SSC'));
+      }
+      else if (cls.includes('ADMISSION') || cls.includes('এডমিশন')) {
+        matchedCat = apiCategories.find(c => c.name.toUpperCase().includes('ADMISSION'));
+      }
+    }
+
+    // 2. Filter subjects by that category
+    if (matchedCat) {
+      const filtered = apiSubjects.filter(s => s.quizCategoryId === matchedCat.id || s.category === matchedCat.id);
+      
+      // Map to UI subjects format
+      const mapped = filtered.map(s => {
+        const fallback = ALL_QUIZ_SUBJECTS.find(x => x.engName.toLowerCase() === s.name.toLowerCase() || x.name === s.name);
+        return {
+          id: s.id || s.slug,
+          name: s.name,
+          engName: s.name,
+          symbol: fallback?.symbol || s.name.charAt(0).toUpperCase(),
+          color: fallback?.color || 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800/30 dark:text-slate-400'
+        };
+      });
+      
+      if (mapped.length > 0) {
+        setQuizSubjects(mapped);
+      } else {
+        setQuizSubjects(getQuizSubjects(activeGoalId));
+      }
+    } else {
+      setQuizSubjects(getQuizSubjects(activeGoalId));
+    }
+  }, [apiCategories, apiSubjects, activeGoalId]);
+
   // WIZARD STEP STATE (0: Subject List, 1: Topic Select, 2: Standard Select, 3: Confirm, 4: Live Exam)
   const [wizardStep, setWizardStep] = useState<number>(0);
   const [mainTabToggle, setMainTabToggle] = useState<'mock' | 'quick'>('mock');
 
+  // Bookmarking functionality
+  const [bookmarkedMap, setBookmarkedMap] = useState<Record<string | number, boolean>>(() => {
+    try {
+      const stored = localStorage.getItem('takeuup_bookmarks');
+      if (stored) {
+        const list = JSON.parse(stored);
+        const map: Record<string | number, boolean> = {};
+        list.forEach((b: any) => { map[b.id] = true; });
+        return map;
+      }
+    } catch(e) {}
+    return {};
+  });
+
+  const toggleBookmark = (q: any) => {
+    try {
+      const stored = localStorage.getItem('takeuup_bookmarks');
+      let list = stored ? JSON.parse(stored) : [];
+      const qId = `quiz-${q.id}`;
+      const isBm = !!bookmarkedMap[q.id];
+      if (isBm) {
+        list = list.filter((b: any) => b.id !== qId && b.id !== q.id);
+        setBookmarkedMap(prev => ({ ...prev, [q.id]: false }));
+      } else {
+        const newBm = {
+          id: qId,
+          subject: selectedSubject?.name || 'কুইজ',
+          questionText: q.question,
+          options: q.options,
+          correctAnswerIndex: q.options.indexOf(q.answer) !== -1 ? q.options.indexOf(q.answer) : 0,
+          explanation: q.explanation || 'সঠিক উত্তর যাচাই করুন।',
+          savedDate: 'আজকে'
+        };
+        list = [newBm, ...list.filter((b: any) => b.id !== qId)];
+        setBookmarkedMap(prev => ({ ...prev, [q.id]: true }));
+      }
+      localStorage.setItem('takeuup_bookmarks', JSON.stringify(list));
+      window.dispatchEvent(new CustomEvent('takeuup_bookmarks_updated'));
+    } catch(e) {}
+  };
+
   // STEP CONFIGURATIONS STATE
-  const [selectedSubject, setSelectedSubject] = useState<any>(QUIZ_SUBJECTS[0]);
+  const [selectedSubject, setSelectedSubject] = useState<any>(null);
+  
+  // Set default selected subject when quizSubjects updates
+  useEffect(() => {
+    if (quizSubjects.length > 0 && !selectedSubject) {
+      setSelectedSubject(quizSubjects[0]);
+    } else if (quizSubjects.length > 0 && selectedSubject) {
+      // check if currently selected subject is still in the list
+      if (!quizSubjects.find(s => s.id === selectedSubject.id)) {
+        setSelectedSubject(quizSubjects[0]);
+      }
+    }
+  }, [quizSubjects, selectedSubject]);
   const [selectedTopicsMap, setSelectedTopicsMap] = useState<Record<string, boolean>>({ 't1': true }); // default selected
   const [expandedSectionsMap, setExpandedSectionsMap] = useState<Record<string, boolean>>({ 'goddo': true });
   const [totalQuestionsCount, setTotalQuestionsCount] = useState<number>(25);
@@ -258,7 +412,7 @@ export const QuizInterface: React.FC<QuizInterfaceProps> = ({ isEmbedded = false
 
           {/* Grid of 14 Subjects */}
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3">
-            {QUIZ_SUBJECTS.map((subj) => (
+            {quizSubjects.map((subj) => (
               <div
                 key={subj.id}
                 onClick={() => {
@@ -722,9 +876,18 @@ export const QuizInterface: React.FC<QuizInterfaceProps> = ({ isEmbedded = false
                   <h4 className="font-bold text-sm text-slate-900 dark:text-white leading-relaxed">
                     {qIdx + 1}. {q.question}
                   </h4>
-                  <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full shrink-0">
-                    ১ মার্ক
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
+                      ১ মার্ক
+                    </span>
+                    <button 
+                      onClick={() => toggleBookmark(q)}
+                      className={`p-1 rounded-lg transition-colors ${bookmarkedMap[q.id] ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500'}`}
+                      title={bookmarkedMap[q.id] ? "দাগানো তালিকা থেকে সরান" : "দাগিয়ে রাখুন"}
+                    >
+                      <Bookmark size={16} className={bookmarkedMap[q.id] ? 'fill-amber-500' : ''} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -786,6 +949,91 @@ export const QuizInterface: React.FC<QuizInterfaceProps> = ({ isEmbedded = false
               {!examSubmitted ? (
                 <button
                   onClick={() => {
+                    let correctCount = 0;
+                    const questionDetails = MOCK_QUIZ_QUESTIONS.map(q => {
+                      const userAns = userSelectedAnswers[q.id];
+                      const isCorrect = userAns === q.answer;
+                      if (isCorrect) correctCount++;
+                      return {
+                        id: q.id,
+                        questionText: q.question,
+                        options: q.options,
+                        userAnswer: userAns || null,
+                        userAnswerIndex: userAns ? q.options.indexOf(userAns) : -1,
+                        correctAnswer: q.answer,
+                        correctAnswerIndex: q.options.indexOf(q.answer),
+                        isCorrect,
+                        explanation: q.explanation || 'সঠিক উত্তর যাচাই করুন।'
+                      };
+                    });
+                    
+                    const addedPoints = correctCount * 10;
+                    window.dispatchEvent(new CustomEvent('takeuup_stats_updated', {
+                      detail: { addedPoints, streakIncrement: 1 }
+                    }));
+
+                    const examTitle = `${selectedSubject?.name || 'কুইজ'} স্পেশাল মক টেস্ট`;
+                    const subjectName = selectedSubject?.name || 'সাধারণ';
+                    const timeSpent = Math.max(1, totalExamTimeMins);
+
+                    // Record exam in takeuup_exam_history so it reflects in StudentHistory -> পরীক্ষা
+                    try {
+                      const newExamRecord = {
+                        id: `ex-${Date.now()}`,
+                        examTitle: examTitle,
+                        subject: subjectName,
+                        score: correctCount,
+                        totalQuestions: MOCK_QUIZ_QUESTIONS.length,
+                        accuracyPercentage: Math.round((correctCount / MOCK_QUIZ_QUESTIONS.length) * 100),
+                        timeSpentMinutes: timeSpent,
+                        dateCompleted: new Date().toISOString().split('T')[0],
+                        details: questionDetails
+                      };
+                      const prevHistory = JSON.parse(localStorage.getItem('takeuup_exam_history') || '[]');
+                      localStorage.setItem('takeuup_exam_history', JSON.stringify([newExamRecord, ...prevHistory]));
+                      window.dispatchEvent(new CustomEvent('takeuup_exam_history_updated'));
+                    } catch(e) {}
+
+                    // Submit to backend API as well
+                    try {
+                      import('../../services/api').then(({ submitQuizScore }) => {
+                        submitQuizScore(
+                          activeGoalId,
+                          subjectName,
+                          correctCount,
+                          MOCK_QUIZ_QUESTIONS.length,
+                          examTitle,
+                          timeSpent,
+                          questionDetails
+                        ).catch(() => {});
+                      });
+                    } catch(e) {}
+
+                    // Record wrong answers into takeuup_mistakes
+                    try {
+                      const wrongMistakes: any[] = [];
+                      questionDetails.forEach(qd => {
+                        if (qd.userAnswer && !qd.isCorrect) {
+                          wrongMistakes.push({
+                            id: `mst-${Date.now()}-${qd.id}`,
+                            subject: subjectName,
+                            questionText: qd.questionText,
+                            options: qd.options,
+                            userAnswerIndex: qd.userAnswerIndex,
+                            correctAnswerIndex: qd.correctAnswerIndex,
+                            explanation: qd.explanation || 'সঠিক উত্তর যাচাই করুন।',
+                            resolved: false,
+                            dateAdded: new Date().toISOString().split('T')[0]
+                          });
+                        }
+                      });
+                      if (wrongMistakes.length > 0) {
+                        const existingMistakes = JSON.parse(localStorage.getItem('takeuup_mistakes') || '[]');
+                        localStorage.setItem('takeuup_mistakes', JSON.stringify([...wrongMistakes, ...existingMistakes]));
+                        window.dispatchEvent(new CustomEvent('takeuup_mistakes_updated'));
+                      }
+                    } catch(e) {}
+
                     setExamSubmitted(true);
                     setExamStarted(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });

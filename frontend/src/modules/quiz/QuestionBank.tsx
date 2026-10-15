@@ -252,14 +252,16 @@ const MOCK_EXAM_MCQS = [
     question: "‘তাই শিক্ষাক্ষেত্রে তাদের এত মূল্য’ বলতে ‘জীবন ও বৃক্ষ’ প্রবন্ধে কোনটির গুরুত্বকে বোঝানো হয়েছে?",
     marks: 1,
     options: ["মনুষ্যত্বের", "সাহিত্যের", "বিশ্বজিজ্ঞাসার", "চর্মচক্ষুর"],
-    answer: "মনুষ্যত্বের"
+    answer: "মনুষ্যত্বের",
+    explanation: "প্রাবন্ধিক মোতাহের হোসেন চৌধুরী জীবন ও বৃক্ষ প্রবন্ধে মনুষ্যত্ব অর্জনের ওপর গুরুত্বারোপ করেছেন।"
   },
   {
     id: 202,
     question: "সংলাপ ও গল্প বলার ছন্দে রচিত কোনটি?",
     marks: 1,
     options: ["প্রত্যাবর্তনের লজ্জা", "সুচেতনা", "সোনার তরী", "তাহারেই পড়ে মনে"],
-    answer: "তাহারেই পড়ে মনে"
+    answer: "তাহারেই পড়ে মনে",
+    explanation: "সুফিয়া কামালের 'তাহারেই পড়ে মনে' কবিতাটি সংলাপনির্ভর ও নাটকীয় গুণসম্পন্ন।"
   },
   {
     id: 203,
@@ -272,7 +274,8 @@ const MOCK_EXAM_MCQS = [
       "শিক্ষার প্রসারে নিরলসভাবে কাজ করে",
       "নিঃস্বার্থভাবে সাধারণ মানুষের উপকার করে"
     ],
-    answer: "ধর্মের দোহাই দিয়ে সাধারণ মানুষকে শোষণ করে"
+    answer: "ধর্মের দোহাই দিয়ে সাধারণ মানুষকে শোষণ করে",
+    explanation: "মজিদও লালসালু উপন্যাসে ধর্মের অপব্যবহার করে গ্রামীণ সাধারণ মানুষকে শোষণ ও নিয়ন্ত্রণ করত।"
   }
 ];
 
@@ -634,6 +637,33 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
     }
   };
 
+  const handleToggleBookmark = (mcq: any) => {
+    const isBm = !!bookmarkedQuestions[mcq.id];
+    const newStatus = !isBm;
+    setBookmarkedQuestions(prev => ({ ...prev, [mcq.id]: newStatus }));
+    try {
+      const stored = localStorage.getItem('takeuup_bookmarks');
+      let list = stored ? JSON.parse(stored) : [];
+      const bmId = `qbank-${mcq.id}`;
+      if (newStatus) {
+        const newBm = {
+          id: bmId,
+          subject: selectedSubjectObj?.name || 'প্রশ্নব্যাংক',
+          questionText: mcq.question,
+          options: mcq.options,
+          correctAnswerIndex: mcq.options.indexOf(mcq.answer) !== -1 ? mcq.options.indexOf(mcq.answer) : 0,
+          explanation: mcq.explanation || 'সঠিক উত্তর যাচাই করুন।',
+          savedDate: 'আজকে'
+        };
+        list = [newBm, ...list.filter((b: any) => b.id !== bmId)];
+      } else {
+        list = list.filter((b: any) => b.id !== bmId);
+      }
+      localStorage.setItem('takeuup_bookmarks', JSON.stringify(list));
+      window.dispatchEvent(new CustomEvent('takeuup_bookmarks_updated'));
+    } catch(e) {}
+  };
+
   const handleSubmitExamSession = () => {
     if (!selectedExamPaper) return;
     setTestSubmitted(true);
@@ -647,6 +677,86 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
         localStorage.setItem(activeExamKey, JSON.stringify(parsed));
       } catch (e) {}
     }
+
+    try {
+      let correct = 0;
+      const questionDetails = MOCK_EXAM_MCQS.map((m: any) => {
+        const userAns = testAnswers[m.id];
+        const isCorrect = userAns === m.answer;
+        if (isCorrect) correct++;
+        return {
+          id: m.id,
+          questionText: m.question,
+          options: m.options,
+          userAnswer: userAns || null,
+          userAnswerIndex: userAns ? m.options.indexOf(userAns) : -1,
+          correctAnswer: m.answer,
+          correctAnswerIndex: m.options.indexOf(m.answer),
+          isCorrect,
+          explanation: m.explanation || 'সঠিক উত্তর যাচাই করুন।'
+        };
+      });
+
+      const examTitle = selectedExamPaper.title || 'প্রশ্নব্যাংক পরীক্ষা';
+      const subjectName = selectedSubjectObj?.name || 'সাধারণ';
+      const timeSpent = Math.max(1, Math.round(((selectedExamPaper.time.includes('২ ঘণ্টা') ? 9000 : 1800) - examTimeLeft) / 60));
+
+      const newExam = {
+        id: `ex-qb-${Date.now()}`,
+        examTitle: examTitle,
+        subject: subjectName,
+        score: correct,
+        totalQuestions: MOCK_EXAM_MCQS.length,
+        accuracyPercentage: Math.round((correct / MOCK_EXAM_MCQS.length) * 100),
+        timeSpentMinutes: timeSpent,
+        dateCompleted: new Date().toISOString().split('T')[0],
+        details: questionDetails
+      };
+      const prev = JSON.parse(localStorage.getItem('takeuup_exam_history') || '[]');
+      localStorage.setItem('takeuup_exam_history', JSON.stringify([newExam, ...prev]));
+      window.dispatchEvent(new CustomEvent('takeuup_exam_history_updated'));
+
+      // Submit to backend
+      try {
+        import('../../services/api').then(({ submitQuizScore }) => {
+          submitQuizScore(
+            'QuestionBank',
+            subjectName,
+            correct,
+            MOCK_EXAM_MCQS.length,
+            examTitle,
+            timeSpent,
+            questionDetails
+          ).catch(() => {});
+        });
+      } catch(e) {}
+
+      // Record mistakes into takeuup_mistakes
+      try {
+        const wrongMistakes: any[] = [];
+        questionDetails.forEach(qd => {
+          if (qd.userAnswer && !qd.isCorrect) {
+            wrongMistakes.push({
+              id: `mst-qb-${Date.now()}-${qd.id}`,
+              subject: subjectName,
+              questionText: qd.questionText,
+              options: qd.options,
+              userAnswerIndex: qd.userAnswerIndex,
+              correctAnswerIndex: qd.correctAnswerIndex,
+              explanation: qd.explanation || 'সঠিক উত্তর যাচাই করুন।',
+              resolved: false,
+              dateAdded: new Date().toISOString().split('T')[0]
+            });
+          }
+        });
+        if (wrongMistakes.length > 0) {
+          const existingMistakes = JSON.parse(localStorage.getItem('takeuup_mistakes') || '[]');
+          localStorage.setItem('takeuup_mistakes', JSON.stringify([...wrongMistakes, ...existingMistakes]));
+          window.dispatchEvent(new CustomEvent('takeuup_mistakes_updated'));
+        }
+      } catch(e) {}
+    } catch(e) {}
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -1161,7 +1271,13 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
                     </h3>
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 shrink-0">
                       <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px]">{mcq.marks}</span>
-                      <button className="hover:text-amber-500"><Bookmark size={15} /></button>
+                      <button 
+                        onClick={() => handleToggleBookmark(mcq)}
+                        className={`p-1 rounded-lg transition-colors ${bookmarkedQuestions[mcq.id] ? 'text-amber-500' : 'hover:text-amber-500 text-slate-400'}`}
+                        title={bookmarkedQuestions[mcq.id] ? "দাগানো তালিকা থেকে সরান" : "দাগিয়ে রাখুন"}
+                      >
+                        <Bookmark size={15} className={bookmarkedQuestions[mcq.id] ? 'fill-amber-500' : ''} />
+                      </button>
                     </div>
                   </div>
 

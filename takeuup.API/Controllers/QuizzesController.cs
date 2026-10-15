@@ -466,6 +466,9 @@ namespace ECommerce.API.Controllers
                 Subject = dto.Subject,
                 Score = dto.Score,
                 TotalQuestions = dto.TotalQuestions,
+                ExamTitle = string.IsNullOrWhiteSpace(dto.ExamTitle) ? $"{dto.Subject} মডেল টেস্ট" : dto.ExamTitle,
+                TimeSpentMinutes = dto.TimeSpentMinutes ?? 10,
+                DetailsJson = dto.DetailsJson,
                 CompletedAt = DateTimeOffset.UtcNow
             };
 
@@ -499,6 +502,18 @@ namespace ECommerce.API.Controllers
                 .Where(r => r.UserId == UserId.ToString() && r.CompletedAt >= today)
                 .CountAsync();
             return Ok(new { count });
+        }
+
+        // 🔒 Get past quiz results for current user
+        [HttpGet("my-results")]
+        public async Task<IActionResult> GetMyQuizResults()
+        {
+            var results = await _db.UserQuizResults
+                .Where(r => r.UserId == UserId.ToString())
+                .OrderByDescending(r => r.CompletedAt)
+                .Take(50)
+                .ToListAsync();
+            return Ok(results);
         }
 
         // 🔓 Public: Leaderboard
@@ -541,6 +556,9 @@ namespace ECommerce.API.Controllers
         public string Subject { get; set; } = default!;
         public int Score { get; set; }
         public int TotalQuestions { get; set; }
+        public string? ExamTitle { get; set; }
+        public int? TimeSpentMinutes { get; set; }
+        public string? DetailsJson { get; set; }
     }
 
     public class CorrectionRequestDto

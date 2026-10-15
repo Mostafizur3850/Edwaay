@@ -143,9 +143,12 @@ export const Dashboard = ({ isDemoView = false }: { isDemoView?: boolean }) => {
 
     syncProfile();
 
+    const interval = setInterval(syncProfile, 5000);
+
     window.addEventListener('storage', syncProfile);
     window.addEventListener('focus', syncProfile);
     return () => {
+      clearInterval(interval);
       window.removeEventListener('storage', syncProfile);
       window.removeEventListener('focus', syncProfile);
     };

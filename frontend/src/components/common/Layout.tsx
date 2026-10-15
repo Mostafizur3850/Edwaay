@@ -112,8 +112,8 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
   };
 
   const navLinkClass = (path: string) => `relative px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group ${location.pathname === path
-      ? 'bg-teal-100 text-teal-700 dark:bg-teal-400/10 dark:text-teal-400 shadow-sm border border-teal-200 dark:border-teal-800/50'
-      : 'text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-400/5'
+    ? 'text-teal-600 dark:text-teal-400 bg-slate-50 dark:bg-white/5'
+    : 'text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-50 dark:hover:bg-white/5'
     }`;
 
   // Determine Logo Link based on role
@@ -129,8 +129,8 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
   };
 
   const isJobActive = location.pathname.startsWith('/jobs')
-    ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.1)] border border-violet-500/20'
-    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5';
+    ? 'text-teal-600 dark:text-teal-400 bg-slate-50 dark:bg-white/5'
+    : 'text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-50 dark:hover:bg-white/5';
 
   const MEGA_MENU_ITEMS = [
     {
@@ -170,8 +170,8 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
   return (
     <>
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 border-b ${scrolled
-          ? 'bg-white/80 dark:bg-[#030712]/80 backdrop-blur-xl border-slate-200 dark:border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-black/50'
-          : 'bg-white/60 dark:bg-[#030712]/60 backdrop-blur-md border-transparent'
+        ? 'bg-white/80 dark:bg-[#030712]/80 backdrop-blur-xl border-slate-200 dark:border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-black/50'
+        : 'bg-white/60 dark:bg-[#030712]/60 backdrop-blur-md border-transparent'
         }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
@@ -218,7 +218,7 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
 
                     if (isJobs) {
                       return (
-                        <Link key={url} to={url} className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${isJobActive}`}>
+                        <Link key={url} to={url} className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${isJobActive}`}>
                           {title}
                         </Link>
                       );
@@ -233,7 +233,7 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
 
                   {/* Mega Menu Dropdown */}
                   <div className="relative group">
-                    <button className="px-4 py-2 rounded-full text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-400/5 transition-all flex items-center gap-1">
+                    <button className="px-4 py-2 rounded-full text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-50 dark:hover:bg-white/5 transition-all flex items-center gap-1">
                       {t('nav_more')} <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
                     </button>
 
@@ -244,7 +244,7 @@ const Navbar = ({ isAuthenticated, onLogout }: { isAuthenticated: boolean; onLog
                           <Link
                             key={item.name}
                             to={item.path}
-                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group/item"
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group/item"
                           >
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.bg} ${item.color} group-hover/item:scale-110 transition-transform shadow-inner`}>
                               {item.icon}

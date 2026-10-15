@@ -66,14 +66,14 @@ const App = () => {
   }, []);
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-      const user = localStorage.getItem('takeuup_user');
-      if (!user) return false;
-      try {
-        const u = JSON.parse(user);
-        return !!(u && (u.id || u.email || u.name));
-      } catch (e) {
-        return false;
-      }
+    const user = localStorage.getItem('takeuup_user');
+    if (!user) return false;
+    try {
+      const u = JSON.parse(user);
+      return !!(u && (u.id || u.email || u.name));
+    } catch (e) {
+      return false;
+    }
   });
 
   const [maintenanceState, setMaintenanceState] = useState<{ isMaintenanceMode: boolean; maintenanceText: string; imageUrl?: string | null } | null>(null);
@@ -131,25 +131,27 @@ const App = () => {
   const [showGoalModal, setShowGoalModal] = useState<boolean>(false);
 
   useEffect(() => {
-    if (isAuthenticated && currentUser && currentUser.role !== 'admin' && currentUser.role !== 'employer' && currentUser.role !== 'teacher') {
+    if (isAuthenticated && currentUser && currentUser.role !== 'admin' && currentUser.role !== 'employer' && currentUser.role !== 'teacher' && !getIsAdmin()) {
       getCurrentGoal(currentUser.id || currentUser.email).then(res => {
         if (res) {
           if (res.hasSelectedInitialGoal === false) {
-            setShowGoalModal(true);
+            if (!currentUser.hasSelectedInitialGoal && !currentUser.activeGoalName && !currentUser.studentClass) {
+              setShowGoalModal(true);
+            }
           } else if (res.activeGoalName && (res.activeGoalName !== currentUser.activeGoalName || res.activeGoalName !== currentUser.studentClass)) {
-            const updated = { 
-              ...currentUser, 
-              hasSelectedInitialGoal: true, 
-              activeGoalName: res.activeGoalName, 
+            const updated = {
+              ...currentUser,
+              hasSelectedInitialGoal: true,
+              activeGoalName: res.activeGoalName,
               studentClass: res.activeGoalName,
-              activeGoalCategoryId: res.activeGoalCategoryId 
+              activeGoalCategoryId: res.activeGoalCategoryId
             };
             localStorage.setItem('takeuup_user', JSON.stringify(updated));
             setCurrentUser(updated);
           }
         }
       }).catch(() => {
-        if (!currentUser.hasSelectedInitialGoal) {
+        if (!currentUser.hasSelectedInitialGoal && !currentUser.activeGoalName && !currentUser.studentClass) {
           setShowGoalModal(true);
         }
       });
@@ -225,7 +227,7 @@ const App = () => {
       try {
         const u = JSON.parse(local);
         setCurrentUser(u);
-      } catch (e) {}
+      } catch (e) { }
     }
     const targetPath = getTargetDashboardPath();
     if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
@@ -262,16 +264,16 @@ const App = () => {
               </div>
 
               <h1 className="text-4xl font-extrabold text-white tracking-tight">System Under Maintenance</h1>
-              
+
               <p className="text-slate-400 text-base leading-relaxed">
                 {maintenanceState.maintenanceText}
               </p>
 
               {maintenanceState.imageUrl && (
                 <div className="mt-6 flex justify-center">
-                  <img 
-                    src={maintenanceState.imageUrl.startsWith('http') ? maintenanceState.imageUrl : `http://localhost:5141/${maintenanceState.imageUrl}`} 
-                    alt="Maintenance illustration" 
+                  <img
+                    src={maintenanceState.imageUrl.startsWith('http') ? maintenanceState.imageUrl : `http://localhost:5141/${maintenanceState.imageUrl}`}
+                    alt="Maintenance illustration"
                     className="max-h-64 rounded-2xl border border-slate-800 object-cover shadow-2xl"
                   />
                 </div>
@@ -300,11 +302,11 @@ const App = () => {
             onGoalSelected={handleGoalSelected}
           />
           <Layout isAuthenticated={isAuthenticated} onLogout={handleLogout}>
-            
+
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/resources" element={<ResourcesPage />} />
-              
+
               {/* Student Portal Dashboard Routes */}
               <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
               <Route path="/profile" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
@@ -342,36 +344,36 @@ const App = () => {
               <Route path="/admin" element={isAuthenticated && getIsAdmin() ? <AdminPanel onLogout={handleLogout} /> : <Navigate to="/login" replace />} />
               <Route path="/mentor/dashboard" element={isAuthenticated && (getIsMentor() || getIsAdmin()) ? <MentorDashboard onLogout={handleLogout} /> : <Navigate to="/login" replace />} />
               <Route path="/employer-dashboard" element={isAuthenticated && getIsEmployer() ? <EmployerDashboard onLogout={handleLogout} /> : <Navigate to="/login" replace />} />
-              
+
               {/* Teacher & Shared Quiz Routes */}
-              <Route 
-                path="/teacher/workspace" 
-                element={isAuthenticated && (getIsTeacher() || getIsAdmin()) ? <TeacherWorkspace /> : <Navigate to="/login" replace />} 
+              <Route
+                path="/teacher/workspace"
+                element={isAuthenticated && (getIsTeacher() || getIsAdmin()) ? <TeacherWorkspace /> : <Navigate to="/login" replace />}
               />
               <Route path="/quiz/v/:quizData" element={<StudentQuiz />} />
               <Route path="/reading-room/:subjectName" element={isAuthenticated ? <ReadingRoom /> : <Navigate to="/login" replace />} />
-              
+
               {/* Job Portal Routes */}
               <Route path="/jobs" element={<JobPortalHome />} />
               <Route path="/jobs/search" element={<JobSearch />} />
-              
+
               {/* Protected Route: Create Job */}
-              <Route 
-                path="/jobs/create" 
-                element={isAuthenticated ? <JobPost /> : <Navigate to="/login" state={{ returnTo: '/jobs/create' }} replace />} 
+              <Route
+                path="/jobs/create"
+                element={isAuthenticated ? <JobPost /> : <Navigate to="/login" state={{ returnTo: '/jobs/create' }} replace />}
               />
-              
+
               <Route path="/jobs/create-cv" element={<CVBuilder />} />
               <Route path="/jobs/test/:jobId" element={<JobTestInterface />} />
-              
+
               {/* Utility Tools Route */}
               <Route path="/tools/:toolId" element={<ToolsInterface />} />
               <Route path="/all-tools" element={<AllToolsPage />} />
-              
+
               <Route path="/payment/bkash-sandbox" element={<BkashSandbox />} />
               <Route path="/payment/success" element={<PaymentSuccess />} />
               <Route path="/payment/failed" element={<PaymentFailed />} />
-              
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>

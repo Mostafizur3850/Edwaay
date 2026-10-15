@@ -559,7 +559,6 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ user, onUpdateUser
           targetGoalsJson: JSON.stringify(targetGoals),
           unlockedGoalsJson: JSON.stringify(unlockedGoals),
           goalProgressJson: JSON.stringify(goalProgress),
-          routineTasksJson: JSON.stringify(routineTasks),
           mistakesJson: JSON.stringify(mistakes)
         });
       } catch (e) {
@@ -569,7 +568,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ user, onUpdateUser
     
     const timer = setTimeout(syncToBackend, 1500);
     return () => clearTimeout(timer);
-  }, [targetGoals, unlockedGoals, goalProgress, routineTasks, mistakes, user]);
+  }, [targetGoals, unlockedGoals, goalProgress, mistakes, user]);
 
   const handleToggleModule = (courseId: string, moduleId: string) => {
     const updatedCourses = courses.map(c => {

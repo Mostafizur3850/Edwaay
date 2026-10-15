@@ -3,15 +3,25 @@
 export const BASE_URL = 'http://localhost:5141/api';
 
 // Helper to determine if backend is online
-let isBackendOnline = false;
+let isBackendOnline = true;
+let lastStatusCheckTime = 0;
+let isCheckingStatus = false;
 
 // Check backend status
 export function getIsBackendOnline(): boolean { return isBackendOnline; }
 
-export async function checkBackendStatus(): Promise<boolean> {
+export async function checkBackendStatus(force = false): Promise<boolean> {
+    const now = Date.now();
+    if (!force && isBackendOnline && (now - lastStatusCheckTime < 8000)) {
+        return true;
+    }
+    if (isCheckingStatus) {
+        return isBackendOnline;
+    }
+    isCheckingStatus = true;
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500); // 1.5s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
         
         const response = await fetch(`${BASE_URL}/GeneralSetting`, { 
             method: 'GET',
@@ -20,8 +30,12 @@ export async function checkBackendStatus(): Promise<boolean> {
         });
         clearTimeout(timeoutId);
         isBackendOnline = response.ok;
+        lastStatusCheckTime = Date.now();
     } catch (e) {
         isBackendOnline = false;
+        lastStatusCheckTime = Date.now();
+    } finally {
+        isCheckingStatus = false;
     }
     return isBackendOnline;
 }
@@ -44,34 +58,63 @@ export function getHeaders(): HeadersInit {
 
 // Generic API caller with fallback logic
 export async function callApi<T>(path: string, options: RequestInit, fallbackAction?: () => T | Promise<T>): Promise<T> {
-    const online = await checkBackendStatus();
-    if (!online) {
-        if (fallbackAction) return await fallbackAction();
-        return [] as unknown as T;
-    }
     try {
         const headers = { ...getHeaders(), ...options.headers } as any;
         if (options.body instanceof FormData) {
             delete headers['Content-Type'];
         }
+        
+        let signal = options.signal;
+        let timeoutId: any = null;
+        if (!signal) {
+            const controller = new AbortController();
+            timeoutId = setTimeout(() => controller.abort(), 12000);
+            signal = controller.signal;
+        }
+
         const response = await fetch(`${BASE_URL}/${path}`, {
             ...options,
+            signal,
             headers,
-            credentials: 'include'
+            credentials: 'include',
+            cache: 'no-store'
         });
         
+        if (timeoutId) clearTimeout(timeoutId);
+        
         if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            let errorText = `API Error: ${response.status} ${response.statusText}`;
+            try {
+                const text = await response.text();
+                if (text) {
+                    try {
+                        const json = JSON.parse(text);
+                        errorText = json.message || text;
+                    } catch {
+                        errorText = text;
+                    }
+                }
+            } catch (err) {}
+            const httpError = new Error(errorText);
+            (httpError as any).isHttpError = true;
+            (httpError as any).status = response.status;
+            throw httpError;
         }
+
+        isBackendOnline = true;
+        lastStatusCheckTime = Date.now();
         
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
             return await response.json() as T;
         }
         return {} as T;
-    } catch (e) {
-        console.warn(`Backend call to ${path} failed.`, e);
-        if (fallbackAction) return await fallbackAction();
+    } catch (e: any) {
+        if (!e.isHttpError) {
+            isBackendOnline = false;
+            console.warn(`Backend call to ${path} failed (offline/network).`, e);
+            if (fallbackAction) return await fallbackAction();
+        }
         throw e; // Throw error so UI can display proper validation messages
     }
 }
@@ -455,10 +498,19 @@ export async function fetchQuestions(category: string, subject: string, includeA
     });
 }
 
-export async function submitQuizScore(category: string, subject: string, score: number, totalQuestions: number): Promise<any> {
+export async function submitQuizScore(
+    category: string,
+    subject: string,
+    score: number,
+    totalQuestions: number,
+    examTitle?: string,
+    timeSpentMinutes?: number,
+    details?: any
+): Promise<any> {
+    const detailsJson = typeof details === 'string' ? details : (details ? JSON.stringify(details) : undefined);
     return await callApi('Quizzes/submit', {
         method: 'POST',
-        body: JSON.stringify({ category, subject, score, totalQuestions })
+        body: JSON.stringify({ category, subject, score, totalQuestions, examTitle, timeSpentMinutes, detailsJson })
     }, () => {
         // Fallback local update
         const local = localStorage.getItem('takeuup_user');
@@ -1532,8 +1584,8 @@ export async function updateQuizSubject(id: string, subject: any): Promise<any> 
     });
 }
 
-export async function deleteQuizSubject(id: string): Promise<any> {
-    return await callApi(`QuizSettings/subjects/${id}`, {
+export async function deleteQuizSubject(id: string, force: boolean = false): Promise<any> {
+    return await callApi(`QuizSettings/subjects/${id}${force ? '?force=true' : ''}`, {
         method: 'DELETE'
     }, () => {
         const stored = localStorage.getItem('takeuup_quiz_subjects');
@@ -2353,10 +2405,6 @@ export async function fetchGoalCategoryList(): Promise<any[]> {
 }
 
 export async function selectInitialGoal(userId: string, goalCategoryId: string): Promise<any> {
-    const online = await checkBackendStatus();
-    if (!online) {
-        return { success: true, message: "Initial goal selected (Offline)." };
-    }
     const response = await fetch(`${BASE_URL}/StudentGoal/select-initial`, {
         method: 'POST',
         headers: getHeaders(),
@@ -2371,10 +2419,15 @@ export async function selectInitialGoal(userId: string, goalCategoryId: string):
 }
 
 export async function getCurrentGoal(userId: string): Promise<any> {
+    const local = localStorage.getItem('takeuup_user');
+    let localUser: any = null;
+    try { localUser = local ? JSON.parse(local) : null; } catch (e) {}
+    const hasInitialGoal = !!(localUser?.hasSelectedInitialGoal || localUser?.activeGoalName || localUser?.studentClass);
+
     return await callApi(`StudentGoal/current/${encodeURIComponent(userId)}`, { method: 'GET' }, () => ({
-        hasSelectedInitialGoal: false,
-        activeGoalCategoryId: null,
-        activeGoalName: null
+        hasSelectedInitialGoal: hasInitialGoal,
+        activeGoalCategoryId: localUser?.activeGoalCategoryId || null,
+        activeGoalName: localUser?.activeGoalName || localUser?.studentClass || null
     }));
 }
 

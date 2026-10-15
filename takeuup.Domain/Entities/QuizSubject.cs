@@ -10,5 +10,6 @@ namespace ECommerce.Domain.Entities
         public QuizCategory? QuizCategory { get; set; }
         public bool IsActive { get; set; } = true;
         public string? PendingName { get; set; }
+        public string? Group { get; set; }
     }
 }

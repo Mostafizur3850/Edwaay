@@ -54,31 +54,43 @@ public class StudentGoalController : ControllerBase
 
         var fullGoalName = GetFormattedGoalName(category, parentCategory);
 
-        var profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.UserId.ToString() == req.UserId || p.Email == req.UserId);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == req.UserId || u.Email == req.UserId || u.UserName == req.UserId);
+
+        var profile = await _db.userProfiles.FirstOrDefaultAsync(p => 
+            p.UserId.ToString() == req.UserId || 
+            p.Email == req.UserId || 
+            (user != null && p.UserId.ToString() == user.Id) || 
+            (user != null && p.Email == user.Email));
+
         if (profile == null)
         {
-            // If userProfile entity doesn't exist yet, search User by id or email and create profile
-            Guid userGuid;
-            if (Guid.TryParse(req.UserId, out userGuid))
+            Guid userGuid = Guid.Empty;
+            if (user != null && Guid.TryParse(user.Id, out var parsedGuid))
             {
-                var user = await _db.Users.FindAsync(req.UserId);
-                if (user != null)
-                {
-                    profile = new UserProfile
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = userGuid,
-                        Email = user.Email ?? req.UserId,
-                        Name = user.FullName ?? user.UserName ?? "Student",
-                        PhoneNumber = user.PhoneNumber ?? "",
-                        ProfileImageUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(user.FullName ?? "Student")}&background=random",
-                        ActiveGoalCategoryId = category.Id,
-                        ActiveGoalName = fullGoalName,
-                        HasSelectedInitialGoal = true
-                    };
-                    _db.userProfiles.Add(profile);
-                }
+                userGuid = parsedGuid;
             }
+            else if (!Guid.TryParse(req.UserId, out userGuid))
+            {
+                userGuid = Guid.NewGuid();
+            }
+
+            var studentEmail = user?.Email ?? (req.UserId.Contains("@") ? req.UserId : $"{req.UserId}@takeuup.com");
+            var studentName = user?.FullName ?? user?.UserName ?? (studentEmail.Contains("@") ? studentEmail.Split('@')[0] : "Student");
+
+            profile = new UserProfile
+            {
+                Id = Guid.NewGuid(),
+                UserId = userGuid,
+                Email = studentEmail,
+                Name = studentName,
+                PhoneNumber = user?.PhoneNumber ?? "",
+                ProfileImageUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(studentName)}&background=random",
+                ActiveGoalCategoryId = category.Id,
+                ActiveGoalName = fullGoalName,
+                StudentClass = fullGoalName,
+                HasSelectedInitialGoal = true
+            };
+            _db.userProfiles.Add(profile);
         }
         else
         {
@@ -107,10 +119,16 @@ public class StudentGoalController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return BadRequest(new { message = "UserId is required." });
 
-        var profile = await _db.userProfiles.FirstOrDefaultAsync(p => p.UserId.ToString() == userId || p.Email == userId);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId || u.Email == userId || u.UserName == userId);
+
+        var profile = await _db.userProfiles.FirstOrDefaultAsync(p => 
+            p.UserId.ToString() == userId || 
+            p.Email == userId || 
+            (user != null && p.UserId.ToString() == user.Id) || 
+            (user != null && p.Email == user.Email));
         
         var pendingRequest = await _db.GoalChangeRequests
-            .Where(r => (r.UserId.ToString() == userId || r.StudentEmail == userId) && r.Status == "Pending")
+            .Where(r => (r.UserId.ToString() == userId || r.StudentEmail == userId || (user != null && r.StudentEmail == user.Email)) && r.Status == "Pending")
             .OrderByDescending(r => r.CreatedAt)
             .FirstOrDefaultAsync();
 
@@ -133,8 +151,8 @@ public class StudentGoalController : ControllerBase
 
         return Ok(new
         {
-            profile.HasSelectedInitialGoal,
-            profile.ActiveGoalCategoryId,
+            hasSelectedInitialGoal = profile.HasSelectedInitialGoal,
+            activeGoalCategoryId = profile.ActiveGoalCategoryId,
             activeGoalName = profile.ActiveGoalName ?? profile.StudentClass,
             pendingChangeRequest = pendingRequest != null ? new
             {

@@ -103,6 +103,7 @@ namespace ECommerce.API.Controllers
             subject.Slug = subject.Name.ToLower().Replace(" ", "-");
             subject.CreatedAt = DateTimeOffset.UtcNow;
             subject.UpdatedAt = DateTimeOffset.UtcNow;
+            // Note: subject.Group is automatically bound from FromBody if present
 
             await _db.QuizSubjects.AddAsync(subject);
             await _db.CommitAsync();
@@ -126,6 +127,7 @@ namespace ECommerce.API.Controllers
                     subject.PendingName = updated.Name;
                     subject.IsActive = updated.IsActive;
                     subject.QuizCategoryId = updated.QuizCategoryId;
+                    subject.Group = updated.Group;
                     subject.UpdatedAt = DateTimeOffset.UtcNow;
 
                     await _db.CommitAsync();
@@ -138,6 +140,7 @@ namespace ECommerce.API.Controllers
             subject.Slug = updated.Name.ToLower().Replace(" ", "-");
             subject.IsActive = updated.IsActive;
             subject.QuizCategoryId = updated.QuizCategoryId;
+            subject.Group = updated.Group;
             subject.PendingName = null; // Clear if it was set
             subject.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -147,13 +150,13 @@ namespace ECommerce.API.Controllers
 
         [HttpDelete("subjects/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteSubject(Guid id)
+        public async Task<IActionResult> DeleteSubject(Guid id, [FromQuery] bool force = false)
         {
             var subject = await _db.QuizSubjects.FindAsync(id);
             if (subject == null) return NotFound("Subject not found.");
 
             var hasQuestions = await _db.Questions.AnyAsync(q => q.Subject == subject.Name);
-            if (hasQuestions)
+            if (hasQuestions && !force)
             {
                 return BadRequest("Cannot delete subject because questions are already added to it.");
             }

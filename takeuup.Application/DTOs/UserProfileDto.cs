@@ -18,6 +18,8 @@ namespace ECommerce.Application.DTOs
         public int Streak { get; set; }
         public int Points { get; set; }
         public string? StudentClass { get; set; }
+        public string? ActiveGoalName { get; set; }
+        public Guid? ActiveGoalCategoryId { get; set; }
         public string? SelectedSubjectsJson { get; set; }
         public bool IsTeacherApproved { get; set; }
         public bool IsProfileCompleted { get; set; }

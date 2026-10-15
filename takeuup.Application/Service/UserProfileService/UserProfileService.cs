@@ -53,6 +53,8 @@ namespace ECommerce.Application.Service
                 Streak = profile.Streak,
                 Points = profile.Points,
                 StudentClass = profile.StudentClass,
+                ActiveGoalName = profile.ActiveGoalName,
+                ActiveGoalCategoryId = profile.ActiveGoalCategoryId,
                 SelectedSubjectsJson = profile.SelectedSubjectsJson,
                 TargetGoalsJson = profile.TargetGoalsJson,
                 UnlockedGoalsJson = profile.UnlockedGoalsJson,

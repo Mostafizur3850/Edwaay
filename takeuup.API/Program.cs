@@ -461,6 +461,9 @@ app.Lifetime.ApplicationStarted.Register(async () =>
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('QuizSubjects') AND name = 'PendingName')
     ALTER TABLE QuizSubjects ADD PendingName NVARCHAR(100) NULL;
 
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('QuizSubjects') AND name = 'Group')
+    ALTER TABLE QuizSubjects ADD [Group] NVARCHAR(100) NULL;
+
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('userProfiles') AND name = 'Streak')
     ALTER TABLE userProfiles ADD Streak INT NOT NULL DEFAULT 0;
 

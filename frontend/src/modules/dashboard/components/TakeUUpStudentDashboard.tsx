@@ -133,36 +133,61 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
   const [liveStats, setLiveStats] = useState({ streak: user?.streak || 0, points: user?.points || 0, rank: user?.rank || '-' });
 
   React.useEffect(() => {
-    if (user) {
-      // Fetch latest user profile to get up-to-date points and streak
-      fetch(`${BASE_URL}/UserProfile`, { credentials: 'include', headers: getHeaders() })
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.points !== undefined) {
-             setLiveStats(prev => ({ ...prev, streak: data.streak, points: data.points }));
-          }
-        })
-        .catch(err => console.error("Failed to fetch user profile", err));
-        
-      // Fetch leaderboard to get rank
-      fetch(`${BASE_URL}/UserProfile/leaderboard`, { credentials: 'include', headers: getHeaders() })
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            const myRankEntry = data.find((x: any) => x.name === user.name || x.id === user.id);
-            if (myRankEntry) {
-              setLiveStats(prev => ({ ...prev, rank: myRankEntry.rank }));
+    const fetchStats = () => {
+      if (user) {
+        // Fetch latest user profile to get up-to-date points and streak
+        fetch(`${BASE_URL}/UserProfile`, { credentials: 'include', headers: getHeaders(), cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.points !== undefined) {
+               setLiveStats(prev => ({ ...prev, streak: data.streak, points: data.points }));
+               // If active goal changed on backend, update local storage and state
+               if (data.activeGoalName && user.activeGoalName !== data.activeGoalName) {
+                 const updatedUser = { ...user, activeGoalName: data.activeGoalName, studentClass: data.activeGoalName };
+                 localStorage.setItem('takeuup_user', JSON.stringify(updatedUser));
+                 if (onUpdateUser) onUpdateUser(updatedUser);
+               }
             }
-          }
-        })
-        .catch(err => console.error("Failed to fetch leaderboard", err));
-    }
+          })
+          .catch(err => console.error("Failed to fetch user profile", err));
+          
+        // Fetch leaderboard to get rank
+        fetch(`${BASE_URL}/UserProfile/leaderboard`, { credentials: 'include', headers: getHeaders(), cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data)) {
+              const myRankEntry = data.find((x: any) => x.name === user.name || x.id === user.id);
+              if (myRankEntry) {
+                setLiveStats(prev => ({ ...prev, rank: myRankEntry.rank }));
+              }
+            }
+          })
+          .catch(err => console.error("Failed to fetch leaderboard", err));
+      }
+    };
+    
+    fetchStats();
+    
+    const handleStatsUpdated = (e: any) => {
+      if (e.detail) {
+        setLiveStats(prev => ({
+          ...prev,
+          points: prev.points + (e.detail.addedPoints || 0),
+          streak: prev.streak + (e.detail.streakIncrement || 0)
+        }));
+      } else {
+        fetchStats();
+      }
+    };
+
+    window.addEventListener('takeuup_stats_updated', handleStatsUpdated);
+    return () => window.removeEventListener('takeuup_stats_updated', handleStatsUpdated);
   }, [user]);
 
   React.useEffect(() => {
     if (user) {
       setLoadingSubjects(true);
-      fetch(`${BASE_URL}/Dashboard/student-tracker?goal=${encodeURIComponent(activeGoalId)}`, { credentials: 'include', headers: getHeaders() })
+      fetch(`${BASE_URL}/Dashboard/student-tracker?goal=${encodeURIComponent(activeGoalId)}`, { credentials: 'include', headers: getHeaders(), cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           if (data && data.subjects) {
@@ -173,14 +198,14 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
         .catch(err => console.error("Failed to fetch tracker data", err))
         .finally(() => setLoadingSubjects(false));
     }
-  }, [user, activeGoalId]);
+  }, [user?.id, activeGoalId]);
 
   const activeGoalProgress = dynamicSubjects;
   const unresolvedMistakesCount = (mistakes || []).filter(m => !m.resolved).length;
   const [localRoutineTasks, setLocalRoutineTasks] = useState<any[]>(routineTasks);
 
   React.useEffect(() => {
-    fetch(`${BASE_URL}/Dashboard/get-routine`, { credentials: 'include', headers: getHeaders() })
+    fetch(`${BASE_URL}/Dashboard/get-routine?t=${Date.now()}`, { credentials: 'include', headers: getHeaders(), cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.routineTasks) {
@@ -618,7 +643,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
               <div
                 onClick={() => handleTabClick('quizzes')}
-                className="bg-white hover:bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
+                className="bg-white hover:bg-slate-50 border border-slate-100 p-5 min-h-[120px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
               >
                 <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-1">
                   <Zap size={20} className="fill-current" />
@@ -631,7 +656,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
               <div
                 onClick={() => handleTabClick('mistakes')}
-                className="bg-white hover:bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group relative"
+                className="bg-white hover:bg-slate-50 border border-slate-100 p-5 min-h-[120px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group relative"
               >
                 <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mb-1">
                   <X size={20} strokeWidth={3} />
@@ -644,7 +669,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
               <div
                 onClick={() => handleTabClick('courses')}
-                className="bg-white hover:bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
+                className="bg-white hover:bg-slate-50 border border-slate-100 p-5 min-h-[120px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
               >
                 <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-1">
                   <BookOpen size={20} className="fill-blue-500/20" />
@@ -657,7 +682,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
               <div
                 onClick={() => handleTabClick('qbank')}
-                className="bg-white hover:bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
+                className="bg-white hover:bg-slate-50 border border-slate-100 p-5 min-h-[120px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-1">
                   <FileText size={20} className="fill-emerald-500/20" />
@@ -670,7 +695,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
               <div
                 onClick={() => handleTabClick('mega-quiz')}
-                className="bg-white hover:bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
+                className="bg-white hover:bg-slate-50 border border-slate-100 p-5 min-h-[120px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
               >
                 <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center mb-1">
                   <Trophy size={20} className="fill-purple-500/20" />
@@ -683,7 +708,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
 
               <div
                 onClick={() => handleTabClick('leaderboard')}
-                className="bg-white hover:bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
+                className="bg-white hover:bg-slate-50 border border-slate-100 p-5 min-h-[120px] rounded-2xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all shadow-sm group"
               >
                 <div className="w-10 h-10 rounded-full bg-cyan-50 text-cyan-500 flex items-center justify-center mb-1">
                   <BarChart3 size={20} className="fill-cyan-500/20" />
@@ -719,7 +744,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
                   </div>
 
                   <div className="space-y-4">
-                    {loadingSubjects ? (
+                    {loadingSubjects && activeGoalProgress.length === 0 ? (
                       <div className={`p-8 text-center rounded-2xl border ${theme === 'dark' ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-50 border-slate-200'} animate-pulse`}>
                         <p className={`text-sm font-bold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>বিষয় লোড হচ্ছে...</p>
                       </div>
@@ -924,14 +949,20 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
         {/* TAB 4: MOCK EXAMS / QUIZZES */}
         {(currentTab === 'quizzes' || currentTab === 'quiz') && (
           <div className="animate-in fade-in duration-300">
-            <QuizInterface isEmbedded={true} />
+            <QuizInterface isEmbedded={true} user={user} />
           </div>
         )}
 
         {/* TAB 5: MISTAKE BANK */}
         {currentTab === 'mistakes' && (
           <div className="animate-in fade-in duration-300">
-            <MistakeBank mistakes={mistakes} onResolveMistake={onResolveMistake || (() => { })} />
+            <MistakeBank 
+              mistakes={mistakes} 
+              onResolveMistake={onResolveMistake || (() => { })}
+              user={user}
+              subjects={dynamicSubjects?.map((s: any) => s.name)}
+              goal={trackerGoalName || activeGoalId}
+            />
           </div>
         )}
 
