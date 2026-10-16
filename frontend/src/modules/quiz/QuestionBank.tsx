@@ -6,7 +6,7 @@ import {
   ArrowRight, Landmark, Layers, Zap, Heart, Bookmark, Upload, User, Trophy, ShieldCheck
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchQuestions } from '../../services/api';
+import { fetchQuestions, fetchQuizCategories, fetchQuizSubjects } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
 
 // --- INSTITUTION DATA LIST ---
@@ -91,16 +91,16 @@ const INSTITUTION_CARDS = [
   }
 ];
 
-// --- SUBJECT DATA LIST ---
-const SUBJECT_CARDS = [
+// --- BCS PRESET SUBJECTS LIST ---
+export const BCS_SUBJECT_CARDS = [
   {
-    id: 'Bangla-1',
-    name: 'HSC Bangla 1st Test Paper',
-    engName: 'Bangla 1st Paper',
-    category: 'Humanities & Gen',
-    paper: '১ম পত্র',
-    letter: 'অ',
-    questionsCount: 1200,
+    id: 'bcs-bangla-lit',
+    name: 'বাংলা সাহিত্য',
+    engName: 'Bangla Literature',
+    category: 'BCS',
+    paper: '২০ নম্বর',
+    letter: 'সা',
+    questionsCount: 2200,
     type: 'bangla',
     gradient: 'from-amber-600/20 to-yellow-600/20',
     borderColor: 'border-amber-500/40 dark:border-amber-500/40',
@@ -108,13 +108,13 @@ const SUBJECT_CARDS = [
     icon: BookOpen
   },
   {
-    id: 'Bangla-2',
-    name: 'HSC Bangla 2nd Test Paper',
-    engName: 'Bangla 2nd Paper',
-    category: 'Humanities & Gen',
-    paper: '২য় পত্র',
-    letter: 'আ',
-    questionsCount: 1450,
+    id: 'bcs-bangla-lang',
+    name: 'বাংলা ভাষা ও ব্যাকরণ',
+    engName: 'Bangla Language & Grammar',
+    category: 'BCS',
+    paper: '১৫ নম্বর',
+    letter: 'বা',
+    questionsCount: 1850,
     type: 'bangla',
     gradient: 'from-orange-600/20 to-amber-600/20',
     borderColor: 'border-orange-500/40 dark:border-orange-500/40',
@@ -122,13 +122,13 @@ const SUBJECT_CARDS = [
     icon: BookOpen
   },
   {
-    id: 'English-1',
-    name: 'HSC English 1st Test Paper',
-    engName: 'English 1st Paper',
-    category: 'Language',
-    paper: '১ম পত্র',
-    letter: 'A',
-    questionsCount: 1600,
+    id: 'bcs-english-lang',
+    name: 'English Language',
+    engName: 'Grammar & Usage',
+    category: 'BCS',
+    paper: '২০ নম্বর',
+    letter: 'En',
+    questionsCount: 2400,
     type: 'english',
     gradient: 'from-rose-600/20 to-pink-600/20',
     borderColor: 'border-rose-500/40 dark:border-rose-500/40',
@@ -136,48 +136,193 @@ const SUBJECT_CARDS = [
     icon: Globe
   },
   {
-    id: 'English-2',
-    name: 'HSC English 2nd Test Paper',
-    engName: 'English 2nd Paper',
-    category: 'Language',
-    paper: '২য় পত্র',
-    letter: 'a',
-    questionsCount: 1850,
+    id: 'bcs-english-lit',
+    name: 'English Literature',
+    engName: 'Periods, Authors & Quotes',
+    category: 'BCS',
+    paper: '১৫ নম্বর',
+    letter: 'Lit',
+    questionsCount: 1650,
     type: 'english',
-    gradient: 'from-red-600/20 to-rose-600/20',
-    borderColor: 'border-red-500/40 dark:border-red-500/40',
-    textColor: 'text-red-600 dark:text-red-400',
-    icon: Globe
+    gradient: 'from-pink-600/20 to-purple-600/20',
+    borderColor: 'border-pink-500/40 dark:border-pink-500/40',
+    textColor: 'text-pink-600 dark:text-pink-400',
+    icon: BookOpen
   },
   {
-    id: 'ICT',
-    name: 'HSC ICT Test Paper',
-    engName: 'Information & Comm Tech (ICT)',
-    category: 'Science',
-    paper: 'আবশ্যিক',
-    letter: '💻',
-    questionsCount: 1100,
+    id: 'bcs-bangladesh-affairs',
+    name: 'বাংলাদেশ বিষয়াবলি',
+    engName: 'Bangladesh Affairs',
+    category: 'BCS',
+    paper: '৩০ নম্বর',
+    letter: '🇧🇩',
+    questionsCount: 3200,
     type: 'default',
-    gradient: 'from-indigo-600/20 to-cyan-600/20',
-    borderColor: 'border-indigo-500/40 dark:border-indigo-500/40',
-    textColor: 'text-indigo-600 dark:text-indigo-400',
-    icon: Globe
+    gradient: 'from-emerald-600/20 to-teal-600/20',
+    borderColor: 'border-emerald-500/40 dark:border-emerald-500/40',
+    textColor: 'text-emerald-600 dark:text-emerald-400',
+    icon: Award
   },
   {
-    id: 'Physics-1',
-    name: 'HSC Physics 1st Test Paper',
-    engName: 'Physics 1st Paper',
-    category: 'Science',
-    paper: '১ম পত্র',
-    letter: '⚛️',
-    questionsCount: 2150,
+    id: 'bcs-international-affairs',
+    name: 'আন্তর্জাতিক বিষয়াবলি',
+    engName: 'International Affairs',
+    category: 'BCS',
+    paper: '২০ নম্বর',
+    letter: '🌍',
+    questionsCount: 2100,
     type: 'default',
     gradient: 'from-blue-600/20 to-cyan-600/20',
     borderColor: 'border-blue-500/40 dark:border-blue-500/40',
     textColor: 'text-cyan-600 dark:text-cyan-400',
+    icon: Globe
+  },
+  {
+    id: 'bcs-general-science',
+    name: 'সাধারণ বিজ্ঞান',
+    engName: 'General Science',
+    category: 'BCS',
+    paper: '১৫ নম্বর',
+    letter: '🔬',
+    questionsCount: 1950,
+    type: 'default',
+    gradient: 'from-indigo-600/20 to-blue-600/20',
+    borderColor: 'border-indigo-500/40 dark:border-indigo-500/40',
+    textColor: 'text-indigo-600 dark:text-indigo-400',
     icon: Atom
+  },
+  {
+    id: 'bcs-computer-ict',
+    name: 'কম্পিউটার ও তথ্যপ্রযুক্তি',
+    engName: 'Computer & Information Tech',
+    category: 'BCS',
+    paper: '১৫ নম্বর',
+    letter: '💻',
+    questionsCount: 1750,
+    type: 'default',
+    gradient: 'from-cyan-600/20 to-teal-600/20',
+    borderColor: 'border-cyan-500/40 dark:border-cyan-500/40',
+    textColor: 'text-cyan-600 dark:text-cyan-400',
+    icon: Globe
+  },
+  {
+    id: 'bcs-math-reasoning',
+    name: 'গাণিতিক যুক্তি',
+    engName: 'Mathematical Reasoning',
+    category: 'BCS',
+    paper: '১৫ নম্বর',
+    letter: '📐',
+    questionsCount: 1800,
+    type: 'default',
+    gradient: 'from-violet-600/20 to-purple-600/20',
+    borderColor: 'border-violet-500/40 dark:border-violet-500/40',
+    textColor: 'text-violet-600 dark:text-violet-400',
+    icon: Calculator
+  },
+  {
+    id: 'bcs-mental-ability',
+    name: 'মানসিক দক্ষতা',
+    engName: 'Mental Ability',
+    category: 'BCS',
+    paper: '১৫ নম্বর',
+    letter: '🧠',
+    questionsCount: 1600,
+    type: 'default',
+    gradient: 'from-fuchsia-600/20 to-pink-600/20',
+    borderColor: 'border-fuchsia-500/40 dark:border-fuchsia-500/40',
+    textColor: 'text-fuchsia-600 dark:text-fuchsia-400',
+    icon: Sparkles
+  },
+  {
+    id: 'bcs-geography',
+    name: 'ভূগোল, পরিবেশ ও দুর্যোগ ব্যবস্থাপনা',
+    engName: 'Geography, Env & Disaster Mgmt',
+    category: 'BCS',
+    paper: '১০ নম্বর',
+    letter: '🧭',
+    questionsCount: 1200,
+    type: 'default',
+    gradient: 'from-teal-600/20 to-emerald-600/20',
+    borderColor: 'border-teal-500/40 dark:border-teal-500/40',
+    textColor: 'text-teal-600 dark:text-teal-400',
+    icon: Globe
+  },
+  {
+    id: 'bcs-ethics-governance',
+    name: 'নৈতিকতা, মূল্যবোধ ও সুশাসন',
+    engName: 'Ethics, Values & Good Governance',
+    category: 'BCS',
+    paper: '১০ নম্বর',
+    letter: '⚖️',
+    questionsCount: 1100,
+    type: 'default',
+    gradient: 'from-amber-600/20 to-orange-600/20',
+    borderColor: 'border-amber-500/40 dark:border-amber-500/40',
+    textColor: 'text-amber-600 dark:text-amber-400',
+    icon: ShieldCheck
+  },
+  {
+    id: 'bcs-current-affairs',
+    name: 'কারেন্ট অ্যাফেয়ার্স ও সাধারণ জ্ঞান',
+    engName: 'Current Affairs & GK',
+    category: 'BCS',
+    paper: 'আবশ্যিক',
+    letter: '📰',
+    questionsCount: 2500,
+    type: 'default',
+    gradient: 'from-sky-600/20 to-blue-600/20',
+    borderColor: 'border-sky-500/40 dark:border-sky-500/40',
+    textColor: 'text-sky-600 dark:text-sky-400',
+    icon: Landmark
   }
 ];
+
+// --- HSC PRESET SUBJECTS LIST ---
+export const HSC_SUBJECT_CARDS = [
+  { id: 'Bangla-1', name: 'HSC Bangla 1st Test Paper', engName: 'Bangla 1st Paper', category: 'HSC', paper: '১ম পত্র', letter: 'অ', questionsCount: 1200, type: 'bangla', gradient: 'from-amber-600/20 to-yellow-600/20', borderColor: 'border-amber-500/40 dark:border-amber-500/40', textColor: 'text-amber-600 dark:text-amber-400', icon: BookOpen },
+  { id: 'Bangla-2', name: 'HSC Bangla 2nd Test Paper', engName: 'Bangla 2nd Paper', category: 'HSC', paper: '২য় পত্র', letter: 'আ', questionsCount: 1450, type: 'bangla', gradient: 'from-orange-600/20 to-amber-600/20', borderColor: 'border-orange-500/40 dark:border-orange-500/40', textColor: 'text-orange-600 dark:text-orange-400', icon: BookOpen },
+  { id: 'English-1', name: 'HSC English 1st Test Paper', engName: 'English 1st Paper', category: 'HSC', paper: '১ম পত্র', letter: 'A', questionsCount: 1600, type: 'english', gradient: 'from-rose-600/20 to-pink-600/20', borderColor: 'border-rose-500/40 dark:border-rose-500/40', textColor: 'text-rose-600 dark:text-rose-400', icon: Globe },
+  { id: 'English-2', name: 'HSC English 2nd Test Paper', engName: 'English 2nd Paper', category: 'HSC', paper: '২য় পত্র', letter: 'a', questionsCount: 1850, type: 'english', gradient: 'from-red-600/20 to-rose-600/20', borderColor: 'border-red-500/40 dark:border-red-500/40', textColor: 'text-red-600 dark:text-red-400', icon: Globe },
+  { id: 'ICT', name: 'HSC ICT Test Paper', engName: 'Information & Comm Tech (ICT)', category: 'HSC', paper: 'আবশ্যিক', letter: '💻', questionsCount: 1100, type: 'default', gradient: 'from-indigo-600/20 to-cyan-600/20', borderColor: 'border-indigo-500/40 dark:border-indigo-500/40', textColor: 'text-indigo-600 dark:text-indigo-400', icon: Globe },
+  { id: 'Physics-1', name: 'HSC Physics 1st Test Paper', engName: 'Physics 1st Paper', category: 'HSC', paper: '১ম পত্র', letter: '⚛️', questionsCount: 2150, type: 'default', gradient: 'from-blue-600/20 to-cyan-600/20', borderColor: 'border-blue-500/40 dark:border-blue-500/40', textColor: 'text-cyan-600 dark:text-cyan-400', icon: Atom },
+  { id: 'Physics-2', name: 'HSC Physics 2nd Test Paper', engName: 'Physics 2nd Paper', category: 'HSC', paper: '২য় পত্র', letter: '⚡', questionsCount: 1980, type: 'default', gradient: 'from-sky-600/20 to-blue-600/20', borderColor: 'border-sky-500/40 dark:border-sky-500/40', textColor: 'text-sky-600 dark:text-sky-400', icon: Atom },
+  { id: 'Chemistry-1', name: 'HSC Chemistry 1st Test Paper', engName: 'Chemistry 1st Paper', category: 'HSC', paper: '১ম পত্র', letter: '⚗️', questionsCount: 1850, type: 'default', gradient: 'from-teal-600/20 to-emerald-600/20', borderColor: 'border-teal-500/40 dark:border-teal-500/40', textColor: 'text-teal-600 dark:text-teal-400', icon: FlaskConical },
+  { id: 'Chemistry-2', name: 'HSC Chemistry 2nd Test Paper', engName: 'Chemistry 2nd Paper', category: 'HSC', paper: '২য় পত্র', letter: '🧪', questionsCount: 1920, type: 'default', gradient: 'from-emerald-600/20 to-green-600/20', borderColor: 'border-emerald-500/40 dark:border-emerald-500/40', textColor: 'text-emerald-600 dark:text-emerald-400', icon: FlaskConical },
+  { id: 'Math-1', name: 'HSC Higher Math 1st Paper', engName: 'Higher Math 1st Paper', category: 'HSC', paper: '১ম পত্র', letter: '📐', questionsCount: 2200, type: 'default', gradient: 'from-purple-600/20 to-violet-600/20', borderColor: 'border-purple-500/40 dark:border-purple-500/40', textColor: 'text-purple-600 dark:text-purple-400', icon: Calculator },
+  { id: 'Biology-1', name: 'HSC Biology 1st Test Paper', engName: 'Botany 1st Paper', category: 'HSC', paper: '১ম পত্র', letter: '🧬', questionsCount: 1750, type: 'default', gradient: 'from-green-600/20 to-emerald-600/20', borderColor: 'border-green-500/40 dark:border-green-500/40', textColor: 'text-green-600 dark:text-green-400', icon: Dna }
+];
+
+// --- ADMISSION PRESET SUBJECTS LIST ---
+export const ADMISSION_SUBJECT_CARDS = [
+  { id: 'adm-physics', name: 'পদার্থবিজ্ঞান (ভর্তি পরীক্ষা)', engName: 'Physics for Admission', category: 'Admission', paper: 'ভার্সিটি ও ইঞ্জিঃ', letter: '⚛️', questionsCount: 3500, type: 'default', gradient: 'from-blue-600/20 to-cyan-600/20', borderColor: 'border-blue-500/40 dark:border-blue-500/40', textColor: 'text-cyan-600 dark:text-cyan-400', icon: Atom },
+  { id: 'adm-chemistry', name: 'রসায়ন (ভর্তি পরীক্ষা)', engName: 'Chemistry for Admission', category: 'Admission', paper: 'মেডিকেল ও ভার্সিটি', letter: '🧪', questionsCount: 3100, type: 'default', gradient: 'from-emerald-600/20 to-teal-600/20', borderColor: 'border-emerald-500/40 dark:border-emerald-500/40', textColor: 'text-emerald-600 dark:text-emerald-400', icon: FlaskConical },
+  { id: 'adm-math', name: 'উচ্চতর গণিত (ভর্তি পরীক্ষা)', engName: 'Mathematics for Admission', category: 'Admission', paper: 'ইঞ্জিঃ ও ঢাবি ক', letter: '📐', questionsCount: 2900, type: 'default', gradient: 'from-purple-600/20 to-violet-600/20', borderColor: 'border-purple-500/40 dark:border-purple-500/40', textColor: 'text-purple-600 dark:text-purple-400', icon: Calculator },
+  { id: 'adm-biology', name: 'জীববিজ্ঞান (মেডিকেল ও ঢাবি)', engName: 'Biology for Medical & DU', category: 'Admission', paper: 'মেডিকেল স্পেশাল', letter: '🧬', questionsCount: 3400, type: 'default', gradient: 'from-teal-600/20 to-emerald-600/20', borderColor: 'border-teal-500/40 dark:border-teal-500/40', textColor: 'text-teal-600 dark:text-teal-400', icon: Dna },
+  { id: 'adm-english', name: 'English (Admission Care)', engName: 'Grammar, Vocab & Comprehension', category: 'Admission', paper: 'সকল ইউনিট', letter: 'En', questionsCount: 2600, type: 'english', gradient: 'from-rose-600/20 to-pink-600/20', borderColor: 'border-rose-500/40 dark:border-rose-500/40', textColor: 'text-rose-600 dark:text-rose-400', icon: Globe },
+  { id: 'adm-gk', name: 'সাধারণ জ্ঞান (বাংলাদেশ ও আন্তর্জাতিক)', engName: 'General Knowledge', category: 'Admission', paper: 'ঢাবি খ/ঘ ও মেডিকেল', letter: '🧠', questionsCount: 2800, type: 'default', gradient: 'from-amber-600/20 to-yellow-600/20', borderColor: 'border-amber-500/40 dark:border-amber-500/40', textColor: 'text-amber-600 dark:text-amber-400', icon: Globe }
+];
+
+// --- SSC PRESET SUBJECTS LIST ---
+export const SSC_SUBJECT_CARDS = [
+  { id: 'ssc-bangla', name: 'এসএসসি বাংলা ১ম ও ২য় পত্র', engName: 'SSC Bangla 1st & 2nd', category: 'SSC', paper: 'আবশ্যিক', letter: 'বা', questionsCount: 1500, type: 'bangla', gradient: 'from-amber-600/20 to-orange-600/20', borderColor: 'border-amber-500/40', textColor: 'text-amber-600', icon: BookOpen },
+  { id: 'ssc-english', name: 'SSC English 1st & 2nd Paper', engName: 'SSC English Grammar & Comp', category: 'SSC', paper: 'আবশ্যিক', letter: 'En', questionsCount: 1600, type: 'english', gradient: 'from-rose-600/20 to-pink-600/20', borderColor: 'border-rose-500/40', textColor: 'text-rose-600', icon: Globe },
+  { id: 'ssc-math', name: 'এসএসসি সাধারণ গণিত', engName: 'SSC General Mathematics', category: 'SSC', paper: 'আবশ্যিক', letter: '📐', questionsCount: 2100, type: 'default', gradient: 'from-violet-600/20 to-purple-600/20', borderColor: 'border-violet-500/40', textColor: 'text-violet-600', icon: Calculator },
+  { id: 'ssc-higher-math', name: 'উচ্চতর গণিত (বিজ্ঞান)', engName: 'SSC Higher Mathematics', category: 'SSC', paper: 'বিজ্ঞান বিভাগ', letter: 'π', questionsCount: 1800, type: 'default', gradient: 'from-purple-600/20 to-indigo-600/20', borderColor: 'border-purple-500/40', textColor: 'text-purple-600', icon: Calculator },
+  { id: 'ssc-physics', name: 'পদার্থবিজ্ঞান', engName: 'SSC Physics', category: 'SSC', paper: 'বিজ্ঞান বিভাগ', letter: '⚛️', questionsCount: 1650, type: 'default', gradient: 'from-blue-600/20 to-cyan-600/20', borderColor: 'border-blue-500/40', textColor: 'text-cyan-600', icon: Atom },
+  { id: 'ssc-chemistry', name: 'রসায়ন', engName: 'SSC Chemistry', category: 'SSC', paper: 'বিজ্ঞান বিভাগ', letter: '🧪', questionsCount: 1550, type: 'default', gradient: 'from-emerald-600/20 to-teal-600/20', borderColor: 'border-emerald-500/40', textColor: 'text-emerald-600', icon: FlaskConical },
+  { id: 'ssc-biology', name: 'জীববিজ্ঞান', engName: 'SSC Biology', category: 'SSC', paper: 'বিজ্ঞান বিভাগ', letter: '🧬', questionsCount: 1400, type: 'default', gradient: 'from-teal-600/20 to-green-600/20', borderColor: 'border-teal-500/40', textColor: 'text-teal-600', icon: Dna },
+  { id: 'ssc-ict', name: 'তথ্য ও যোগাযোগ প্রযুক্তি (ICT)', engName: 'SSC ICT', category: 'SSC', paper: 'আবশ্যিক', letter: '💻', questionsCount: 1100, type: 'default', gradient: 'from-cyan-600/20 to-blue-600/20', borderColor: 'border-cyan-500/40', textColor: 'text-cyan-600', icon: Globe }
+];
+
+export const PRESET_SUBJECTS_BY_CAT: Record<string, any[]> = {
+  BCS: BCS_SUBJECT_CARDS,
+  HSC: HSC_SUBJECT_CARDS,
+  Admission: ADMISSION_SUBJECT_CARDS,
+  SSC: SSC_SUBJECT_CARDS
+};
+
+// Default SUBJECT_CARDS for compatibility
+const SUBJECT_CARDS = BCS_SUBJECT_CARDS;
 
 // --- SUB CATEGORIES FOR DRILL-DOWN ---
 const SUB_CATEGORIES_BY_SUBJECT: Record<string, Array<{ id: string; name: string; tag: string; bg: string; iconType: string; description: string }>> = {
@@ -200,15 +345,41 @@ const SUB_CATEGORIES_BY_SUBJECT: Record<string, Array<{ id: string; name: string
   ]
 };
 
-// --- DUMMY BOARD EXAMS LIST ---
-const DUMMY_BOARD_EXAMS = [
-  { id: 'all-2026', title: 'সকল বোর্ড ২০২৬', time: '৩০ মিনিট', questionsCount: 30, category: 'board', attempts: [{ name: 'প্রচেষ্টা ১', time: '5:30 PM 20 August 2026', score: 10 }] },
-  { id: 'all-2026-cq', title: 'সকল বোর্ড ২০২৬ (সৃজনশীল)', time: '২ ঘণ্টা ৩০ মিনিট', questionsCount: 11, category: 'board', attempts: [] },
-  { id: 'ctg-mad-2026', title: 'মাদ্রাসা বোর্ড ২০২৬ (চট্টগ্রাম)', time: '৩০ মিনিট', questionsCount: 25, category: 'madrasa', attempts: [] },
-  { id: 'ctg-2026', title: 'চট্টগ্রাম বোর্ড ২০২৬', time: '৩০ মিনিট', questionsCount: 25, category: 'board', attempts: [] },
-  { id: 'dhaka-2025', title: 'ঢাকা বোর্ড ২০২৫', time: '৩০ মিনিট', questionsCount: 25, category: 'board', attempts: [] },
-  { id: 'rajshahi-2025', title: 'রাজশাহী বোর্ড ২০২৫', time: '৩০ মিনিট', questionsCount: 25, category: 'board', attempts: [] }
-];
+// --- EXAMS LIST BY CATEGORY ---
+const EXAMS_BY_CATEGORY: Record<string, Array<{ id: string; title: string; time: string; questionsCount: number; category: string; attempts: any[] }>> = {
+  BCS: [
+    { id: 'bcs-46', title: '৪৬তম বিসিএস প্রিলিমিনারি প্রশ্ন ও নির্ভুল সমাধান', time: '২ ঘণ্টা', questionsCount: 200, category: 'bcs', attempts: [] },
+    { id: 'bcs-45', title: '৪৫তম বিসিএস প্রিলিমিনারি প্রশ্ন ও নির্ভুল সমাধান', time: '২ ঘণ্টা', questionsCount: 200, category: 'bcs', attempts: [{ name: 'প্রচেষ্টা ১', time: '10:15 AM Yesterday', score: 142 }] },
+    { id: 'bcs-44', title: '৪৪তম বিসিএস প্রিলিমিনারি প্রশ্ন ও নির্ভুল সমাধান', time: '২ ঘণ্টা', questionsCount: 200, category: 'bcs', attempts: [] },
+    { id: 'bcs-43', title: '৪৩তম বিসিএস প্রিলিমিনারি প্রশ্ন ও নির্ভুল সমাধান', time: '২ ঘণ্টা', questionsCount: 200, category: 'bcs', attempts: [] },
+    { id: 'bcs-41', title: '৪১তম বিসিএস প্রিলিমিনারি প্রশ্ন ও নির্ভুল সমাধান', time: '২ ঘণ্টা', questionsCount: 200, category: 'bcs', attempts: [] },
+    { id: 'bcs-40', title: '৪০তম বিসিএস প্রিলিমিনারি প্রশ্ন ও নির্ভুল সমাধান', time: '২ ঘণ্টা', questionsCount: 200, category: 'bcs', attempts: [] },
+    { id: 'bcs-drill-1', title: 'বিসিএস বিষয়ভিত্তিক স্পেশাল মডেল টেস্ট - সেট ০১', time: '৩০ মিনিট', questionsCount: 50, category: 'model', attempts: [] },
+    { id: 'bcs-drill-2', title: 'বিসিএস বিষয়ভিত্তিক স্পেশাল মডেল টেস্ট - সেট ০২', time: '৩০ মিনিট', questionsCount: 50, category: 'model', attempts: [] }
+  ],
+  HSC: [
+    { id: 'all-2026', title: 'সকল বোর্ড ২০২৬', time: '৩০ মিনিট', questionsCount: 30, category: 'board', attempts: [{ name: 'প্রচেষ্টা ১', time: '5:30 PM 20 August 2026', score: 10 }] },
+    { id: 'all-2026-cq', title: 'সকল বোর্ড ২০২৬ (সৃজনশীল)', time: '২ ঘণ্টা ৩০ মিনিট', questionsCount: 11, category: 'board', attempts: [] },
+    { id: 'ctg-mad-2026', title: 'মাদ্রাসা বোর্ড ২০২৬ (চট্টগ্রাম)', time: '৩০ মিনিট', questionsCount: 25, category: 'madrasa', attempts: [] },
+    { id: 'ctg-2026', title: 'চট্টগ্রাম বোর্ড ২০২৬', time: '৩০ মিনিট', questionsCount: 25, category: 'board', attempts: [] },
+    { id: 'dhaka-2025', title: 'ঢাকা বোর্ড ২০২৫', time: '৩০ মিনিট', questionsCount: 25, category: 'board', attempts: [] },
+    { id: 'rajshahi-2025', title: 'রাজশাহী বোর্ড ২০২৫', time: '৩০ মিনিট', questionsCount: 25, category: 'board', attempts: [] }
+  ],
+  Admission: [
+    { id: 'du-ka-2024', title: 'ঢাকা বিশ্ববিদ্যালয় "ক" ইউনিট (২০২৩-২৪)', time: '১ ঘণ্টা ৩০ মিনিট', questionsCount: 100, category: 'varsity', attempts: [] },
+    { id: 'buet-2024', title: 'বুয়েট প্রিলিমিনারি ভর্তি পরীক্ষা (২০২৩-২৪)', time: '১ ঘণ্টা', questionsCount: 100, category: 'engineering', attempts: [] },
+    { id: 'med-2024', title: 'মেডিকেল ভর্তি পরীক্ষা (MBBS ২০২৩-২৪)', time: '১ ঘণ্টা', questionsCount: 100, category: 'medical', attempts: [] },
+    { id: 'ckruet-2024', title: 'গুচ্ছ ইঞ্জিনিয়ারিং (CKRUET ২০২৩-২৪)', time: '২ ঘণ্টা', questionsCount: 100, category: 'engineering', attempts: [] },
+    { id: 'ju-a-2024', title: 'জাহাঙ্গীরনগর বিশ্ববিদ্যালয় "A" ইউনিট', time: '৫৫ মিনিট', questionsCount: 80, category: 'varsity', attempts: [] }
+  ],
+  SSC: [
+    { id: 'ssc-all-2025', title: 'এসএসসি সকল বোর্ড ২০২৫', time: '৩০ মিনিট', questionsCount: 30, category: 'board', attempts: [] },
+    { id: 'ssc-dhaka-2024', title: 'এসএসসি ঢাকা বোর্ড ২০২৪', time: '৩০ মিনিট', questionsCount: 30, category: 'board', attempts: [] },
+    { id: 'ssc-ctg-2024', title: 'এসএসসি চট্টগ্রাম বোর্ড ২০২৪', time: '৩০ মিনিট', questionsCount: 30, category: 'board', attempts: [] }
+  ]
+};
+
+const DUMMY_BOARD_EXAMS = EXAMS_BY_CATEGORY.BCS;
 
 // --- DUMMY LEADERBOARD DATA (Screenshot 1 Match) ---
 const EXAM_LEADERBOARD = [
@@ -388,11 +559,140 @@ const SHORT_QA_REPOSITORY = [
   }
 ];
 
-export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = false }) => {
+const CATEGORY_TABS = [
+  { id: 'BCS', label: 'বিসিএস প্রিলিমিনারি', icon: '🏛️', sub: 'BCS Preliminary' },
+  { id: 'HSC', label: 'এইচএসসি ও বোর্ড', icon: '🎓', sub: 'HSC & College' },
+  { id: 'Admission', label: 'বিশ্ববিদ্যালয় ভর্তি', icon: '🏫', sub: 'Varsity Admission' },
+  { id: 'SSC', label: 'এসএসসি', icon: '📚', sub: 'SSC & Dakhil' },
+] as const;
+
+const CATEGORY_HEADER_INFO: Record<string, { badge: string; title: string; desc: string }> = {
+  BCS: {
+    badge: '🏛️ BCS Preliminary Question Bank',
+    title: 'TakeUUp বিসিএস প্রিলিমিনারি প্রশ্নব্যাংক আর্কাইভ',
+    desc: '১০ম থেকে ৪৬তম বিসিএস প্রিলিমিনারি, পিএসসি ও সরকারি চাকরির বিগত বছরের অধ্যায় ও বিষয়ভিত্তিক নির্ভুল প্রশ্নব্যাংক ও সমাধান।'
+  },
+  HSC: {
+    badge: '🎓 HSC & Board Question Bank',
+    title: 'TakeUUp এইচএসসি ও বোর্ড প্রশ্নব্যাংক আর্কাইভ',
+    desc: 'বিগত বছরের সকল শিক্ষাবোর্ডের এইচএসসি টেস্ট পেপার, CQ ও MCQ নির্ভুল উত্তরমালা ও লাইভ টাইমার পরীক্ষা।'
+  },
+  Admission: {
+    badge: '🏫 University Admission Question Bank',
+    title: 'TakeUUp বিশ্ববিদ্যালয় ভর্তি প্রশ্নব্যাংক আর্কাইভ',
+    desc: 'ঢাকা বিশ্ববিদ্যালয়, বুয়েট, মেডিকেল ও গুচ্ছ বিশ্ববিদ্যালয় ভর্তি পরীক্ষার বিগত ২০ বছরের প্রশ্ন সমাধান।'
+  },
+  SSC: {
+    badge: '📚 SSC & Board Question Bank',
+    title: 'TakeUUp এসএসসি ও বোর্ড প্রশ্নব্যাংক আর্কাইভ',
+    desc: 'এসএসসি পরীক্ষার সকল বোর্ডের বিষয়ভিত্তিক টেস্ট পেপার, সৃজনশীল ও বহুনির্বাচনী প্রশ্ন সমাধান।'
+  }
+};
+
+const detectUserCategory = (u: any): 'BCS' | 'HSC' | 'Admission' | 'SSC' => {
+  const str = `${u?.activeGoalName || ''} ${u?.targetGoal || ''} ${u?.studentClass || ''} ${u?.goal || ''}`.toLowerCase();
+  if (str.includes('bcs') || str.includes('বিসিএস') || str.includes('জবস') || str.includes('job') || str.includes('প্রিলি')) {
+    return 'BCS';
+  }
+  if (str.includes('admission') || str.includes('ভর্তি') || str.includes('ভার্সিটি') || str.includes('মেডিকেল') || str.includes('বুয়েট') || str.includes('varsity')) {
+    return 'Admission';
+  }
+  if (str.includes('ssc') || str.includes('এসএসসি') || str.includes('দশম') || str.includes('নবম') || str.includes('class 10') || str.includes('class 9')) {
+    return 'SSC';
+  }
+  if (str.includes('hsc') || str.includes('এইচএসসি') || str.includes('একাদশ') || str.includes('দ্বাদশ') || str.includes('college')) {
+    return 'HSC';
+  }
+  return 'BCS';
+};
+
+export const QuestionBank: React.FC<{ isEmbedded?: boolean; user?: any }> = ({ isEmbedded = false, user: propUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  // 0. USER & DYNAMIC GOAL DETECTION
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    if (propUser) return propUser;
+    try {
+      const stored = localStorage.getItem('takeuup_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const userGoalCategory = useMemo(() => detectUserCategory(currentUser), [currentUser]);
+  const [activeCategory, setActiveCategory] = useState<'BCS' | 'HSC' | 'Admission' | 'SSC'>(() => detectUserCategory(currentUser));
+  const prevGoalRef = React.useRef<string>(userGoalCategory);
+
+  useEffect(() => {
+    if (propUser) {
+      setCurrentUser(propUser);
+      const newGoal = detectUserCategory(propUser);
+      // Only switch activeCategory if the user's registered goal actually changed, preserving manual tab selections
+      if (newGoal !== prevGoalRef.current) {
+        prevGoalRef.current = newGoal;
+        setActiveCategory(newGoal);
+      }
+    }
+  }, [propUser]);
+
+  // Dynamic Subjects from Backend API (/QuizSettings/subjects and /QuizSettings/categories)
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [dbSubjectsByCategory, setDbSubjectsByCategory] = useState<Record<string, any[]>>({});
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadDynamicData = async () => {
+      setIsLoadingSubjects(true);
+      try {
+        const [catsData, subjsData] = await Promise.all([
+          fetchQuizCategories(),
+          fetchQuizSubjects()
+        ]);
+
+        if (!isMounted) return;
+
+        if (catsData && Array.isArray(catsData)) {
+          setDbCategories(catsData);
+        }
+
+        if (subjsData && Array.isArray(subjsData)) {
+          const grouped: Record<string, any[]> = { BCS: [], HSC: [], Admission: [], SSC: [] };
+          const catIdToName: Record<string, string> = {};
+
+          if (catsData && Array.isArray(catsData)) {
+            catsData.forEach((c: any) => {
+              const lower = (c.name || '').toLowerCase();
+              if (lower.includes('bcs') || lower.includes('বিসিএস')) catIdToName[c.id] = 'BCS';
+              else if (lower.includes('admission') || lower.includes('ভর্তি')) catIdToName[c.id] = 'Admission';
+              else if (lower.includes('ssc') || lower.includes('এসএসসি')) catIdToName[c.id] = 'SSC';
+              else if (lower.includes('hsc') || lower.includes('এইচএসসি')) catIdToName[c.id] = 'HSC';
+              else catIdToName[c.id] = c.name;
+            });
+          }
+
+          subjsData.forEach((s: any) => {
+            const catName = catIdToName[s.quizCategoryId] || 'BCS';
+            if (!grouped[catName]) grouped[catName] = [];
+            grouped[catName].push(s);
+          });
+
+          setDbSubjectsByCategory(grouped);
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic quiz categories/subjects:', err);
+      } finally {
+        if (isMounted) setIsLoadingSubjects(false);
+      }
+    };
+
+    loadDynamicData();
+    return () => { isMounted = false; };
+  }, []);
 
   // 1. ALL REACT HOOK STATES AT TOP (PREVENTS BLANK SCREEN BUG)
   const [activeMainTab, setActiveMainTab] = useState<'subject' | 'institution' | 'all'>('subject');
@@ -420,6 +720,78 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
   const [testAnswers, setTestAnswers] = useState<Record<number, string>>({});
   const [testSubmitted, setTestSubmitted] = useState(false);
   const [dbQuestions, setDbQuestions] = useState<any[]>([]);
+
+  // Compute displayed subjects for activeCategory (merging presets with DB subjects & search query)
+  const displayedSubjects = useMemo(() => {
+    const presets = PRESET_SUBJECTS_BY_CAT[activeCategory] || BCS_SUBJECT_CARDS;
+    const dbList = dbSubjectsByCategory[activeCategory] || [];
+
+    let list: any[] = [];
+    if (dbList.length > 0) {
+      list = dbList.map((dbSubj: any, index: number) => {
+        const matchedPreset = presets.find(p => 
+          p.name.toLowerCase() === dbSubj.name.toLowerCase() ||
+          p.engName.toLowerCase() === (dbSubj.name || '').toLowerCase() ||
+          (dbSubj.slug && p.id.toLowerCase().includes(dbSubj.slug.toLowerCase()))
+        );
+
+        if (matchedPreset) {
+          return {
+            ...matchedPreset,
+            id: dbSubj.id || matchedPreset.id,
+            dbId: dbSubj.id,
+            name: dbSubj.name || matchedPreset.name
+          };
+        }
+
+        const fallbackGradients = [
+          'from-amber-600/20 to-yellow-600/20',
+          'from-blue-600/20 to-cyan-600/20',
+          'from-emerald-600/20 to-teal-600/20',
+          'from-purple-600/20 to-pink-600/20',
+          'from-rose-600/20 to-red-600/20',
+          'from-cyan-600/20 to-indigo-600/20'
+        ];
+        return {
+          id: dbSubj.id || `dyn-${index}`,
+          dbId: dbSubj.id,
+          name: dbSubj.name,
+          engName: dbSubj.group || dbSubj.slug || 'Subject Archive',
+          category: activeCategory,
+          paper: 'আবশ্যিক',
+          letter: dbSubj.name ? dbSubj.name.charAt(0) : 'ব',
+          questionsCount: 1500 + (index * 120),
+          type: 'default',
+          gradient: fallbackGradients[index % fallbackGradients.length],
+          borderColor: 'border-cyan-500/40',
+          textColor: 'text-cyan-600 dark:text-cyan-400',
+          icon: BookOpen
+        };
+      });
+
+      // Add any presets not yet in DB so list is complete
+      presets.forEach(p => {
+        const alreadyIn = list.some(item => 
+          item.name.toLowerCase() === p.name.toLowerCase() || 
+          item.engName.toLowerCase() === p.engName.toLowerCase()
+        );
+        if (!alreadyIn) {
+          list.push(p);
+        }
+      });
+    } else {
+      list = presets;
+    }
+
+    if (!searchTerm.trim()) return list;
+
+    const q = searchTerm.toLowerCase().trim();
+    return list.filter(item => 
+      item.name.toLowerCase().includes(q) ||
+      (item.engName && item.engName.toLowerCase().includes(q)) ||
+      (item.paper && item.paper.toLowerCase().includes(q))
+    );
+  }, [activeCategory, dbSubjectsByCategory, searchTerm]);
 
   // 2. LISTEN FOR SIDEBAR RESET SIGNAL
   useEffect(() => {
@@ -451,7 +823,14 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
     const instId = searchParams.get('inst');
 
     if (subjId) {
-      const foundSubj = SUBJECT_CARDS.find(s => s.id === subjId) || {
+      const allKnown = [
+        ...BCS_SUBJECT_CARDS,
+        ...HSC_SUBJECT_CARDS,
+        ...ADMISSION_SUBJECT_CARDS,
+        ...SSC_SUBJECT_CARDS,
+        ...(Object.values(dbSubjectsByCategory).flat())
+      ];
+      const foundSubj = allKnown.find((s: any) => s.id === subjId || s.dbId === subjId) || {
         id: subjId,
         name: subjId.replace('-', ' '),
         engName: subjId,
@@ -476,7 +855,8 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
     }
 
     if (paperId) {
-      const foundExam = DUMMY_BOARD_EXAMS.find(e => e.id === paperId) || {
+      const allExams = Object.values(EXAMS_BY_CATEGORY).flat();
+      const foundExam = allExams.find(e => e.id === paperId) || {
         id: paperId,
         title: paperId.replace('-', ' ').toUpperCase(),
         time: '৩০ মিনিট',
@@ -488,7 +868,7 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
     if (instId) {
       setSelectedInstId(instId);
     }
-  }, [location.search, location.hash]);
+  }, [location.search, location.hash, dbSubjectsByCategory]);
 
   // 4. RESTORE PERSISTENT EXAM STATE FROM LOCALSTORAGE
   useEffect(() => {
@@ -823,15 +1203,29 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 text-xs font-bold">
                 <Sparkles size={14} className="text-cyan-500" />
-                <span>TakeUUp Verified Question Bank</span>
+                <span>
+                  {selectedExamPaper 
+                    ? 'TakeUUp Live Exam' 
+                    : selectedSubjectObj 
+                    ? 'TakeUUp Subject Portal' 
+                    : (CATEGORY_HEADER_INFO[activeCategory]?.badge || 'TakeUUp Verified Question Bank')}
+                </span>
               </div>
 
               <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                {selectedExamPaper ? selectedExamPaper.title : selectedSubjectObj ? selectedSubjectObj.name : 'TakeUUp প্রশ্নব্যাংক আর্কাইভ'}
+                {selectedExamPaper 
+                  ? selectedExamPaper.title 
+                  : selectedSubjectObj 
+                  ? selectedSubjectObj.name 
+                  : (CATEGORY_HEADER_INFO[activeCategory]?.title || 'TakeUUp প্রশ্নব্যাংক আর্কাইভ')}
               </h1>
 
               <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                বিগত বছরের সকল বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষা, মেডিকেল, ইঞ্জিনিয়ারিং, বিসিএস ও বোর্ডের নির্ভুল উত্তরমালা ও লাইভ টাইমার পরীক্ষা।
+                {selectedExamPaper 
+                  ? `সময়: ${selectedExamPaper.time} • মোট প্রশ্ন: ${selectedExamPaper.questionsCount} টি` 
+                  : selectedSubjectObj 
+                  ? `${selectedSubjectObj.engName} • অধ্যায় ও পত্র ভিত্তিক সেরা প্রশ্ন আর্কাইভ ও নির্ভুল সমাধান।` 
+                  : (CATEGORY_HEADER_INFO[activeCategory]?.desc || 'বিগত বছরের সকল পরীক্ষার প্রশ্ন সমাধান।')}
               </p>
             </div>
 
@@ -839,7 +1233,7 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-500" size={18} />
               <input
                 type="text"
-                placeholder="প্রশ্ন, বিষয় বা বিশ্ববিদ্যালয় খুঁজুন..."
+                placeholder="প্রশ্ন বা বিষয় খুঁজুন..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full border rounded-2xl py-3 pl-11 pr-4 text-xs font-bold placeholder-slate-400 focus:outline-none focus:border-cyan-400 shadow-sm ${
@@ -854,22 +1248,69 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
       {/* 2. MAIN BROWSE GRID */}
       {!selectedInstId && !selectedSubjectObj && !selectedExamPaper && (
         <div className="space-y-8">
-          <div className="space-y-4">
+          <div className="space-y-6">
+            
+            {/* Category Switcher Tabs */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex flex-wrap items-center gap-2">
+                {CATEGORY_TABS.map((tab) => {
+                  const isSelected = activeCategory === tab.id;
+                  const isUserGoal = userGoalCategory === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveCategory(tab.id as any);
+                        setSelectedSubjectId(null);
+                        setSelectedSubjectObj(null);
+                        setSelectedSubCategory(null);
+                        setSelectedExamPaper(null);
+                      }}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition-all ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/25 scale-[1.02]'
+                          : isDark
+                          ? 'bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                          : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 shadow-sm'
+                      }`}
+                    >
+                      <span className="text-sm">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                      {isUserGoal && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          isSelected 
+                            ? 'bg-white/20 text-white border border-white/30' 
+                            : 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30'
+                        }`}>
+                          🎯 লক্ষ্য
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-3.5 py-1.5 rounded-full border border-cyan-500/30">
+                {displayedSubjects.length}টি বিষয়
+              </span>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                   <BookOpen className="text-cyan-500" size={20} />
-                  বিষয় ভিত্তিক প্রশ্নব্যাংক (Subject Wise)
+                  {CATEGORY_TABS.find(t => t.id === activeCategory)?.label || 'বিষয় ভিত্তিক'} প্রশ্নব্যাংক
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">সকল বিষয়ের অধ্যায় ও পত্র ভিত্তিক সেরা প্রশ্ন আর্কাইভ</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {activeCategory === 'BCS' 
+                    ? 'বিসিএস প্রিলিমিনারি সিলেবাস অনুযায়ী সকল বিষয়ের সেরা প্রশ্ন ও সমাধান' 
+                    : 'সকল বিষয়ের অধ্যায় ও পত্র ভিত্তিক সেরা প্রশ্ন আর্কাইভ'}
+                </p>
               </div>
-              <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30">
-                {SUBJECT_CARDS.length}টি বিষয়
-              </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {SUBJECT_CARDS.map(subj => (
+              {displayedSubjects.map(subj => (
                 <div
                   key={subj.id}
                   onClick={() => handleSelectSubject(subj.id)}
@@ -894,7 +1335,7 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{subj.engName}</p>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 text-[11px]">
-                    <span className="text-slate-500 font-semibold">{subj.questionsCount.toLocaleString()}+ প্রশ্ন</span>
+                    <span className="text-slate-500 font-semibold">{(subj.questionsCount || 1500).toLocaleString()}+ প্রশ্ন</span>
                     <span className="text-cyan-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                       খুলুন <ArrowRight size={12} />
                     </span>
@@ -1056,7 +1497,7 @@ export const QuestionBank: React.FC<{ isEmbedded?: boolean }> = ({ isEmbedded = 
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {DUMMY_BOARD_EXAMS.map((exam) => (
+            {(EXAMS_BY_CATEGORY[activeCategory] || EXAMS_BY_CATEGORY.BCS).map((exam) => (
               <div
                 key={exam.id}
                 onClick={() => {

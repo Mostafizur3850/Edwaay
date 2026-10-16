@@ -95,6 +95,7 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
   const [isGeneratingRoutine, setIsGeneratingRoutine] = useState(false);
   const [aiPromptText, setAiPromptText] = useState("আমার BCS exam 120 দিন পর। আমি প্রতিদিন 3 ঘণ্টা পড়তে পারি। আমার ইংরেজি ও গণিতে দুর্বলতা আছে।");
   const [showAiConfig, setShowAiConfig] = useState(false);
+  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${BASE_URL}/Dashboard/get-routine?t=${Date.now()}`, { credentials: 'include', headers: getHeaders(), cache: 'no-store' })
@@ -119,15 +120,33 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
   };
 
   const handleGenerateAiRoutine = async () => {
+    if (!aiPromptText.trim()) return;
     setIsGeneratingRoutine(true);
-    const aiTasks = await generateDynamicStudyRoutine(aiPromptText, "120", "3", "None", tasks, []);
-    setIsGeneratingRoutine(false);
-    setShowAiConfig(false);
-    if (aiTasks && aiTasks.length > 0) {
-      setTasks(aiTasks);
-      syncRoutineToDb(aiTasks);
-    } else {
-      alert("AI failed to generate routine. Please check API key.");
+    try {
+      const result = await generateDynamicStudyRoutine(aiPromptText.trim(), "", "", "", tasks, []);
+      setIsGeneratingRoutine(false);
+      setShowAiConfig(false);
+      
+      if (result) {
+        if (result.advice) {
+          setAiAdvice(result.advice);
+        }
+        const newTasks = result.tasks || [];
+        if (Array.isArray(newTasks) && newTasks.length > 0) {
+          const normalized = newTasks.map((t: any, idx: number) => ({
+            ...t,
+            id: t.id || `rt-ai-${Date.now()}-${idx}`,
+            day: selectedDay,
+            done: false
+          }));
+          setTasks(normalized);
+          syncRoutineToDb(normalized);
+        }
+      }
+    } catch (e) {
+      console.error("AI Routine Generation error:", e);
+      setIsGeneratingRoutine(false);
+      setShowAiConfig(false);
     }
   };
 
@@ -293,6 +312,48 @@ export const StudyRoutinePlanner: React.FC<StudyRoutinePlannerProps> = () => {
                 {isGeneratingRoutine ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Sparkles size={18}/>}
                 {isGeneratingRoutine ? "AI is generating your perfect plan..." : "Generate AI Routine Now"}
             </button>
+        </div>
+      )}
+
+      {/* AI TUTOR ADVICE & STRATEGY CARD */}
+      {aiAdvice && (
+        <div className={`p-6 rounded-3xl border mb-6 shadow-2xl transition-all animate-in fade-in slide-in-from-top-4 ${
+          isDark 
+            ? 'bg-gradient-to-br from-indigo-950/80 via-slate-900 to-slate-950 border-purple-500/40 text-slate-200' 
+            : 'bg-gradient-to-br from-purple-50 via-indigo-50/60 to-white border-purple-200 text-slate-800 shadow-purple-500/10'
+        }`}>
+          <div className="flex items-center justify-between pb-3 border-b border-purple-500/20 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-2xl text-white shadow-lg shadow-purple-500/30">
+                <Sparkles size={20} />
+              </div>
+              <div>
+                <h3 className="font-black text-base lg:text-lg text-purple-600 dark:text-purple-400">
+                  AI Tutor এর স্টাডি অ্যানালাইসিস ও সমাধান
+                </h3>
+                <span className="text-[11px] text-slate-500 font-semibold">আপনার ইনপুটের ভিত্তিতে তৈরি করা স্পেশাল গাইডলাইন</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setAiAdvice(null)}
+              className="text-xs text-slate-400 hover:text-rose-500 font-bold px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:border-rose-400 transition-colors"
+            >
+              বন্ধ করুন
+            </button>
+          </div>
+
+          <div className="text-xs lg:text-sm leading-relaxed whitespace-pre-line font-medium text-slate-700 dark:text-slate-200 p-2">
+            {aiAdvice}
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-purple-500/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+              <CheckCircle2 size={16} /> নিচের দৈনিক রুটিনে টাস্কগুলো স্বয়ংক্রিয়ভাবে যোগ করা হয়েছে
+            </span>
+            <span className="text-slate-400 text-[11px] font-semibold">
+              নির্বাচিত দিন: {WEEK_DAYS.find(d => d.id === selectedDay)?.label}
+            </span>
+          </div>
         </div>
       )}
 

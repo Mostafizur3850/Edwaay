@@ -935,7 +935,7 @@ export const TakeUUpStudentDashboard: React.FC<TakeUUpStudentDashboardProps> = (
         {/* TAB 2: QUESTION BANK */}
         {currentTab === 'qbank' && (
           <div className="animate-in fade-in duration-300">
-            <QuestionBank key={qbankResetKey} isEmbedded={true} />
+            <QuestionBank key={qbankResetKey} isEmbedded={true} user={user} />
           </div>
         )}
 

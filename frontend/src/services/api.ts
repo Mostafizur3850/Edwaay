@@ -485,7 +485,6 @@ export async function updateUserProfile(profileData: {
     });
 }
 
-// ---------------- QUIZ API ----------------
 
 export async function fetchQuestions(category: string, subject: string, includeAll?: boolean): Promise<any[]> {
     let url = `Quizzes/questions?category=${encodeURIComponent(category)}&subject=${encodeURIComponent(subject)}`;
