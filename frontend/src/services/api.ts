@@ -571,11 +571,13 @@ export async function fetchLeaderboard(): Promise<any[]> {
 
 // ---------------- JOBS API ----------------
 
-export async function fetchJobs(destination?: string, isFeatured?: boolean): Promise<any[]> {
+export async function fetchJobs(destination?: string, isFeatured?: boolean, category?: string, categoryId?: string): Promise<any[]> {
     let url = 'Jobs';
-    const params = [];
+    const params: string[] = [];
     if (destination) params.push(`destination=${encodeURIComponent(destination)}`);
     if (isFeatured !== undefined) params.push(`isFeatured=${isFeatured}`);
+    if (category) params.push(`category=${encodeURIComponent(category)}`);
+    if (categoryId) params.push(`categoryId=${encodeURIComponent(categoryId)}`);
     if (params.length > 0) url += `?${params.join('&')}`;
 
     return await callApi(url, { method: 'GET' }, () => {
@@ -585,12 +587,21 @@ export async function fetchJobs(destination?: string, isFeatured?: boolean): Pro
                 let parsed = JSON.parse(stored);
                 if (destination) parsed = parsed.filter((j: any) => j.destination?.toLowerCase() === destination.toLowerCase());
                 if (isFeatured !== undefined) parsed = parsed.filter((j: any) => j.isFeatured === isFeatured);
+                if (category) parsed = parsed.filter((j: any) => j.category?.toLowerCase() === category.toLowerCase());
+                if (categoryId) parsed = parsed.filter((j: any) => (j.categoryId || j.CategoryId)?.toString() === categoryId);
                 return parsed;
             } catch(e) { /* ignore */ }
         }
         return [
-            { id: '1', title: 'Junior Frontend Dev', company: 'Pathao', location: 'Gulshan, Dhaka', salary: '25k-30k', type: 'Full-time', destination: 'Portal', isFeatured: true },
-            { id: '2', title: 'Product Designer', company: 'bKash', location: 'Remote', salary: '40k-50k', type: 'Contract', destination: 'Portal', isFeatured: true }
+            { id: '1', title: 'সহকারী পরিচালক (সাধারণ)', company: 'বাংলাদেশ ব্যাংক', location: 'মতিঝিল, ঢাকা', salary: '৳২২,০০০ - ৳৫৩,০৬০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'সরকারি চাকরি' },
+            { id: '2', title: 'প্রবেশনারি অফিসার (PO)', company: 'ডাচ-বাংলা ব্যাংক লিমিটেড', location: 'ঢাকা, বাংলাদেশ', salary: '৳৫৫,০০০ - ৳৭০,০০০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'ব্যাংক জবস' },
+            { id: '3', title: 'প্রজেক্ট কো-অর্ডিনেটর', company: 'ব্র্যাক (BRAC)', location: 'কক্সবাজার / ঢাকা', salary: '৳৪০,০০০ - ৳৬০,০০০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'এনজিও জবস' },
+            { id: '4', title: 'সহকারী শিক্ষক', company: 'আইডিয়াল স্কুল অ্যান্ড কলেজ', location: 'মতিঝিল, ঢাকা', salary: '৳২৫,০০০ - ৳৩৫,০০০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'শিক্ষক নিয়োগ' },
+            { id: '5', title: 'সেলস এক্সিকিউটিভ', company: 'প্রাণ-আরএফএল গ্রুপ', location: 'চট্টগ্রাম ও ঢাকা', salary: '৳২৮,০০০ - ৳৪৫,০০০', type: 'Full-time', destination: 'Portal', isFeatured: false, category: 'সেলস/মার্কেটিং' },
+            { id: '6', title: 'উপ-সহকারী প্রকৌশলী', company: 'বাংলাদেশ রেলওয়ে', location: 'কমলাপুর, ঢাকা', salary: '৳১৬,০০০ - ৳৩৮,৬৪০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'রেলওয়ে জবস' },
+            { id: '7', title: 'মেডিকেল অফিসার', company: 'স্কয়ার হাসপাতাল', location: 'পান্থপথ, ঢাকা', salary: '৳৫৫,০০০ - ৳৮০,০০০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'হেলথ/মেডিকেল' },
+            { id: '8', title: 'সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার', company: 'পাঠাও', location: 'গুলশান, ঢাকা', salary: '৳৯০,০০০ - ৳১,৩০,০০০', type: 'Full-time', destination: 'Portal', isFeatured: true, category: 'সফটওয়্যার ইঞ্জিনিয়ারিং' },
+            { id: '9', title: 'এক্সিকিউটিভ অফিসার', company: 'বেক্সিমকো ফার্মা', location: 'টঙ্গী, গাজীপুর', salary: '৳৩৫,০০০ - ৳৫০,০০০', type: 'Full-time', destination: 'Portal', isFeatured: false, category: 'বেসরকারি চাকরি' }
         ];
     });
 }
@@ -763,25 +774,34 @@ export async function deleteCompany(companyId: string): Promise<any> {
     });
 }
 
+export const DEFAULT_JOB_CATEGORIES = [
+    { id: 'cat-govt', name: 'সরকারি চাকরি', slug: 'govt-jobs', isActive: true },
+    { id: 'cat-bank', name: 'ব্যাংক জবস', slug: 'bank-jobs', isActive: true },
+    { id: 'cat-ngo', name: 'এনজিও জবস', slug: 'ngo-jobs', isActive: true },
+    { id: 'cat-teacher', name: 'শিক্ষক নিয়োগ', slug: 'teacher-recruitment', isActive: true },
+    { id: 'cat-sales', name: 'সেলস/মার্কেটিং', slug: 'sales-marketing', isActive: true },
+    { id: 'cat-railway', name: 'রেলওয়ে জবস', slug: 'railway-jobs', isActive: true },
+    { id: 'cat-defense', name: 'ডিফেন্স জবস', slug: 'defense-jobs', isActive: true },
+    { id: 'cat-health', name: 'হেলথ/মেডিকেল', slug: 'health-medical', isActive: true },
+    { id: 'cat-newspaper', name: 'চাকরির পত্রিকা', slug: 'job-circular', isActive: true },
+    { id: 'cat-private', name: 'বেসরকারি চাকরি', slug: 'private-jobs', isActive: true },
+    { id: 'cat-sp-software', name: 'সফটওয়্যার ইঞ্জিনিয়ারিং', slug: 'special-software', isActive: true },
+    { id: 'cat-sp-parttime', name: 'পার্ট টাইম জব', slug: 'special-part-time', isActive: true },
+    { id: 'cat-sp-remote', name: 'রিমোট জবস', slug: 'special-remote', isActive: true },
+    { id: 'cat-sp-intern', name: 'ইন্টার্নশিপ', slug: 'special-internship', isActive: true }
+];
+
 export async function fetchJobCategories(): Promise<any[]> {
     return await callApi('JobCategories', { method: 'GET' }, () => {
         const stored = localStorage.getItem('takeuup_categories');
-        return stored ? JSON.parse(stored) : [
-            { id: 'cat-1', name: 'Software Engineering', slug: 'software-engineering', isActive: true },
-            { id: 'cat-2', name: 'UI/UX Design', slug: 'ui-ux-design', isActive: true },
-            { id: 'cat-3', name: 'Content Writing', slug: 'content-writing', isActive: true }
-        ];
+        return stored ? JSON.parse(stored) : DEFAULT_JOB_CATEGORIES;
     });
 }
 
 export async function fetchAdminJobCategories(): Promise<any[]> {
     return await callApi('JobCategories/admin', { method: 'GET' }, () => {
         const stored = localStorage.getItem('takeuup_categories');
-        return stored ? JSON.parse(stored) : [
-            { id: 'cat-1', name: 'Software Engineering', slug: 'software-engineering', isActive: true },
-            { id: 'cat-2', name: 'UI/UX Design', slug: 'ui-ux-design', isActive: true },
-            { id: 'cat-3', name: 'Content Writing', slug: 'content-writing', isActive: true }
-        ];
+        return stored ? JSON.parse(stored) : DEFAULT_JOB_CATEGORIES;
     });
 }
 
@@ -790,9 +810,10 @@ export async function createJobCategory(categoryData: any): Promise<any> {
         method: 'POST',
         body: JSON.stringify(categoryData)
     }, () => {
-        const category = { id: Date.now().toString(), slug: categoryData.name.toLowerCase().replace(/ /g, '-'), ...categoryData };
+        const slug = categoryData.slug || categoryData.name.toLowerCase().replace(/ /g, '-').replace(/\//g, '-');
+        const category = { id: Date.now().toString(), slug, ...categoryData };
         const stored = localStorage.getItem('takeuup_categories');
-        const list = stored ? JSON.parse(stored) : [];
+        const list = stored ? JSON.parse(stored) : [...DEFAULT_JOB_CATEGORIES];
         list.push(category);
         localStorage.setItem('takeuup_categories', JSON.stringify(list));
         return category;

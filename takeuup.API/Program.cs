@@ -714,114 +714,233 @@ END
             Console.WriteLine("Mock Mentors Seeded.");
         }
 
-        try
+        // 1. Seed categories dynamically
+        var existingCategories = await dbContext.JobCategories.ToListAsync();
+        var defaultCategories = new List<JobCategory>
         {
-            await dbContext.Database.ExecuteSqlRawAsync("DELETE FROM JobApplications; DELETE FROM Jobs; DELETE FROM Companies; DELETE FROM JobCategories;");
-            Console.WriteLine("Cleared old Job, Company, and Category records for clean reseeding.");
+            new() { Name = "সরকারি চাকরি", Slug = "govt-jobs", IsActive = true },
+            new() { Name = "ব্যাংক জবস", Slug = "bank-jobs", IsActive = true },
+            new() { Name = "এনজিও জবস", Slug = "ngo-jobs", IsActive = true },
+            new() { Name = "শিক্ষক নিয়োগ", Slug = "teacher-recruitment", IsActive = true },
+            new() { Name = "সেলস/মার্কেটিং", Slug = "sales-marketing", IsActive = true },
+            new() { Name = "রেলওয়ে জবস", Slug = "railway-jobs", IsActive = true },
+            new() { Name = "ডিফেন্স জবস", Slug = "defense-jobs", IsActive = true },
+            new() { Name = "হেলথ/মেডিকেল", Slug = "health-medical", IsActive = true },
+            new() { Name = "চাকরির পত্রিকা", Slug = "job-circular", IsActive = true },
+            new() { Name = "বেসরকারি চাকরি", Slug = "private-jobs", IsActive = true },
+            new() { Name = "সফটওয়্যার ইঞ্জিনিয়ারিং", Slug = "special-software", IsActive = true },
+            new() { Name = "পার্ট টাইম জব", Slug = "special-part-time", IsActive = true },
+            new() { Name = "রিমোট জবস", Slug = "special-remote", IsActive = true },
+            new() { Name = "ইন্টার্নশিপ", Slug = "special-internship", IsActive = true }
+        };
+
+        var addedCats = new List<JobCategory>();
+        foreach (var defCat in defaultCategories)
+        {
+            var found = existingCategories.FirstOrDefault(c => c.Name == defCat.Name || c.Slug == defCat.Slug);
+            if (found == null)
+            {
+                dbContext.JobCategories.Add(defCat);
+                addedCats.Add(defCat);
+            }
         }
-        catch {}
-
-        // 1. Seed categories
-        var catSoftware = new JobCategory { Name = "Software Engineering", Slug = "software-engineering", IsActive = true };
-        var catUIUX = new JobCategory { Name = "UI/UX Design", Slug = "ui-ux-design", IsActive = true };
-        var catContent = new JobCategory { Name = "Content Writing", Slug = "content-writing", IsActive = true };
-        var catMarketing = new JobCategory { Name = "Marketing", Slug = "marketing", IsActive = true };
-        var catGraphics = new JobCategory { Name = "Graphics Design", Slug = "graphics-design", IsActive = true };
-
-        dbContext.JobCategories.AddRange(catSoftware, catUIUX, catContent, catMarketing, catGraphics);
-
-        // 2. Seed companies
-        var compPathao = new Company { Name = "Pathao", Email = "career@pathao.com", Website = "https://pathao.com", Logo = "https://logo.clearbit.com/pathao.com", Address = "Gulshan, Dhaka", IsVerified = true };
-        var compBkash = new Company { Name = "bKash", Email = "career@bkash.com", Website = "https://bkash.com", Logo = "https://ui-avatars.com/api/?name=bKash&background=random", Address = "Remote", IsVerified = true };
-        var compTenMS = new Company { Name = "10 Minute School", Email = "career@10minuteschool.com", Website = "https://10minuteschool.com", Logo = "https://logo.clearbit.com/10minuteschool.com", Address = "Banani, Dhaka", IsVerified = true };
-        var compTakeUUp = new Company { Name = "TakeUUp", Email = "career@takeuup.com", Website = "https://takeuup.com", Logo = "https://ui-avatars.com/api/?name=TakeUUp&background=random", Address = "Remote", IsVerified = true };
-
-        dbContext.Companies.AddRange(compPathao, compBkash, compTenMS, compTakeUUp);
         await dbContext.SaveChangesAsync();
+        var allCats = await dbContext.JobCategories.ToListAsync();
 
-        // 3. Seed jobs referencing categories and companies
-        if (!await dbContext.Jobs.AnyAsync())
+        // 2. Seed companies if not present
+        if (!await dbContext.Companies.AnyAsync())
+        {
+            var compPathao = new Company { Name = "Pathao", Email = "career@pathao.com", Website = "https://pathao.com", Logo = "https://logo.clearbit.com/pathao.com", Address = "Gulshan, Dhaka", IsVerified = true };
+            var compBkash = new Company { Name = "bKash", Email = "career@bkash.com", Website = "https://bkash.com", Logo = "https://ui-avatars.com/api/?name=bKash&background=random", Address = "Remote", IsVerified = true };
+            var compBrac = new Company { Name = "BRAC", Email = "career@brac.net", Website = "https://brac.net", Logo = "https://ui-avatars.com/api/?name=BRAC&background=random", Address = "Mohakhali, Dhaka", IsVerified = true };
+            var compSquare = new Company { Name = "Square Hospital", Email = "career@squarehospital.com", Website = "https://squarehospital.com", Logo = "https://ui-avatars.com/api/?name=Square+Hospital&background=random", Address = "Panthapath, Dhaka", IsVerified = true };
+            var compGovt = new Company { Name = "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার", Email = "info@bangladesh.gov.bd", Website = "https://bangladesh.gov.bd", Logo = "https://ui-avatars.com/api/?name=Govt+BD&background=random", Address = "ঢাকা, বাংলাদেশ", IsVerified = true };
+
+            dbContext.Companies.AddRange(compPathao, compBkash, compBrac, compSquare, compGovt);
+            await dbContext.SaveChangesAsync();
+        }
+
+        // 3. Seed sample jobs referencing categories
+        var catGovt = allCats.FirstOrDefault(c => c.Slug == "govt-jobs");
+        var catBank = allCats.FirstOrDefault(c => c.Slug == "bank-jobs");
+        var catNgo = allCats.FirstOrDefault(c => c.Slug == "ngo-jobs");
+        var catTeacher = allCats.FirstOrDefault(c => c.Slug == "teacher-recruitment");
+        var catSales = allCats.FirstOrDefault(c => c.Slug == "sales-marketing");
+        var catRailway = allCats.FirstOrDefault(c => c.Slug == "railway-jobs");
+        var catHealth = allCats.FirstOrDefault(c => c.Slug == "health-medical");
+        var catPrivate = allCats.FirstOrDefault(c => c.Slug == "private-jobs");
+        var catSoftwareSpecial = allCats.FirstOrDefault(c => c.Slug == "special-software");
+
+        // Reseed jobs if no jobs or only old English jobs
+        bool shouldSeedJobs = !await dbContext.Jobs.AnyAsync(j => j.Category == "সরকারি চাকরি" || j.Category == "ব্যাংক জবস");
+        if (shouldSeedJobs)
         {
             dbContext.Jobs.AddRange(
                 new Job 
                 { 
-                    Title = "Junior Frontend Dev", 
-                    Company = "Pathao", 
-                    Location = "Gulshan, Dhaka", 
-                    Salary = "25k-30k", 
+                    Title = "সহকারী পরিচালক (সাধারণ)", 
+                    Company = "বাংলাদেশ ব্যাংক", 
+                    Location = "মতিঝিল, ঢাকা", 
+                    Salary = "৳২২,০০০ - ৳৫৩,০৬০", 
                     Type = "Full-time", 
                     Destination = "Portal", 
                     IsFeatured = true,
-                    Category = "Software Engineering",
+                    Category = catGovt?.Name ?? "সরকারি চাকরি",
+                    CategoryId = catGovt?.Id,
                     ExperienceLevel = "Entry Level",
-                    Description = "Join Pathao's dynamic engineering team as a Junior Frontend Developer to build next-generation ride-sharing, food delivery, and payment interfaces.",
-                    Requirements = "• Proficiency in HTML, CSS, JavaScript, and React.js.\n• Experience with Tailwind CSS and responsive design.\n• Familiarity with state management libraries like Redux or Context API.\n• Good problem-solving skills.",
-                    Responsibilities = "• Collaborate with product designers and backend engineers to implement clean user interfaces.\n• Write modular, reusable, and testable code.\n• Optimize web applications for maximum speed and scalability.",
-                    Benefits = "• Competitive salary.\n• Flexible work hours.\n• Weekly team lunches and refreshments.\n• Opportunity to learn from senior engineers.",
-                    CompanyLogo = "https://logo.clearbit.com/pathao.com",
-                    CompanyId = compPathao.Id,
-                    CategoryId = catSoftware.Id
+                    Description = "বাংলাদেশ ব্যাংকে সহকারী পরিচালক (সাধারণ) পদে নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে। যেকোনো স্বীকৃত বিশ্ববিদ্যালয় থেকে স্নাতকোত্তর বা সমমানের ডিগ্রিধারী প্রার্থীরা আবেদন করতে পারবেন।",
+                    Requirements = "• যেকোনো স্বীকৃত বিশ্ববিদ্যালয় থেকে ৪ বছর মেয়াদী স্নাতক/স্নাতকোত্তর।\n• ন্যূনতম ২টি প্রথম বিভাগ/শ্রেণি বা সমমানের সিজিপিএ।",
+                    Responsibilities = "• ব্যাংকিং কার্যক্রম পরিচালনা ও তদারকি।\n• নীতি নির্ধারণী ডেটা বিশ্লেষণ ও রিপোর্ট প্রস্তুতকরণ।",
+                    Benefits = "• সরকারি পে-স্কেল অনুযায়ী আকর্ষণীয় বেতন ও ভাতাদি।\n• প্রভিডেন্ট ফান্ড ও চিকিৎসা ভাতা।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=Bangladesh+Bank&background=random"
                 },
                 new Job 
                 { 
-                    Title = "Senior UI/UX Designer", 
-                    Company = "bKash", 
-                    Location = "Remote", 
-                    Salary = "50k-70k", 
-                    Type = "Contract", 
+                    Title = "প্রবেশনারি অফিসার (PO)", 
+                    Company = "ডাচ-বাংলা ব্যাংক লিমিটেড", 
+                    Location = "ঢাকা, বাংলাদেশ", 
+                    Salary = "৳৫৫,০০০ - ৳৭০,০০০", 
+                    Type = "Full-time", 
                     Destination = "Portal", 
                     IsFeatured = true,
-                    Category = "UI/UX Design",
-                    ExperienceLevel = "Senior Level",
-                    Description = "bKash is looking for a Senior UI/UX Designer to lead the redesign of our mobile banking app, creating seamless and delightful payment experiences for millions of users.",
-                    Requirements = "• 5+ years of experience in UI/UX design for web and mobile platforms.\n• Strong portfolio demonstrating user-centric design processes.\n• Expertise in Figma, Adobe XD, or Sketch.\n• Excellent communication and leadership skills.",
-                    Responsibilities = "• Conduct user research and translate insights into wireframes, user flows, and interactive prototypes.\n• Establish and maintain a cohesive design system.\n• Collaborate with developers to ensure pixel-perfect implementation.",
-                    Benefits = "• Top-tier compensation packages.\n• Comprehensive health insurance.\n• Annual performance bonuses.\n• Creative and inclusive work environment.",
-                    CompanyLogo = "https://ui-avatars.com/api/?name=bKash&background=random",
-                    CompanyId = compBkash.Id,
-                    CategoryId = catUIUX.Id
+                    Category = catBank?.Name ?? "ব্যাংক জবস",
+                    CategoryId = catBank?.Id,
+                    ExperienceLevel = "Entry Level",
+                    Description = "ডাচ-বাংলা ব্যাংক লিমিটেড আকর্ষণীয় বেতন ও সুযোগ-সুবিধা সহ একদল মেধাবী ও উদ্যমী প্রবেশনারি অফিসার নিয়োগ করছে।",
+                    Requirements = "• বিবিএ / এমবিএ / অর্থনীতি / কম্পিউটার সায়েন্স থেকে স্নাতক।\n• চমৎকার যোগাযোগ দক্ষতা ও কম্পিউটার জ্ঞান।",
+                    Responsibilities = "• ব্যাংকিং শাখা পরিচালনা ও গ্রাহক সেবা প্রদান।",
+                    Benefits = "• প্রবেশনারি পিরিয়ড শেষে আকর্ষণীয় স্কেল।\n• গ্র্যাচুইটি ও বার্ষিক ইনসেন্টিভ বোনাস।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=Dutch+Bangla&background=random"
                 },
                 new Job 
                 { 
-                    Title = "Content Executive", 
-                    Company = "10 Minute School", 
-                    Location = "Banani, Dhaka", 
-                    Salary = "15k-20k", 
-                    Type = "Part-time", 
+                    Title = "প্রজেক্ট কো-অর্ডিনেটর (এডুকেশন প্রোগ্রাম)", 
+                    Company = "ব্র্যাক (BRAC)", 
+                    Location = "কক্সবাজার / ঢাকা", 
+                    Salary = "৳৪০,০০০ - ৳৬০,০০০", 
+                    Type = "Full-time", 
+                    Destination = "Portal", 
+                    IsFeatured = true,
+                    Category = catNgo?.Name ?? "এনজিও জবস",
+                    CategoryId = catNgo?.Id,
+                    ExperienceLevel = "Mid Level",
+                    Description = "ব্র্যাক শিক্ষা কর্মসূচির অধীনে শিশুদের প্রাথমিক শিক্ষা ও ঝরে পড়া রোধ প্রকল্পের জন্য প্রজেক্ট কো-অর্ডিনেটর আবশ্যক।",
+                    Requirements = "• সমাজবিজ্ঞান / উন্নয়ন অধ্যয়ন বা সমমানের বিষয়ে স্নাতক।\n• এনজিও সেক্টরে ন্যূনতম ২ বছরের অভিজ্ঞতা।",
+                    Responsibilities = "• মাঠ পর্যায়ের কার্যক্রম তদারকি ও অগ্রগতি রিপোর্ট প্রণয়ন।",
+                    Benefits = "• উৎসব ভাতা ও হেলথ ইনস্যুরেন্স।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=BRAC&background=random"
+                },
+                new Job 
+                { 
+                    Title = "সহকারী শিক্ষক (গণিত ও ইংরেজি)", 
+                    Company = "আইডিয়াল স্কুল অ্যান্ড কলেজ", 
+                    Location = "মতিঝিল, ঢাকা", 
+                    Salary = "৳২৫,০০০ - ৳৩৫,০০০", 
+                    Type = "Full-time", 
                     Destination = "Portal", 
                     IsFeatured = false,
-                    Category = "Content Writing",
+                    Category = catTeacher?.Name ?? "শিক্ষক নিয়োগ",
+                    CategoryId = catTeacher?.Id,
                     ExperienceLevel = "Entry Level",
-                    Description = "10 Minute School is searching for a Content Executive to create engaging educational content, study guides, and blog posts for students across Bangladesh.",
-                    Requirements = "• Strong written communication skills in both Bangla and English.\n• Passion for education and simplifying complex topics.\n• Basic understanding of SEO best practices.\n• Familiarity with social media platforms.",
-                    Responsibilities = "• Write clear, concise, and engaging educational copy.\n• Coordinate with instructors to prepare study materials.\n• Manage content publishing calendar.",
-                    Benefits = "• Friendly workspace environment.\n• Mentorship and career growth opportunities.\n• Flexible hybrid working model.",
-                    CompanyLogo = "https://logo.clearbit.com/10minuteschool.com",
-                    CompanyId = compTenMS.Id,
-                    CategoryId = catContent.Id
+                    Description = "মাধ্যমিক শাখার জন্য গণিত এবং ইংরেজি বিষয়ের দক্ষ ও আন্তরিক সহকারী শিক্ষক নিয়োগ দেওয়া হবে।",
+                    Requirements = "• সংশ্লিষ্ট বিষয়ে স্নাতক/স্নাতকোত্তর।\n• বিএড (B.Ed) ডিগ্রিধারীদের অগ্রাধিকার দেওয়া হবে।",
+                    Responsibilities = "• পাঠদান পরিকল্পনা তৈরি ও শিক্ষার্থীদের মূল্যায়ন।",
+                    Benefits = "• প্রভিডেন্ট ফান্ড ও বাড়ি ভাড়া ভাতা।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=Ideal+School&background=random"
                 },
                 new Job 
                 { 
-                    Title = "Academic Content Writer", 
-                    Company = "TakeUUp", 
-                    Location = "Remote", 
-                    Salary = "12k", 
-                    Type = "Internship", 
-                    Destination = "Career", 
-                    IsFeatured = true,
-                    Category = "Content Writing",
+                    Title = "সেলস অ্যান্ড মার্কেটিং এক্সিকিউটিভ", 
+                    Company = "প্রাণ-আরএফএল গ্রুপ", 
+                    Location = "চট্টগ্রাম ও ঢাকা", 
+                    Salary = "৳২৮,০০০ - ৳৪৫,০০০", 
+                    Type = "Full-time", 
+                    Destination = "Portal", 
+                    IsFeatured = false,
+                    Category = catSales?.Name ?? "সেলস/মার্কেটিং",
+                    CategoryId = catSales?.Id,
                     ExperienceLevel = "Entry Level",
-                    Description = "Join TakeUUp as an Academic Content Writer Intern to help students with formula sheets, quiz questions, and blog guides.",
-                    Requirements = "• Currently pursuing a University degree.\n• Strong academic background in Science, Commerce, or Arts.\n• Detail-oriented with good editing skills.",
-                    Responsibilities = "• Write academic answers, formula sheets, and study hack articles.\n• Verify correctness of question banks.",
-                    Benefits = "• Paid internship stipend.\n• Certificate of internship completion.\n• Recommendation letter.\n• Flexible working hours (Remote).",
-                    CompanyLogo = "https://ui-avatars.com/api/?name=TakeUUp&background=random",
-                    CompanyId = compTakeUUp.Id,
-                    CategoryId = catContent.Id
+                    Description = "দেশের অন্যতম বৃহৎ শিল্প গ্রুপ প্রাণ-আরএফএল এর বিক্রয় কার্যক্রম সম্প্রসারণের লক্ষ্যে উদ্যমী মার্কেটিং অফিসার আবশ্যক।",
+                    Requirements = "• স্নাতক পাস। সেলসে কাজ করার প্রবল আগ্রহ থাকতে হবে।",
+                    Responsibilities = "• রিটেইলার ও ডিস্ট্রিবিউটরদের সাথে সুসম্পর্ক রক্ষা।\n• বিক্রয় লক্ষ্যমাত্রা অর্জন।",
+                    Benefits = "• আকর্ষণীয় সেলস ইনসেন্টিভ ও টিএ/ডিএ।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=Pran+RFL&background=random"
+                },
+                new Job 
+                { 
+                    Title = "উপ-সহকারী প্রকৌশলী (সিভিল)", 
+                    Company = "বাংলাদেশ রেলওয়ে", 
+                    Location = "কমলাপুর, ঢাকা", 
+                    Salary = "৳১৬,০০০ - ৳৩৮,৬৪০", 
+                    Type = "Full-time", 
+                    Destination = "Portal", 
+                    IsFeatured = true,
+                    Category = catRailway?.Name ?? "রেলওয়ে জবস",
+                    CategoryId = catRailway?.Id,
+                    ExperienceLevel = "Entry Level",
+                    Description = "বাংলাদেশ রেলওয়ের পূর্বাঞ্চল জোনে রেললাইন সংস্কার ও অবকাঠামো উন্নয়নে উপ-সহকারী প্রকৌশলী পদে আবেদন আহ্বান করা হচ্ছে।",
+                    Requirements = "• পলিটেকনিক ইনস্টিটিউট থেকে ডিপ্লোমা ইন সিভিল ইঞ্জিনিয়ারিং।",
+                    Responsibilities = "• রেললাইনের নিরাপত্তা ও নিয়মিত রক্ষণাবেক্ষণ পরিদর্শন।",
+                    Benefits = "• সরকারি রেল পাস ও বাসস্থান সুবিধা।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=BD+Railway&background=random"
+                },
+                new Job 
+                { 
+                    Title = "মেডিকেল অফিসার (ইমার্জেন্সি)", 
+                    Company = "স্কয়ার হাসপাতাল লিমিটেড", 
+                    Location = "পান্থপথ, ঢাকা", 
+                    Salary = "৳৫৫,০০০ - ৳৮০,০০০", 
+                    Type = "Full-time", 
+                    Destination = "Portal", 
+                    IsFeatured = true,
+                    Category = catHealth?.Name ?? "হেলথ/মেডিকেল",
+                    CategoryId = catHealth?.Id,
+                    ExperienceLevel = "Mid Level",
+                    Description = "স্কয়ার হাসপাতালের ইমার্জেন্সি ও ট্রমা কেয়ার ইউনিটে সার্বক্ষণিক সেবার জন্য অভিজ্ঞ মেডিকেল অফিসার প্রয়োজন।",
+                    Requirements = "• বিএমডিসি (BMDC) রেজিস্ট্রেশনপ্রাপ্ত এমবিবিএস ডিগ্রি।\n• জরুরি বিভাগে ন্যূনতম ১ বছরের কাজের অভিজ্ঞতা।",
+                    Responsibilities = "• জরুরি রোগীদের দ্রুত প্রাথমিক চিকিৎসা ও পর্যবেক্ষণ।",
+                    Benefits = "• আকর্ষণীয় বেতন কাঠামো ও শিফট ভাতা।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=Square+Hospital&background=random"
+                },
+                new Job 
+                { 
+                    Title = "সিনিয়র ফুল-স্ট্যাক ডেভেলপার", 
+                    Company = "পাঠাও (Pathao)", 
+                    Location = "গুলশান, ঢাকা / Remote", 
+                    Salary = "৳৯০,০০০ - ৳১,৩০,০০০", 
+                    Type = "Full-time", 
+                    Destination = "Portal", 
+                    IsFeatured = true,
+                    Category = catSoftwareSpecial?.Name ?? "সফটওয়্যার ইঞ্জিনিয়ারিং",
+                    CategoryId = catSoftwareSpecial?.Id,
+                    ExperienceLevel = "Senior Level",
+                    Description = "পাঠাও এর উচ্চ স্কেলেবিলিটি সম্বলিত ফিনটেক ও লজিস্টিক প্ল্যাটফর্ম তৈরির জন্য সিনিয়র ডেভেলপার আবশ্যক।",
+                    Requirements = "• React, Node.js, TypeScript ও ক্লাউড অবকাঠামোয় গভীর দক্ষতা।",
+                    Responsibilities = "• উচ্চ ট্রাফিক সার্ভার ও মাইক্রোসার্ভিস আর্কিটেকচার ডিজাইন।",
+                    Benefits = "• ইন্ডাস্ট্রি সেরা পারিশ্রমিক, হেলথ ইনস্যুরেন্স ও বার্ষিক বোনাস।",
+                    CompanyLogo = "https://logo.clearbit.com/pathao.com"
+                },
+                new Job 
+                { 
+                    Title = "এক্সিকিউটিভ অফিসার (অপারেশনস)", 
+                    Company = "বেক্সিমকো ফার্মা", 
+                    Location = "টঙ্গী, গাজীপুর", 
+                    Salary = "৳৩৫,০০০ - ৳৫০,০০০", 
+                    Type = "Full-time", 
+                    Destination = "Portal", 
+                    IsFeatured = false,
+                    Category = catPrivate?.Name ?? "বেসরকারি চাকরি",
+                    CategoryId = catPrivate?.Id,
+                    ExperienceLevel = "Mid Level",
+                    Description = "বেক্সিমকো ফার্মাসিউটিক্যালস এর সাপ্লাই চেইন ও কোয়ালিটি অপারেশন বিভাগের জন্য দক্ষ অফিসার নিয়োগ দেওয়া হবে।",
+                    Requirements = "• বিজ্ঞান বা ব্যবসায় প্রশাসনে স্নাতক।",
+                    Responsibilities = "• উৎপাদন ও সরবরাহ চ্যানেলের সমন্বয়সাধন।",
+                    Benefits = "• পরিবহন সুবিধা, প্রভিডেন্ট ফান্ড ও গ্র্যাচুইটি।",
+                    CompanyLogo = "https://ui-avatars.com/api/?name=Beximco+Pharma&background=random"
                 }
             );
             await dbContext.SaveChangesAsync();
-            Console.WriteLine("Mock Jobs Seeded.");
+            Console.WriteLine("Bangla Job Categories and Portal Jobs Seeded Successfully.");
         }
 
         // Seeding About Us Settings

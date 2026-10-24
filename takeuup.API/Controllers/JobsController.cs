@@ -31,7 +31,11 @@ namespace ECommerce.API.Controllers
         // 🔓 Public: Get jobs
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetJobs([FromQuery] string? destination, [FromQuery] bool? isFeatured)
+        public async Task<IActionResult> GetJobs(
+            [FromQuery] string? destination, 
+            [FromQuery] bool? isFeatured,
+            [FromQuery] string? category,
+            [FromQuery] Guid? categoryId)
         {
             var query = _db.Jobs.AsQueryable();
 
@@ -43,6 +47,16 @@ namespace ECommerce.API.Controllers
             if (isFeatured.HasValue)
             {
                 query = query.Where(j => j.IsFeatured == isFeatured.Value);
+            }
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(j => j.Category != null && j.Category.ToLower() == category.ToLower());
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(j => j.CategoryId == categoryId.Value);
             }
 
             var jobs = await query.OrderByDescending(j => j.CreatedAt).ToListAsync();
